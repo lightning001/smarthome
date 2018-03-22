@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <TextView
+        android:id="@+id/name_mode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/text_margin"
+        android:text="@string/app_name"
+        android:textSize="@dimen/switch_name"/>
+
+    <Switch
+        android:layout_marginLeft="60dp"
+        android:id="@+id/simpleSwitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="left"
+        android:textSize="15dp"
+        android:text="time start end"
+        android:layout_marginTop="10dp"
+        android:checked="true"
+        android:textOff="Off"
+        android:textOn="On"
+        android:theme="@style/SCBSwitch"
+        />
+
+</LinearLayout>
