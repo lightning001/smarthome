@@ -1,7 +1,6 @@
 'use strict'
 
 var mongoose = require('mongoose');
-var md5 = require('md5');
 
 const uri = 'mongodb://localhost:27017/SmartHome';
 
@@ -21,19 +20,17 @@ var schemaUser = new mongoose.Schema({
   email : {type : String, required: true, index: { unique: true }},
   password : {type : String, required: true},
   name : {type : String},
-  information : {
-    street : {type : String},
-    distric : {type : String},
-    city : {type : String},
-    postcode : {type : Number},
-    phonenumber : {type : String},
-    homephone : {type : String},
-    dob : {type : Date},
-    type : {type : String},
-    status : {type : Boolean, default : false},
-    startdateregister : {type : Date, default : Date.now()},
-    img : {type : String, default : 'person.png'},
-  }
+  street : {type : String},
+  distric : {type : String},
+  city : {type : String},
+  postcode : {type : Number},
+  phonenumber : {type : String},
+  homephone : {type : String},
+  dob : {type : Date},
+  type : {type : String},
+  status : {type : Boolean, default : false},
+  startdateregister : {type : Date, default : Date.now()},
+  img : {type : String, default : 'person.png'},
 });
 schemaUser.set('toObject', { getters: true });
 
@@ -54,20 +51,21 @@ User.findByID = (userID) =>{
 }
 
 User.login = (email, password) => {
-  return new Promise((resolve, reject){
+  return new Promise((resolve, reject) =>{
     //xu ly ma hoa o day
     User.findOne()
     .where('email').equals(email)
-    .where('password').equals(md5(password))
-    .exec((err, data){
+    .where('password').equals(password)
+    .exec((err, data) =>{
       if(err) return reject(new Error('Login unsuccessfully!\n' +err ));
+      if(!data || typeof data == undefined) return reject('Email or password is incorrected');
       return resolve(data);
     });
   });
 }
 
 /**
-Tìm kiếm dựa vào _id của user (kiểu ObjectId)
+Tìm kiếm dựa vào _id của user (kiểu ObjectId) truyền vào string
 */
 User.findBy_ID = (userID) =>{
   return new Promise((resolve, reject) =>{
@@ -93,64 +91,74 @@ User.findByName = (name) =>{
   });
 }
 
-User.findByEmail = (email) =>{
+User.findByEmail = (mEmail) =>{
   return new Promise((resolve, reject) =>{
-    User.find({email : email}, (err, data) =>{
-      if(err){
-        return reject(new Error('Cannot get data!' + '\n' + err));
-      }else{
-        return resolve(data);
-      }
+    if(typeof mEmail != 'string')
+      return reject(new Error('Email must be text'));
+    User.findOne({email : mEmail}, (err, data) =>{
+      if(err) return reject(new Error('Cannot get data!' + '\n' + err));
+      if(!data || data.length ==0) return reject('Can\'t find email: '+mEmail);
+      else return resolve(data);
     });
   });
 }
 
+
+
 User.mInsert = (id, email, password, name) =>{
   return new Promise((resolve, reject) =>{
-    let mUser = new User();
-    mUser.id = id;
-    mUser.email = email;
-    mUser.password = password;
-    mUser.name = name;
-    mUser.save((err) =>{
-      if(err){
-        return reject(new Error('Cannot insert User: ' + JSON.stringify(mUser) + '\n' + err));
-      }else{
-        return resolve(true);
-      }
-    });
+    User.findByEmail(email).then(
+      (data) => {// neu da co email nay thi tra ve loi da ton tai
+        return reject(new Error('Email is already exists'));
+      }, (error) =>{
+        let mUser = new User();
+        mUser.id = id;
+        mUser.email = email;
+        mUser.password = password;
+        mUser.name = name;
+        mUser.save((err) =>{
+          if(err){
+            return reject(new Error('Cannot insert User: ' + JSON.stringify(mUser) + '\n' + err));
+          }else{
+            return resolve(true);
+          }
+        });
+      });
   });
-};
+}
 
 
 User.mInsert = (id, email, password, name, street, distric, city, postcode,
                 phonenumber, homephone, dob, type, status, startdateregister, img) =>{
   return new Promise((resolve, reject) =>{
-    let mUser = new User();
-    mUser.id = id;
-    mUser.email = email;
-    mUser.password = md5(password);
-    mUser.name = name;
-    mUser.information.street = street;
-    mUser.information.distric = distric;
-    mUser.information.city = city;
-    mUser.information.postcode = postcode;
-    mUser.information.phonenumber = phonenumber;
-    mUser.information.homephone = homephone;
-    mUser.information.dob = dob;
-    mUser.information.type = type;
-    mUser.information.status = status;
-    mUser.information.startdateregister = startdateregister;
-    mUser.information.img = img;
-    mUser.save((err) =>{
-      if(err){
-        return reject(new Error('Cannot insert User: ' + JSON.stringify(mUser) + '\n' + err));
-      }else{
-        return resolve(true);
-      }
+    User.findByEmail(email).then(
+      (data) => {// neu da co email nay thi tra ve loi da ton tai
+        return reject(new Error('Email is already exists'));
+      },
+      (error) =>{
+        let mUser = new User();
+        mUser.id = id;
+        mUser.email = email;
+        mUser.password = password;
+        mUser.name = name;
+        mUser.street = street;
+        mUser.distric = distric;
+        mUser.city = city;
+        mUser.postcode = postcode;
+        mUser.phonenumber = phonenumber;
+        mUser.homephone = homephone;
+        mUser.dob = dob;
+        mUser.type = type;
+        mUser.status = status;
+        mUser.startdateregister = startdateregister;
+        mUser.img = img;
+        mUser.save((err) =>{
+          if(err) return reject(new Error('Cannot insert User: ' + JSON.stringify(mUser) + '\n' + err));
+          return resolve(true);
+        });
+      });
     });
-  });
-};
+}
 
 
 /**
@@ -222,9 +230,11 @@ User.getByPage = (quantity, page) =>{
   });
 }
 
-User.mInsert(1, 'linhdanit@gmail.com', '12345', 'Linh Dan', '101/53/10 Mach Thi Lieu', 'Di An', 'Binh Duong', 821111,
-                '0977933807', '02633873877', new Date(1995, 12, 15), 'VIP', 1, Date.now(), 'person.png')
-    .then(data => console.log('Data'+data), err => console.error(err))
-    .catch(err => console.log(err));
+// User.login('linhdanit1@gmail.com', '12345').then(data => console.log(data), err => console.log(err));
+// User.findByEmail('linhdanit@gmail.com').then(data => console.log(data), err => console.log(err));
+// User.mInsert(2, 'linhdanit1512@gmail.com', '123456', 'Linh Dan', '101/53/10 Mach Thi Lieu', 'Di An', 'Binh Duong', 821111,
+//                 '0977933807', '02633873877', new Date(1995, 12, 15), 'VIP', 1, Date.now(), 'person.png')
+//     .then(data => console.log('Data'+data), err => console.error(err))
+//     .catch(err => console.log(err));
 
 module.exports = exports = User;

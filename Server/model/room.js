@@ -17,7 +17,7 @@ var SchemaTypes = mongoose.Schema.Types;
 
 var schemaRoom = new mongoose.Schema({
   id : {type : Number, required: true, index: { unique: true }},
-  user_id : {type: Number, required : true},
+  id_user : {type: mongoose.Types.ObjectId, required : true, ref : 'User'},
   room_name : {type : String, required : true, default : 'Unknown Room'},
   img : {type : String, default : 'room.png'}
 });
@@ -46,18 +46,15 @@ Tìm kiếm dựa vào _id của room (kiểu ObjectId)
 Room.findBy_ID = (roomID) =>{
   return new Promise((resolve, reject) =>{
     Room.findById(new mongoose.Types.ObjectId(roomID), (error, data) =>{
-      if(error){
-        return reject(new Error('Cannot get data!' + '\n' + err));
-      }else{
-        return resolve(data);
-      }
+      if(error) return reject(new Error('Cannot get data!' + '\n' + err));
+      return resolve(data);
     });
   });
 }
 
 Room.findByName = (name, userID) =>{
   return new Promise((resolve, reject) =>{
-    Room.find({'room_name': {$regex: name}, 'user_id' : userID}, (err, data) =>{
+    Room.find({'room_name': {$regex: name}, 'id_user' : new mongoose.Types.ObjectId(userID)}, (err, data) =>{
       if(err){
         return reject(new Error('Cannot get data!' + '\n' + err));
       }else{
@@ -67,23 +64,20 @@ Room.findByName = (name, userID) =>{
   });
 }
 
-Room.findByUser = (userID) =>{
+Room.findByUser = (id_user) =>{
   return new Promise((resolve, reject) =>{
-    Room.find({user_id : userID}, (err, data) =>{
-      if(err){
-        return reject(new Error('Cannot get data!' + '\n' + err));
-      }else{
-        return resolve(data);
-      }
+    Room.find({'id_user' : new mongoose.Types.ObjectId(id_user)}, (err, data) =>{
+      if(err) return reject(new Error('Cannot get data!' + '\n' + err));
+      return resolve(data);
     });
   });
 }
 
-Room.mInsert = (id, user_id, room_name, img) =>{
+Room.mInsert = (id, id_user, room_name, img) =>{
   return new Promise((resolve, reject) =>{
     let mRoom = new Room();
     mRoom.id = id;
-    mRoom.user_id = user_id;
+    mRoom.id_user = id_user;
     mRoom.room_name = room_name;
     mRoom.img = img;
     mRoom.save((err) =>{
@@ -111,7 +105,7 @@ Room.mUpdate = (mRoom) => {
 */
 Room.mDelete = (room_ID) =>{
   return new Promise((resolve, reject) =>{
-    Room.remove({_id : new mongoose.Type.OnjectId(room_ID)}, (err) =>{
+    Room.remove({_id : new mongoose.Type.ObjectId(room_ID)}, (err) =>{
       if (err) return reject(new Error('Cannot delete Room has _id: ' + room_ID));
       return resolve(true);
     });
@@ -142,7 +136,7 @@ Room.getByPage = (quantity, page) =>{
     Room.find()
     .skip((page-1)*quantity)
     .limit(quantity)
-    .sort({user_id : 1, room_name : 1})
+    .sort({id_user : 1, room_name : 1})
     .exec((err, data) =>{
       if(err) return reject(new Error('Cannot get data. Error: \n'+ err));
       return resolve(data);

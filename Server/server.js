@@ -16,7 +16,7 @@ io.sockets.on('connection', function(socket){
     mUser.login(username, password)
     .then(
       (data) => {
-        socket.emit('User',data);
+        socket.emit('User', data);
       }, (err) =>{
         socket.emit('Error', err.toString());
     })

@@ -13,12 +13,11 @@ const options = {
 
 mongoose.connect(uri, options);
 
-var SchemaTypes = mongoose.Schema.Types;
-
 var schemaDeviceInRoom = new mongoose.Schema({
-  deviceInRoom_id : {type : Number, require : true},
-  room_id : {type : Number, require : true},
-  deviceInRoom_name : {type : String},
+  id : {type : Number, require : true},
+  id_device : {type : mongoose.Types.ObjectId, require : true, ref : 'Device'},
+  id_room : {type : mongoose.Types.ObjectId, require : true, ref : 'Room'},
+  device_name : {type : String},
   status : {type : Number, require : true}
 });
 
@@ -28,9 +27,9 @@ var DeviceInRoom = mongoose.model('DeviceInRoom', schemaDeviceInRoom, 'DEVICE_IN
 /**
 Tìm kiếm dựa vào _id của deviceInRoom (kiểu ObjectId)
 */
-DeviceInRoom.findBy_ID = (deviceInRoomID) =>{
+DeviceInRoom.findBy_ID = (_ID) =>{
   return new Promise((resolve, reject) =>{
-    DeviceInRoom.findById(new mongoose.Types.ObjectId(deviceInRoomID), (error, data) =>{
+    DeviceInRoom.findById(new mongoose.Types.ObjectId(_ID), (error, data) =>{
       if(error){
         return reject(new Error('Cannot get data!' + '\n' + err));
       }else{
@@ -40,22 +39,22 @@ DeviceInRoom.findBy_ID = (deviceInRoomID) =>{
   });
 }
 
-DeviceInRoom.findByName = (name, roomID) =>{
+DeviceInRoom.findByName = (name, id_room) =>{
   return new Promise((resolve, reject) =>{
     //find({ 'name' : { $regex: /Ghost/, $options: 'i' } }, function(){});
-    DeviceInRoom.find({'device_name': {$regex: name}, room_id : roomID}, (err, data) =>{
+    DeviceInRoom.find({'device_name': {$regex: name}, 'id_room' : new mongoose.Types.ObjectId(id_room)}, (err, data) =>{
       if(err) return reject(new Error('Cannot get data!' + '\n' + err));
       return resolve(data);
     });
   });
 }
 
-DeviceInRoom.mInsert = (device_id, room_id, device_name, status) =>{
+DeviceInRoom.mInsert = (id_device, id_room, device_name, status) =>{
   return new Promise((resolve, reject) =>{
 
     let mDeviceInRoom = new DeviceInRoom();
-    mDeviceInRoom.device_id = device_id;
-    mDeviceInRoom.room_id = room_id;
+    mDeviceInRoom.id_device = id_device;
+    mDeviceInRoom.id_room = id_room;
     mDeviceInRoom.device_name = device_name;
     mDeviceInRoom.status = status;
 
@@ -68,7 +67,7 @@ DeviceInRoom.mInsert = (device_id, room_id, device_name, status) =>{
 
 
 /**
-@param mDeviceInRoom: 1 thiết bị đầy đủ thuộc tính
+@param mDeviceInRoom:
 */
 DeviceInRoom.mUpdate = (mDeviceInRoom) => {
   return new Promise((resolve, reject) =>{
@@ -84,9 +83,9 @@ DeviceInRoom.mUpdate = (mDeviceInRoom) => {
 @param deviceInRoom_ID: mã _id của thiết bị (kiểu ObjectId)
 @objective : thực hiện xóa 1 DeviceInRoom
 */
-DeviceInRoom.mDelete = (deviceInRoom_ID) =>{
+DeviceInRoom.mDelete = (_ID) =>{
   return new Promise((resolve, reject) =>{
-    DeviceInRoom.remove({_id : new mongoose.Type.OnjectId(deviceInRoom_ID)}, (err) =>{
+    DeviceInRoom.remove({_id : new mongoose.Type.ObjectId(_ID)}, (err) =>{
       if (err) return reject(new Error('Cannot delete DeviceInRoom has _id: ' + deviceInRoom_ID));
       return resolve(true);
     });

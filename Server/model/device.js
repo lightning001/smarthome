@@ -120,7 +120,7 @@ Device.mDelete = (device_ID) =>{
   return new Promise((resolve, reject) =>{
     if(typeof device_ID != 'string')
       return reject(new Error('Device_ID must be a String'));
-    Device.remove({_id : new mongoose.Type.OnjectId(device_ID)}, (err) =>{
+    Device.remove({_id : new mongoose.Type.ObjectId(device_ID)}, (err) =>{
       if (err) return reject(new Error('Cannot delete Device has _id: ' + device_ID));
       return resolve(true);
     });
