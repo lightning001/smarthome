@@ -1,7 +1,9 @@
 'use strict'
 
 var mongoose = require('mongoose');
-
+require('./Mode');
+require('./Device_In_Room');
+var ObjectId = mongoose.Types.ObjectId;
 const uri = 'mongodb://localhost:27017/SmartHome';
 
 const options = {
@@ -14,20 +16,37 @@ const options = {
 mongoose.connect(uri, options);
 
 var schemaModeDetail = new mongoose.Schema({
-  id_mode : {type : mongoose.Types.ObjectId, require : true, ref : 'Mode'},
-  id_device : {type : mongoose.Types.ObjectId, require : true, ref : 'Device'},
+  id_mode : {type : mongoose.Schema.Types.ObjectId, require : true, ref : 'Mode'},
+  id_device : {type : mongoose.Schema.Types.ObjectId, require : true, ref : 'DeviceInRoom'},
 });
 
 schemaModeDetail.set('toObject', { getters: true });
 
 var ModeDetail = mongoose.model('ModeDetail', schemaModeDetail, 'MODE_DETAIL');
 
+ModeDetail.getDetailMode = (id_mode) =>{
+  return new Promise((resolve, reject) =>{
+    ModeDetail.find({'id_mode' : new ObjectId(id_mode)}, {'group': 'id_mode'})
+    .populate('id_mode')
+    .populate('id_device')
+    .exec(function(err, data) {
+      if(err) return reject(new Error('Error' +err));
+      return resolve(JSON.stringify(data));
+    });
+  });
+}
+
+
+// ModeDetail.getDetailMode('5ab47f0d52b9ed7bf00ed1c6')
+// .then(data => console.log(data), err => console.log(err))
+// .catch(err => console.log(err));
+
 ModeDetail.findByMode = (id_mode) =>{
   return new Promise((resolve, reject) =>{
-    if(typeof id_mode != 'string')
-      return reject(new Error('Please check a syntax!'));
-    ModeDetail.find({'id_mode' : new mongoose.Types.ObjectId(id_mode)}, (error, data) =>{
-      if(error) return reject(new Error('Cannot get data!' + '\n' + err));
+    if(typeof id_mode != 'string') return reject(new Error('mode must be a string!'));
+    ModeDetail.find({'id_mode' : new ObjectId(id_mode)})
+    .exec((error, data) =>{
+      if(error) return reject(new Error('Cannot get data!' + '\n' + error));
       if(!data || data.length == 0)
         return reject('No ModeDetail can find');
       return resolve(data);
@@ -39,8 +58,8 @@ ModeDetail.findByDevice = (id_device) =>{
   return new Promise((resolve, reject) =>{
     if(typeof id_device != 'string')
       return reject(new Error('ModeId must be a number'));
-    ModeDetail.findOne({'id_device' : new mongoose.Types.ObjectId(id_device)}, (error, data) =>{
-      if(error) return reject(new Error('Cannot get data!' + '\n' + err));
+    ModeDetail.findOne({'id_device' : new ObjectId(id_device)}, (err, data) =>{
+      if(err) return reject(new Error('Cannot get data!' + '\n' + err));
       if(data && data.length ==0)
         return reject('No ModeDetail can find');
       return resolve(data);
@@ -53,35 +72,37 @@ Tìm kiếm dựa vào _id (truyền vào kiểu String) của modeDetail (kiể
 */
 ModeDetail.findBy_id = (_id) =>{
   return new Promise((resolve, reject) =>{
-    ModeDetail.findById(new mongoose.Types.ObjectId(_id), (error, data) =>{
-      if(error) return reject(new Error('Cannot get data!' + '\n' + err));
+    ModeDetail.findById(new ObjectId(_id), (error, data) =>{
+      if(error) return reject(new Error('Cannot get data!' + '\n' + error));
       if(data.length ==0) return reject(new Error('No Mode can find'))
         return resolve(data);
     });
   });
 }
 
+// var DeviceOnRoom = require('./Device_In_Room');
+// var Mode = require('./Mode');
+
 ModeDetail.mInsert = (id_mode, id_device) =>{
   return new Promise((resolve, reject) =>{
-    if(typeof id_mode != 'ObjectId') return reject(new Error('Mode must be ObjectId'));
-    if(typeof id_device != 'ObjectId') return reject(new Error('Device must be ObjectId'));
     let mModeDetail = new ModeDetail();
-    mModeDetail.id_mode = id_mode;
-    mModeDetail.id_device = id_device,
+    mModeDetail.id_mode = new ObjectId(id_mode);
+    mModeDetail.id_device = new ObjectId(id_device);
     mModeDetail.save((err) =>{
       if(err) return reject(new Error('Cannot insert ModeDetail: ' + JSON.stringify(mModeDetail) + '\n' + err));
       return resolve(true);
     });
   });
-};
+}
 
-// ModeDetail.mInsert(1,3)
-// .then(data => console.log(data), err => console.log(err))
-// .catch(err => console.log(err));
+// ModeDetail.mInsert(new ObjectId('5ab47f0d52b9ed7bf00ed1c6'), new ObjectId('5ab5c49fadfc4664640c883a'));
+// ModeDetail.mInsert(new ObjectId('5ab47f0d52b9ed7bf00ed1c6'), new ObjectId('5ab5c49fadfc4664640c883c'));
+// ModeDetail.mInsert(new ObjectId('5ab480050dd33e6804b27e3d'), new ObjectId('5ab5c49fadfc4664640c883b'));
+// ModeDetail.mInsert(new ObjectId('5ab480050dd33e6804b27e3d'), new ObjectId('5ab5c49fadfc4664640c883a'));
+// ModeDetail.mInsert(new ObjectId('5ab480050dd33e6804b27e3e'), new ObjectId('5ab5c49fadfc4664640c883f'));
+// ModeDetail.mInsert(new ObjectId('5ab480050dd33e6804b27e3e'), new ObjectId('5ab5c49fadfc4664640c883e'));
+// ModeDetail.mInsert(new ObjectId('5ab480050dd33e6804b27e3e'), new ObjectId('5ab5c49fadfc4664640c8840'));
 
-/**
-@param mModeDetail: 1 thiết bị đầy đủ thuộc tính
-*/
 ModeDetail.mUpdate = (mModeDetail) => {
   return new Promise((resolve, reject) =>{
     mModeDetail.save((err, data) =>{
@@ -91,17 +112,11 @@ ModeDetail.mUpdate = (mModeDetail) => {
   });
 };
 
-
-/**
-@param modeDetail_id: mã _id (truyền vào string) của thiết bị (co kiểu ObjectId)
-
-@objective : thực hiện xóa 1 modeDetail
-*/
 ModeDetail.mDelete = (_id) =>{
   return new Promise((resolve, reject) =>{
     if(typeof _id != 'string')
       return reject(new Error('_id must be a String'));
-    ModeDetail.remove({'_id' : new mongoose.Type.ObjectId(_id)}, (err) =>{
+    ModeDetail.remove({'_id' : new ObjectId(_id)}, (err) =>{
       if (err) return reject(new Error('Cannot delete ModeDetail has _id: ' + modeDetail_id));
       return resolve(true);
     });

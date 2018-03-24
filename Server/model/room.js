@@ -17,13 +17,34 @@ var SchemaTypes = mongoose.Schema.Types;
 
 var schemaRoom = new mongoose.Schema({
   id : {type : Number, required: true, index: { unique: true }},
-  id_user : {type: mongoose.Types.ObjectId, required : true, ref : 'User'},
+  id_user : {type: mongoose.Schema.Types.ObjectId, required : true, ref : 'User'},
   room_name : {type : String, required : true, default : 'Unknown Room'},
   img : {type : String, default : 'room.png'}
 });
 
-
 var Room = mongoose.model('Room', schemaRoom, 'ROOM');
+
+var getUser = function(id_user){
+  return new Promise((resolve, reject) =>{
+        Room.aggregate([
+          {
+            $lookup :{
+              from : 'User',// join voi bang Mode
+              localField : 'id_user', //truong join o bang Room
+              foreignField : '_id', // truong join o bang User
+              as : 'User'
+            }
+          }
+        ]).exec((err, data) =>{
+          if(err) return reject(new Error('Error' +err));
+          return resolve(JSON.stringify(data));
+        });
+  });
+}
+
+// getUser(new mongoose.Types.ObjectId())
+// .then(data => console.log(data), err =>console.log(err))
+// .catch(err => console.log(err));
 
 Room.findByID = (roomID) =>{
   return new Promise((resolve, reject) =>{
@@ -77,7 +98,7 @@ Room.mInsert = (id, id_user, room_name, img) =>{
   return new Promise((resolve, reject) =>{
     let mRoom = new Room();
     mRoom.id = id;
-    mRoom.id_user = id_user;
+    mRoom.id_user = new mongoose.Types.ObjectId(id_user);
     mRoom.room_name = room_name;
     mRoom.img = img;
     mRoom.save((err) =>{
@@ -86,6 +107,11 @@ Room.mInsert = (id, id_user, room_name, img) =>{
     });
   });
 }
+
+// Room.mInsert(2, '5ab3333038b9043e4095ff84', 'Bed room', 'bedroom.png');
+// Room.mInsert(3, '5ab3333038b9043e4095ff84', 'Kitchen', 'kitchen.png');
+// Room.mInsert(4, '5ab3333038b9043e4095ff84', 'Bathroom', 'bathroom.png');
+
 
 /**
 @param mRoom: 1 thiết bị đầy đủ thuộc tính
@@ -105,7 +131,7 @@ Room.mUpdate = (mRoom) => {
 */
 Room.mDelete = (room_ID) =>{
   return new Promise((resolve, reject) =>{
-    Room.remove({_id : new mongoose.Type.ObjectId(room_ID)}, (err) =>{
+    Room.remove({_id : new mongoose.Types.ObjectId(room_ID)}, (err) =>{
       if (err) return reject(new Error('Cannot delete Room has _id: ' + room_ID));
       return resolve(true);
     });

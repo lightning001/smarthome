@@ -16,11 +16,12 @@ mongoose.connect(uri, options);
 var schemaMode = new mongoose.Schema({
   id : {type : Number, required: true, index: { unique: true }},
   mode_name : {type : String},
-  id_user : [{type : mongoose.Types.ObjectId, ref : 'User'}],
+  id_user : {type : mongoose.Schema.Types.ObjectId, ref : 'User'},
   status : {type : Number},
   circle : {type : []},
   starttime : {type : Number},
   stoptime : {type : Number}
+
 });
 
 schemaMode.set('toObject', { getters: true });
@@ -157,8 +158,11 @@ Mode.getByPage = (quantity, page) =>{
 // .catch(err => console.log(err));
 
 //id, mode_name, id_user, status, circle, starttime, stoptime
-Mode.mInsert(1, 'Working', '5ab3333038b9043e4095ff84', 1, [0,1,2,3,4], 3600*7, 3600*18)
-  .then((data => console.log("" +data), err => console.log(err+'')))
-  .catch(err => console.log(err +''));
+// Mode.mInsert(2, 'Playing', '5ab3333038b9043e4095ff84', 0, [1,2,3,4,5], 3600*12, 3600*14)
+//   .then((data => console.log("" +data), err => console.log(err+'')))
+//   .catch(err => console.log(err +''));
+//   Mode.mInsert(3, 'Study', '5ab3333038b9043e4095ff84', 0, [5,6], 3600*7, 3600*10)
+//     .then((data => console.log("" +data), err => console.log(err+'')))
+//     .catch(err => console.log(err +''));
 
 module.exports = exports = Mode;

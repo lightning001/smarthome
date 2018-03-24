@@ -15,8 +15,8 @@ mongoose.connect(uri, options);
 
 var schemaDeviceInRoom = new mongoose.Schema({
   id : {type : Number, require : true},
-  id_device : {type : mongoose.Types.ObjectId, require : true, ref : 'Device'},
-  id_room : {type : mongoose.Types.ObjectId, require : true, ref : 'Room'},
+  id_device : {type : mongoose.Schema.Types.ObjectId, require : true, ref : 'Device'},
+  id_room : {type : mongoose.Schema.Types.ObjectId, require : true, ref : 'Room'},
   device_name : {type : String},
   status : {type : Number, require : true}
 });
@@ -49,12 +49,13 @@ DeviceInRoom.findByName = (name, id_room) =>{
   });
 }
 
-DeviceInRoom.mInsert = (id_device, id_room, device_name, status) =>{
+DeviceInRoom.mInsert = (id, id_device, id_room, device_name, status) =>{
   return new Promise((resolve, reject) =>{
 
     let mDeviceInRoom = new DeviceInRoom();
-    mDeviceInRoom.id_device = id_device;
-    mDeviceInRoom.id_room = id_room;
+    mDeviceInRoom.id = id;
+    mDeviceInRoom.id_device = new mongoose.Types.ObjectId(id_device);
+    mDeviceInRoom.id_room = new mongoose.Types.ObjectId(id_room);
     mDeviceInRoom.device_name = device_name;
     mDeviceInRoom.status = status;
 
@@ -65,6 +66,13 @@ DeviceInRoom.mInsert = (id_device, id_room, device_name, status) =>{
   });
 };
 
+// DeviceInRoom.mInsert(1, '5ab5bcba66a8743898db512c', '5aa9dc4ab2b1e7dbea173b93', 'Bong den phong khach 1', 0);
+// DeviceInRoom.mInsert(2, '5ab5bcba66a8743898db512c', '5aa9dc4ab2b1e7dbea173b93', 'Bong den phong khach 2', 0);
+// DeviceInRoom.mInsert(3, '5ab5bcba66a8743898db512c', '5aa9dc66b2b1e7dbea173ba0', 'Cam bien as phong khach', 0);
+// DeviceInRoom.mInsert(4, '5ab5bd2c413df81ccc5ca8b8', '5aa9dc4ab2b1e7dbea173b93', 'Bong den phong ngu 1', 0);
+// DeviceInRoom.mInsert(5, '5ab5bd2c413df81ccc5ca8b8', '5aa9dc4ab2b1e7dbea173b93', 'Bong den phong ngu 2', 0);
+// DeviceInRoom.mInsert(6, '5ab5bd2c413df81ccc5ca8b8', '5aa9dc5db2b1e7dbea173b9e', 'Den huynh quang 1', 0);
+// DeviceInRoom.mInsert(7, '5ab5bd2c413df81ccc5ca8b8', '5aa9dc5db2b1e7dbea173b9e', 'Den huynh quang 2', 0);
 
 /**
 @param mDeviceInRoom:
@@ -85,7 +93,7 @@ DeviceInRoom.mUpdate = (mDeviceInRoom) => {
 */
 DeviceInRoom.mDelete = (_ID) =>{
   return new Promise((resolve, reject) =>{
-    DeviceInRoom.remove({_id : new mongoose.Type.ObjectId(_ID)}, (err) =>{
+    DeviceInRoom.remove({_id : new mongoose.Types.ObjectId(_ID)}, (err) =>{
       if (err) return reject(new Error('Cannot delete DeviceInRoom has _id: ' + deviceInRoom_ID));
       return resolve(true);
     });
