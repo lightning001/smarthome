@@ -16,12 +16,11 @@ mongoose.connect(uri, options);
 var SchemaTypes = mongoose.Schema.Types;
 
 var schemaUser = new mongoose.Schema({
-  id : {type : Number, required: true, index: { unique: true }},
   email : {type : String, required: true, index: { unique: true }},
   password : {type : String, required: true},
   name : {type : String},
   street : {type : String},
-  distric : {type : String},
+  district : {type : String},
   city : {type : String},
   postcode : {type : Number},
   phonenumber : {type : String},
@@ -36,26 +35,13 @@ schemaUser.set('toObject', { getters: true });
 
 var User = mongoose.model('User', schemaUser, 'USER');
 
-User.findByID = (userID) =>{
-  return new Promise((resolve, reject) =>{
-    if(typeof id != 'number')
-      return reject(new Error('UserID must be a number'));
-    User.findOne({id : userID}, (error, data) =>{
-      if(error){
-        return reject(new Error('Cannot get data!' + '\n' + err));
-      }else{
-        return resolve(data);
-      }
-    });
-  });
-}
-
 User.login = (email, password) => {
   return new Promise((resolve, reject) =>{
     //xu ly ma hoa o day
     User.findOne()
     .where('email').equals(email)
     .where('password').equals(password)
+    .where('status').equals(true)
     .exec((err, data) =>{
       if(err) return reject(new Error('Login unsuccessfully!\n' +err ));
       if(!data || typeof data == undefined) return reject('Email or password is incorrected');
@@ -105,14 +91,13 @@ User.findByEmail = (mEmail) =>{
 
 
 
-User.mInsert = (id, email, password, name) =>{
+User.mInsert = (email, password, name) =>{
   return new Promise((resolve, reject) =>{
     User.findByEmail(email).then(
       (data) => {// neu da co email nay thi tra ve loi da ton tai
         return reject(new Error('Email is already exists'));
       }, (error) =>{
         let mUser = new User();
-        mUser.id = id;
         mUser.email = email;
         mUser.password = password;
         mUser.name = name;
@@ -127,8 +112,7 @@ User.mInsert = (id, email, password, name) =>{
   });
 }
 
-
-User.mInsert = (id, email, password, name, street, distric, city, postcode,
+User.mInsert = (email, password, name, street, distric, city, postcode,
                 phonenumber, homephone, dob, type, status, startdateregister, img) =>{
   return new Promise((resolve, reject) =>{
     User.findByEmail(email).then(
@@ -137,7 +121,6 @@ User.mInsert = (id, email, password, name, street, distric, city, postcode,
       },
       (error) =>{
         let mUser = new User();
-        mUser.id = id;
         mUser.email = email;
         mUser.password = password;
         mUser.name = name;
@@ -176,14 +159,13 @@ User.mUpdate = (mUser) => {
   });
 };
 
-
 /**
 @param user_ID: mã _id của thiết bị (kiểu ObjectId)
 @objective : thực hiện xóa 1 user
 */
 User.mDelete = (user_ID) =>{
   return new Promise((resolve, reject) =>{
-    User.remove({_id : user_ID}, (err) =>{
+    User.remove({'_id' : new mongoose.Type.ObjectId(user_ID)}, (err) =>{
       if (err) {
         return reject(new Error('Cannot delete User has _id: ' + user_ID));
       }
@@ -194,14 +176,10 @@ User.mDelete = (user_ID) =>{
     });
   });
 };
+
 /**
 Lấy về tất cả các User
-cach dung:
-  User.getAllUser().then(func1(data), func2(err)).catch(func(err));
-  func1(data) là giá trị khi thực hiện thành công, trả về data
-  func2(err) là xảy ra lỗi khi thực hiện
 */
-
 User.getAllUser = () => {
   return new Promise((resolve, reject) => {
     User.find((err, data) =>{
@@ -222,7 +200,7 @@ User.getByPage = (quantity, page) =>{
     User.find()
     .skip((page-1)*quantity)
     .limit(quantity)
-    .sort({id : 1, name : 1, type : 1, price : -1})
+    .sort({name : 1, type : 1, price : -1})
     .exec((err, data) =>{
       if(err) return reject(new Error('Cannot get data. Error: \n'+ err));
       return resolve(data);
@@ -230,7 +208,84 @@ User.getByPage = (quantity, page) =>{
   });
 }
 
-// User.login('linhdanit1@gmail.com', '12345').then(data => console.log(data), err => console.log(err));
+User.getRoom_Mode_User_Login = (email, password)=>{
+  return new Promise((resolve, reject) =>{
+    User.findOne({'email' : email, 'password' : password, 'status' : true})
+    .exec((err, data) =>{
+      if(err) return reject(new Error(err));
+      if(!data || typeof data == undefined) return reject('Email or password is incorrected');
+      User.aggregate([
+        {
+          $lookup:{
+            from : 'MODE',
+            localField : '_id',
+            foreignField: 'id_user',
+            as: 'listMode'
+          }
+        },{
+          $lookup:{
+            from : 'ROOM',
+            localField : '_id',
+            foreignField: 'id_user',
+            as: 'listRoom'
+          }
+        },{
+          $match:{
+              '_id' : new mongoose.Types.ObjectId(data._id),
+              'listMode' : { $ne: [] },
+              'listRoom' : { $ne: [] }
+          }
+        }
+      ]).exec((err, data) =>{
+        if(err)return reject(new Error(err));
+        else return resolve(data);
+      });
+    });
+  });
+}
+
+User.getRoom_Mode_User = (userID)=>{
+  return new Promise((resolve, reject) =>{
+    User.aggregate([
+      {
+        $lookup:{
+          from : 'MODE',
+          localField : '_id',
+          foreignField: 'id_user',
+          as: 'listMode'
+        }
+      },{
+        $lookup:{
+          from : 'ROOM',
+          localField : '_id',
+          foreignField: 'id_user',
+          as: 'listRoom'
+        }
+      },{
+        $match:{
+            '_id' : new mongoose.Types.ObjectId(userID),
+            'listMode' : { $ne: [] },
+            'listRoom' : { $ne: [] }
+        }
+      }
+    ]).exec((err, data) =>{
+      if(err)return reject(new Error(err));
+      else return resolve(data);
+    });
+  });
+}
+
+// User.getRoom_Mode_User_Login('linhdanit1512@gmail.com', '123456')
+// .then(data =>{
+//   console.log('My data: ' + JSON.stringify(data));
+// }).catch(err =>console.log(err.toString()));
+
+// User.getRoom_Mode_User('5ab3333038b9043e4095ff84')
+// .then(data =>{
+//   console.log('My data: ' + data.toString());
+// }).catch(err =>console.log(err.toString()));
+
+// User.login('linhdanit@gmail.com', '123456').then(data => console.log(data), err => console.log(err));
 // User.findByEmail('linhdanit@gmail.com').then(data => console.log(data), err => console.log(err));
 // User.mInsert(2, 'linhdanit1512@gmail.com', '123456', 'Linh Dan', '101/53/10 Mach Thi Lieu', 'Di An', 'Binh Duong', 821111,
 //                 '0977933807', '02633873877', new Date(1995, 12, 15), 'VIP', 1, Date.now(), 'person.png')

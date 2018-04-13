@@ -17,7 +17,6 @@ mongoose.connect(uri, options);
 var SchemaTypes = mongoose.Schema.Types;
 
 var schemaDevice = new mongoose.Schema({
-  id : {type : Number, required: true, index: { unique: true }},
   name : {type : String},
   img : {type : String},
   description : {type : String},
@@ -29,23 +28,6 @@ var schemaDevice = new mongoose.Schema({
 schemaDevice.set('toObject', { getters: true });
 
 var Device = mongoose.model('Device', schemaDevice, 'DEVICE');
-
-/**
-Tìm kiếm dựa vào id của device
-*/
-Device.findByID = (deviceID) =>{
-  return new Promise((resolve, reject) =>{
-    if(typeof id != 'number')
-      return reject(new Error('DeviceID must be a number'));
-    Device.findOne({id : deviceID}, (error, data) =>{
-      if(error){
-        return reject(new Error('Cannot get data!' + '\n' + err));
-      }else{
-        return resolve(data);
-      }
-    });
-  });
-}
 
 /**
 Tìm kiếm dựa vào _id của device (kiểu ObjectId)
@@ -75,10 +57,9 @@ Device.findByName = (name) =>{
   });
 }
 
-Device.mInsert = (id, name, img, description, price, type) =>{
+Device.mInsert = (name, img, description, price, type) =>{
   return new Promise((resolve, reject) =>{
     let mDevice = new Device();
-    mDevice.id = id;
     mDevice.name = name;
     mDevice.img = img;
     mDevice.description = description;
@@ -87,7 +68,7 @@ Device.mInsert = (id, name, img, description, price, type) =>{
 
     mDevice.save((err) =>{
       if(err){
-        return reject(new Error('Cannot insert Device: ' + JSON.stringify(mDevice) + '\n' + err));
+        return reject(new Error('Cannot insert Device: ' + '\n' + err));
       }else{
         return resolve(true);
       }
@@ -103,7 +84,7 @@ Device.mUpdate = (mDevice) => {
   return new Promise((resolve, reject) =>{
     mDevice.save((err, data) =>{
       if(err){
-        return reject(new Error('Cannot update Device: '+JSON.stringify(mDevice) + '\n' + err));
+        return reject(new Error('Cannot update Device: '+ '\n' + err));
       }else{
         return resolve(true);
       }
@@ -152,7 +133,7 @@ Device.getByPage = (quantity, page) =>{
     Device.find()
     .skip((page-1)*quantity)
     .limit(quantity)
-    .sort({id : 1, name : 1, type : 1, price : -1})
+    .sort({name : 1, type : 1, price : -1})
     .exec((err, data) =>{
       if(err) return reject(new Error('Cannot get data. Error: \n'+ err));
       return resolve(data);

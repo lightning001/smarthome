@@ -36,7 +36,6 @@ ModeDetail.getDetailMode = (id_mode) =>{
   });
 }
 
-
 // ModeDetail.getDetailMode('5ab47f0d52b9ed7bf00ed1c6')
 // .then(data => console.log(data), err => console.log(err))
 // .catch(err => console.log(err));

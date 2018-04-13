@@ -14,7 +14,6 @@ const options = {
 mongoose.connect(uri, options);
 
 var schemaMode = new mongoose.Schema({
-  id : {type : Number, required: true, index: { unique: true }},
   mode_name : {type : String},
   id_user : {type : mongoose.Schema.Types.ObjectId, ref : 'User'},
   status : {type : Number},
@@ -24,26 +23,11 @@ var schemaMode = new mongoose.Schema({
 
 });
 
+
+
 schemaMode.set('toObject', { getters: true });
 
 var Mode = mongoose.model('Mode', schemaMode, 'MODE');
-
-/**
-Tìm kiếm dựa vào id của mode
-*/
-Mode.findByID = (modeID) =>{
-  return new Promise((resolve, reject) =>{
-    if(typeof id != 'number')
-      return reject(new Error('ModeID must be a number'));
-    Mode.findOne({id : modeID}, (error, data) =>{
-      if(error){
-        return reject(new Error('Cannot get data!' + '\n' + err));
-      }else{
-        return resolve(data);
-      }
-    });
-  });
-}
 
 /**
 Tìm kiếm dựa vào _id (truyền vào kiểu String) của mode (kiểu ObjectId)
@@ -57,12 +41,12 @@ Mode.findBy_ID = (mode_ID) =>{
   });
 }
 
-Mode.getByUser = (id_user) =>{
+Mode.findByUser = (id_user) =>{
   return new Promise((resolve, reject) =>{
     Mode.find({'id_user' : new mongoose.Types.ObjectId(id_user)}, (err, data) =>{
       if(err) return reject(new Error('Error: '+err));
       if(data.length == 0) return reject('No mode can be found');
-      return data;
+      return resolve(data);
     });
   });
 }
@@ -78,10 +62,11 @@ Mode.findByName = (name, id_user) =>{
   });
 }
 
-Mode.mInsert = (id, mode_name, id_user, status, circle, starttime, stoptime) =>{
+
+
+Mode.mInsert = (mode_name, id_user, status, circle, starttime, stoptime) =>{
   return new Promise((resolve, reject) =>{
     let mMode = new Mode();
-    mMode.id = id;
     mMode.mode_name = mode_name,
     mMode.id_user = new mongoose.Types.ObjectId(id_user);
     mMode.status = status;
@@ -102,7 +87,7 @@ Mode.mInsert = (id, mode_name, id_user, status, circle, starttime, stoptime) =>{
 Mode.mUpdate = (mMode) => {
   return new Promise((resolve, reject) =>{
     mMode.save((err, data) =>{
-      if(err) return reject(new Error('Cannot update Mode: '+JSON.stringify(mMode) + '\n' + err));
+      if(err) return reject(new Error('Cannot update Mode: '+'\n' + err));
       return resolve(true);
     });
   });
@@ -145,7 +130,7 @@ Mode.getByPage = (quantity, page) =>{
     Mode.find()
     .skip((page-1)*quantity)
     .limit(quantity)
-    .sort({id : 1, name : 1, type : 1, price : -1})
+    .sort({name : 1, type : 1, price : -1})
     .exec((err, data) =>{
       if(err) return reject(new Error('Cannot get data. Error: \n'+ err));
       return resolve(data);

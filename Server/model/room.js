@@ -16,7 +16,6 @@ mongoose.connect(uri, options);
 var SchemaTypes = mongoose.Schema.Types;
 
 var schemaRoom = new mongoose.Schema({
-  id : {type : Number, required: true, index: { unique: true }},
   id_user : {type: mongoose.Schema.Types.ObjectId, required : true, ref : 'User'},
   room_name : {type : String, required : true, default : 'Unknown Room'},
   img : {type : String, default : 'room.png'}
@@ -41,25 +40,6 @@ var getUser = function(id_user){
         });
   });
 }
-
-// getUser(new mongoose.Types.ObjectId())
-// .then(data => console.log(data), err =>console.log(err))
-// .catch(err => console.log(err));
-
-Room.findByID = (roomID) =>{
-  return new Promise((resolve, reject) =>{
-    if(typeof id != 'number')
-      return reject(new Error('RoomID must be a number'));
-    Room.findOne({id : roomID}, (error, data) =>{
-      if(error){
-        return reject(new Error('Cannot get data!' + '\n' + err));
-      }else{
-        return resolve(data);
-      }
-    });
-  });
-}
-
 
 /**
 Tìm kiếm dựa vào _id của room (kiểu ObjectId)
@@ -94,10 +74,9 @@ Room.findByUser = (id_user) =>{
   });
 }
 
-Room.mInsert = (id, id_user, room_name, img) =>{
+Room.mInsert = (id_user, room_name, img) =>{
   return new Promise((resolve, reject) =>{
     let mRoom = new Room();
-    mRoom.id = id;
     mRoom.id_user = new mongoose.Types.ObjectId(id_user);
     mRoom.room_name = room_name;
     mRoom.img = img;

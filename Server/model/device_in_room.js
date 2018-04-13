@@ -14,7 +14,6 @@ const options = {
 mongoose.connect(uri, options);
 
 var schemaDeviceInRoom = new mongoose.Schema({
-  id : {type : Number, require : true},
   id_device : {type : mongoose.Schema.Types.ObjectId, require : true, ref : 'Device'},
   id_room : {type : mongoose.Schema.Types.ObjectId, require : true, ref : 'Room'},
   device_name : {type : String},
@@ -49,11 +48,10 @@ DeviceInRoom.findByName = (name, id_room) =>{
   });
 }
 
-DeviceInRoom.mInsert = (id, id_device, id_room, device_name, status) =>{
+DeviceInRoom.mInsert = (id_device, id_room, device_name, status) =>{
   return new Promise((resolve, reject) =>{
 
     let mDeviceInRoom = new DeviceInRoom();
-    mDeviceInRoom.id = id;
     mDeviceInRoom.id_device = new mongoose.Types.ObjectId(id_device);
     mDeviceInRoom.id_room = new mongoose.Types.ObjectId(id_room);
     mDeviceInRoom.device_name = device_name;
@@ -111,6 +109,7 @@ DeviceInRoom.getAllDeviceInRoom = () => {
     });
   });
 }
+
 /**
 Lấy danh sách thiết bị theo số lượng và trang
 (dùng cho phân trang)
@@ -120,7 +119,7 @@ DeviceInRoom.getByPage = (quantity, page) =>{
     DeviceInRoom.find()
     .skip((page-1)*quantity)
     .limit(quantity)
-    .sort({id : 1, name : 1, type : 1, price : -1})
+    .sort({name : 1, type : 1, price : -1})
     .exec((err, data) =>{
       if(err) return reject(new Error('Cannot get data. Error: \n'+ err));
       return resolve(data);
