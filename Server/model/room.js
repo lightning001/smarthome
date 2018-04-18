@@ -1,17 +1,6 @@
 'use strict'
 
-var mongoose = require('mongoose');
-
-const uri = 'mongodb://localhost:27017/SmartHome';
-
-const options = {
-  reconnectTries: 30, // trying to reconnect
-  reconnectInterval: 500, // Reconnect every 500ms
-  poolSize: 10 // Maintain up to 10 socket connections
-  // If not connected, return errors immediately rather than waiting for reconnect
-};
-
-mongoose.connect(uri, options);
+var mongoose = require('./connection');
 
 var SchemaTypes = mongoose.Schema.Types;
 
@@ -22,6 +11,28 @@ var schemaRoom = new mongoose.Schema({
 });
 
 var Room = mongoose.model('Room', schemaRoom, 'ROOM');
+
+Room.getAllDeviceUser = (userID)=>{
+  return new Promise((resolve, reject) =>{
+    Room.aggregate([
+      {
+        $lookup :{
+          from : 'DEVICEINROOM',
+          localField : '_id',
+          foreignField : 'id_room',
+          as : 'listDevice'
+        }
+      },{
+        $match:{
+            'listDevice' : { $ne: [] },
+        }
+      }
+    ]).exec((err, data) =>{
+      if(err) return reject(new Error('Error' +err));
+        return resolve(data);
+      });
+  });
+}
 
 var getUser = function(id_user){
   return new Promise((resolve, reject) =>{
@@ -74,14 +85,14 @@ Room.findByUser = (id_user) =>{
   });
 }
 
-Room.mInsert = (id_user, room_name, img) =>{
+Room.mInsert = (data) =>{
   return new Promise((resolve, reject) =>{
     let mRoom = new Room();
-    mRoom.id_user = new mongoose.Types.ObjectId(id_user);
-    mRoom.room_name = room_name;
-    mRoom.img = img;
+    mRoom.id_user   = new mongoose.Types.ObjectId(data.id_user);
+    mRoom.room_name = data.room_name;
+    mRoom.img       = data.img;
     mRoom.save((err) =>{
-      if(err) return reject(new Error('Cannot insert Room: ' + JSON.stringify(mRoom) + '\n' + err));
+      if(err) return reject(new Error('Error! An error occurred. Please try again later'));
       return resolve(true);
     });
   });
@@ -95,10 +106,15 @@ Room.mInsert = (id_user, room_name, img) =>{
 /**
 @param mRoom: 1 thiết bị đầy đủ thuộc tính
 */
-Room.mUpdate = (mRoom) => {
+Room.mUpdate = (data) => {
   return new Promise((resolve, reject) =>{
-    mRoom.save((err, data) =>{
-      if(err) return reject(new Error('Cannot update Room: '+JSON.stringify(mRoom) + '\n' + err));
+    let room = new Room();
+    room._id       = new mongoose.Types.ObjectId(data._id);
+    room.id_user   = new mongoose.Types.ObjectId(data.id_user);
+    room.room_name = data.room_name;
+    room.img       = data.img;
+    room.save((err, data) =>{
+      if(err) return reject(new Error('Error! An error occurred. Please try again later'));
       return resolve(true);
     });
   });
@@ -111,17 +127,13 @@ Room.mUpdate = (mRoom) => {
 Room.mDelete = (room_ID) =>{
   return new Promise((resolve, reject) =>{
     Room.remove({_id : new mongoose.Types.ObjectId(room_ID)}, (err) =>{
-      if (err) return reject(new Error('Cannot delete Room has _id: ' + room_ID));
+      if (err) return reject(new Error('Error! An error occurred. Please try again later'));
       return resolve(true);
     });
   });
 };
 /**
 Lấy về tất cả các Room
-cach dung:
-  Room.getAllRoom().then(func1(data), func2(err)).catch(func(err));
-  func1(data) là giá trị khi thực hiện thành công, trả về data
-  func2(err) là xảy ra lỗi khi thực hiện
 */
 
 Room.getAllRoom = () => {
@@ -148,5 +160,10 @@ Room.getByPage = (quantity, page) =>{
     });
   });
 }
+
+// Room.getAllDeviceUser('5ab3333038b9043e4095ff84')
+// .then(data =>console.log(JSON.stringify(data)))
+// .catch(err =>console.log(err.toString()));
+
 
 module.exports = exports = Room;

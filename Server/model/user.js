@@ -1,17 +1,6 @@
 'use strict'
 
-var mongoose = require('mongoose');
-
-const uri = 'mongodb://localhost:27017/SmartHome';
-
-const options = {
-  reconnectTries: 30, // trying to reconnect
-  reconnectInterval: 500, // Reconnect every 500ms
-  poolSize: 10 // Maintain up to 10 socket connections
-  // If not connected, return errors immediately rather than waiting for reconnect
-};
-
-mongoose.connect(uri, options);
+var mongoose = require('./connection');
 
 var SchemaTypes = mongoose.Schema.Types;
 
@@ -79,8 +68,6 @@ User.findByName = (name) =>{
 
 User.findByEmail = (mEmail) =>{
   return new Promise((resolve, reject) =>{
-    if(typeof mEmail != 'string')
-      return reject(new Error('Email must be text'));
     User.findOne({email : mEmail}, (err, data) =>{
       if(err) return reject(new Error('Cannot get data!' + '\n' + err));
       if(!data || data.length ==0) return reject('Can\'t find email: '+mEmail);
@@ -91,16 +78,16 @@ User.findByEmail = (mEmail) =>{
 
 
 
-User.mInsert = (email, password, name) =>{
+User.mInsert = (data) =>{
   return new Promise((resolve, reject) =>{
     User.findByEmail(email).then(
       (data) => {// neu da co email nay thi tra ve loi da ton tai
         return reject(new Error('Email is already exists'));
       }, (error) =>{
         let mUser = new User();
-        mUser.email = email;
-        mUser.password = password;
-        mUser.name = name;
+        mUser.email = data.email;
+        mUser.password = data.password;
+        mUser.name = data.name;
         mUser.save((err) =>{
           if(err){
             return reject(new Error('Cannot insert User: ' + JSON.stringify(mUser) + '\n' + err));
@@ -112,31 +99,30 @@ User.mInsert = (email, password, name) =>{
   });
 }
 
-User.mInsert = (email, password, name, street, distric, city, postcode,
-                phonenumber, homephone, dob, type, status, startdateregister, img) =>{
+User.mInsert = (data) =>{
   return new Promise((resolve, reject) =>{
-    User.findByEmail(email).then(
-      (data) => {// neu da co email nay thi tra ve loi da ton tai
+    User.findByEmail(data.email).then(
+      (data2) => {// neu da co email nay thi tra ve loi da ton tai
         return reject(new Error('Email is already exists'));
       },
       (error) =>{
         let mUser = new User();
-        mUser.email = email;
-        mUser.password = password;
-        mUser.name = name;
-        mUser.street = street;
-        mUser.distric = distric;
-        mUser.city = city;
-        mUser.postcode = postcode;
-        mUser.phonenumber = phonenumber;
-        mUser.homephone = homephone;
-        mUser.dob = dob;
-        mUser.type = type;
-        mUser.status = status;
-        mUser.startdateregister = startdateregister;
-        mUser.img = img;
+        mUser.email             = data.email;
+        mUser.password          = data.password;
+        mUser.name              = data.name;
+        mUser.street            = data.street;
+        mUser.distric           = data.distric;
+        mUser.city              = data.city;
+        mUser.postcode          = data.postcode;
+        mUser.phonenumber       = data.phonenumber;
+        mUser.homephone         = data.homephone;
+        mUser.dob               = data.dob;
+        mUser.type              = data.type;
+        mUser.status            = data.status;
+        mUser.startdateregister = data.startdateregister;
+        mUser.img               = data.img;
         mUser.save((err) =>{
-          if(err) return reject(new Error('Cannot insert User: ' + JSON.stringify(mUser) + '\n' + err));
+          if(err) return reject(new Error('Error! An error occurred. Please try again later'));
           return resolve(true);
         });
       });
@@ -149,9 +135,26 @@ User.mInsert = (email, password, name, street, distric, city, postcode,
 */
 User.mUpdate = (mUser) => {
   return new Promise((resolve, reject) =>{
-    mUser.save((err, data) =>{
+    let u = new User();
+    u._id               = mUser._id;
+    u.email             = mUser.email;
+    u.password          = mUser.password;
+    u.name              = mUser.name;
+    u.street            = mUser.street;
+    u.distric           = mUser.distric;
+    u.city              = mUser.city;
+    u.postcode          = mUser.postcode;
+    u.phonenumber       = mUser.phonenumber;
+    u.homephone         = mUser.homephone;
+    u.dob               = mUser.dob;
+    u.type              = mUser.type;
+    u.status            = mUser.status;
+    u.startdateregister = mUser.startdateregister;
+    u.img               = mUser.img;
+
+    u.save((err, data) =>{
       if(err){
-        return reject(new Error('Cannot update User: '+JSON.stringify(mUser) + '\n' + err));
+        return reject(new Error('Error! An error occurred. Please try again later'));
       }else{
         return resolve(true);
       }
@@ -167,7 +170,7 @@ User.mDelete = (user_ID) =>{
   return new Promise((resolve, reject) =>{
     User.remove({'_id' : new mongoose.Type.ObjectId(user_ID)}, (err) =>{
       if (err) {
-        return reject(new Error('Cannot delete User has _id: ' + user_ID));
+        return reject(new Error('Error! An error occurred. Please try again later'));
       }
       else {
         console.log('Delete Successfully!');

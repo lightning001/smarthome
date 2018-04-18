@@ -3,14 +3,14 @@
 var app = require('express')();
 var server = require('http').createServer(app);
 var io = require('socket.io').listen(server);
-var port = process.env.PORT || 3000;
+var port = process.env.PORT || 5000;
 // val port = 5000;
 
-// var mDevice = require('./model/Device');
+var mDevice = require('./model/Device');
 var mUser = require('./model/User');
 var mRoom = require('./model/Room')
 var mMode = require('./model/Mode');
-// var mModeDetail = require('./model/Mode_Detail');
+var mModeDetail = require('./model/Mode_Detail');
 
 server.listen(port, function(){
   console.log("Waiting statement...");
@@ -31,8 +31,8 @@ io.sockets.on('connection', function(socket){
   mUser.getRoom_Mode_User_Login(data.email, data.password)
     .then(
       (data2) => {
-        console.log('Data: '+JSON.stringify(data2));
-        socket.emit('LoginResult', {'error': false, 'Result' : JSON.stringify(data2)});
+        console.log('Data: '+ JSON.stringify(data2));
+        socket.emit('LoginResult', {'error': false, 'Result' : data2});
       }
       , (err) =>{
       console.log(err.toString());
@@ -44,8 +44,8 @@ io.sockets.on('connection', function(socket){
   });
 
   //lay danh sach cac thiet bi cua che do mode_id
-  socket.on('get-list-device-in-mode', function(mode_id){
-    mModeDetail.getDetailMode(mode_id)
+  socket.on('get-list-device-in-mode', function(data){
+    mModeDetail.getDetailMode(data.mode_id)
     .then(
       data =>{
         socket.emit('Data', data);
@@ -63,6 +63,7 @@ io.sockets.on('connection', function(socket){
   socket.on('get-list-device-user', function(user_id){
   });
   //lay danh sach cac thiet bi trong phong cua user_id+room_id
-  socket.on('get-list-device-room', function(user_id, room_id){
+  socket.on('get-list-device-room', function(data){
+
   });
 });

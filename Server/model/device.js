@@ -1,31 +1,15 @@
 'use strict'
 
-var mongoose = require('mongoose');
+var mongoose = require('./connection');
 require('mongoose-double')(mongoose);
-
-const uri = 'mongodb://localhost:27017/SmartHome';
-
-const options = {
-  reconnectTries: 30, // trying to reconnect
-  reconnectInterval: 500, // Reconnect every 500ms
-  poolSize: 10 // Maintain up to 10 socket connections
-  // If not connected, return errors immediately rather than waiting for reconnect
-};
-
-mongoose.connect(uri, options);
-
-var SchemaTypes = mongoose.Schema.Types;
 
 var schemaDevice = new mongoose.Schema({
   name : {type : String},
   img : {type : String},
   description : {type : String},
-  price : {type : SchemaTypes.Double, default : 0},
+  price : {type : mongoose.Schema.Types.Double, default : 0},
   type : {type : Number}
-
 });
-
-schemaDevice.set('toObject', { getters: true });
 
 var Device = mongoose.model('Device', schemaDevice, 'DEVICE');
 
@@ -57,24 +41,28 @@ Device.findByName = (name) =>{
   });
 }
 
-Device.mInsert = (name, img, description, price, type) =>{
+Device.mInsert = (data) =>{
   return new Promise((resolve, reject) =>{
     let mDevice = new Device();
-    mDevice.name = name;
-    mDevice.img = img;
-    mDevice.description = description;
-    mDevice.price = price;
-    mDevice.type = type;
-
+    mDevice.name = data.name;
+    mDevice.img = data.img;
+    mDevice.description = data.description;
+    mDevice.price = data.price;
+    mDevice.type = data.type;
     mDevice.save((err) =>{
       if(err){
-        return reject(new Error('Cannot insert Device: ' + '\n' + err));
+        return reject(new Error('Error! An error occurred. Please try again later'));
       }else{
         return resolve(true);
       }
     });
   });
 };
+
+// Device.mInsert({'name' : 'Tivi', 'img' : 'https://image.ibb.co/iWJ0sS/ng.png', 'description' : 'Tivi', 'price' : 2000000, 'type' : 1})
+// Device.mInsert({'name' : 'Fan', 'img' : 'https://image.ibb.co/iWJ0sS/ng.png', 'description' : 'Quạt', 'price' : 200000, 'type' : 1})
+// Device.mInsert({'name' : 'Refrigerator', 'img' : 'https://image.ibb.co/iWJ0sS/ng.png', 'description' : 'Tủ lạnh', 'price' : 5000000, 'type' : 1})
+// Device.mInsert({'name' : 'Light sensor', 'img' : 'https://image.ibb.co/iWJ0sS/ng.png', 'description' : 'Cảm biến ánh sáng', 'price' : 50000, 'type' : 0})
 
 
 /**
@@ -84,7 +72,7 @@ Device.mUpdate = (mDevice) => {
   return new Promise((resolve, reject) =>{
     mDevice.save((err, data) =>{
       if(err){
-        return reject(new Error('Cannot update Device: '+ '\n' + err));
+        return reject(new Error('Error! An error occurred. Please try again later'));
       }else{
         return resolve(true);
       }
@@ -100,10 +88,8 @@ Device.mUpdate = (mDevice) => {
 */
 Device.mDelete = (device_ID) =>{
   return new Promise((resolve, reject) =>{
-    if(typeof device_ID != 'string')
-      return reject(new Error('Device_ID must be a String'));
     Device.remove({_id : new mongoose.Types.ObjectId(device_ID)}, (err) =>{
-      if (err) return reject(new Error('Cannot delete Device has _id: ' + device_ID));
+      if (err) return reject(new Error('Error! An error occurred. Please try again later'));
       return resolve(true);
     });
   });
@@ -118,12 +104,13 @@ cach dung:
 
 Device.getAllDevice = () => {
   return new Promise((resolve, reject) => {
-    Device.find((err, data) =>{
+    Device.find()
+    .exec((err, data) =>{
       if(err) return reject(new Error('Cannot get data'));
       return resolve(data);
     });
   });
-}
+};
 /**
 Lấy danh sách thiết bị theo số lượng và trang
 (dùng cho phân trang)
@@ -139,15 +126,8 @@ Device.getByPage = (quantity, page) =>{
       return resolve(data);
     });
   });
-}
+};
 
-// Device.getByPage(2,2).then(data => console.log(data), err => console.log(err +''));
-
-// Device.findBy_ID('5aa9dc4ab2b1e7dbea173b93').then(data => console.log('Data'+ data), err => console.log(err+ ''));
-// Device.findByName('Light').then(data => console.log('Data'+ data), err => console.log(err+ ''));
-// console.log(Device.mInsert(4, 'Refrigerator', 'fridge.png', 'Tủ lạnh', 5000000, 1 ));
-// Device.getAllDevice().then(data => console.log('Data'+ data), err => console.log(err+ ''));
-// Device.getAllDevice();
-// console.log(Device.findByName('đèn'));
+// Device.getAllDevice().then(data =>console.log("Data" + JSON.stringify(data)), err =>console.log(err));
 
 module.exports = exports = Device;

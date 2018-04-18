@@ -1,22 +1,12 @@
 'use strict'
 var mongoose = require('mongoose');
-require('mongoose-double')(mongoose);
 
-const uri = 'mongodb://localhost:27017/SmartHome';
-
-const options = {
-  reconnectTries: 30, // trying to reconnect
-  reconnectInterval: 500, // Reconnect every 500ms
-  poolSize: 10 // Maintain up to 10 socket connections
-  // If not connected, return errors immediately rather than waiting for reconnect
-};
-
-mongoose.connect(uri, options);
+var mongoose = require('./connection');
 
 var schemaMode = new mongoose.Schema({
   mode_name : {type : String},
   id_user : {type : mongoose.Schema.Types.ObjectId, ref : 'User'},
-  status : {type : Number},
+  status : {type : Boolean},
   circle : {type : []},
   starttime : {type : Number},
   stoptime : {type : Number}
@@ -64,18 +54,18 @@ Mode.findByName = (name, id_user) =>{
 
 
 
-Mode.mInsert = (mode_name, id_user, status, circle, starttime, stoptime) =>{
+Mode.mInsert = (data) =>{
   return new Promise((resolve, reject) =>{
     let mMode = new Mode();
-    mMode.mode_name = mode_name,
-    mMode.id_user = new mongoose.Types.ObjectId(id_user);
-    mMode.status = status;
-    mMode.circle = circle;
-    mMode.starttime = starttime;
-    mMode.stoptime = stoptime;
+    mMode.mode_name = data.mode_name,
+    mMode.id_user   = new mongoose.Types.ObjectId(data.id_user);
+    mMode.status    = data.status;
+    mMode.circle    = data.circle;
+    mMode.starttime = data.starttime;
+    mMode.stoptime  = data.stoptime;
 
     mMode.save((err) =>{
-      if(err) return reject(new Error('Cannot insert Mode: ' + JSON.stringify(mMode) + '\n' + err));
+      if(err) return reject(new Error('Error! An error occurred. Please try again later'));
       return resolve(true);
     });
   });
@@ -84,10 +74,17 @@ Mode.mInsert = (mode_name, id_user, status, circle, starttime, stoptime) =>{
 /**
 @param mMode: 1 thiết bị đầy đủ thuộc tính
 */
-Mode.mUpdate = (mMode) => {
+Mode.mUpdate = (data) => {
   return new Promise((resolve, reject) =>{
+    let mMode = new Mode();
+    mMode.mode_name = data.mode_name,
+    mMode.id_user   = new mongoose.Types.ObjectId(data.id_user);
+    mMode.status    = data.status;
+    mMode.circle    = data.circle;
+    mMode.starttime = data.starttime;
+    mMode.stoptime  = data.stoptime;
     mMode.save((err, data) =>{
-      if(err) return reject(new Error('Cannot update Mode: '+'\n' + err));
+      if(err) return reject(new Error('Error! An error occurred. Please try again later'));
       return resolve(true);
     });
   });
@@ -104,7 +101,7 @@ Mode.mDelete = (mode_ID) =>{
     if(typeof mode_ID != 'string')
       return reject(new Error('Mode_ID must be a String'));
     Mode.remove({_id : new mongoose.Types.ObjectId(mode_ID)}, (err) =>{
-      if (err) return reject(new Error('Cannot delete Mode has _id: ' + mode_ID));
+      if (err) return reject(new Error('Error! An error occurred. Please try again later'));
       return resolve(true);
     });
   });

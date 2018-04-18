@@ -1,28 +1,18 @@
 'use strict'
 
-var mongoose = require('mongoose');
+var mongoose = require('./connection');
 require('./Mode');
 require('./Device_In_Room');
+
+
 var ObjectId = mongoose.Types.ObjectId;
-const uri = 'mongodb://localhost:27017/SmartHome';
-
-const options = {
-  reconnectTries: 30, // trying to reconnect
-  reconnectInterval: 500, // Reconnect every 500ms
-  poolSize: 10 // Maintain up to 10 socket connections
-  // If not connected, return errors immediately rather than waiting for reconnect
-};
-
-mongoose.connect(uri, options);
 
 var schemaModeDetail = new mongoose.Schema({
   id_mode : {type : mongoose.Schema.Types.ObjectId, require : true, ref : 'Mode'},
   id_device : {type : mongoose.Schema.Types.ObjectId, require : true, ref : 'DeviceInRoom'},
 });
 
-schemaModeDetail.set('toObject', { getters: true });
-
-var ModeDetail = mongoose.model('ModeDetail', schemaModeDetail, 'MODE_DETAIL');
+var ModeDetail = mongoose.model('ModeDetail', schemaModeDetail, 'MODEDETAIL');
 
 ModeDetail.getDetailMode = (id_mode) =>{
   return new Promise((resolve, reject) =>{
@@ -30,22 +20,19 @@ ModeDetail.getDetailMode = (id_mode) =>{
     .populate('id_mode')
     .populate('id_device')
     .exec(function(err, data) {
-      if(err) return reject(new Error('Error' +err));
-      return resolve(JSON.stringify(data));
+      if(err) return reject(new Error('Error! An error occurred. Please try again later'));
+      return resolve(data);
     });
   });
 }
 
-// ModeDetail.getDetailMode('5ab47f0d52b9ed7bf00ed1c6')
-// .then(data => console.log(data), err => console.log(err))
-// .catch(err => console.log(err));
+ModeDetail.getDetailMode('5ab47f0d52b9ed7bf00ed1c6').then(data =>console.log(JSON.stringify(data), err =>console.log(err)));
 
 ModeDetail.findByMode = (id_mode) =>{
   return new Promise((resolve, reject) =>{
-    if(typeof id_mode != 'string') return reject(new Error('mode must be a string!'));
     ModeDetail.find({'id_mode' : new ObjectId(id_mode)})
     .exec((error, data) =>{
-      if(error) return reject(new Error('Cannot get data!' + '\n' + error));
+      if(error) return reject(new Error('Error! An error occurred. Please try again later'));
       if(!data || data.length == 0)
         return reject('No ModeDetail can find');
       return resolve(data);
@@ -58,7 +45,7 @@ ModeDetail.findByDevice = (id_device) =>{
     if(typeof id_device != 'string')
       return reject(new Error('ModeId must be a number'));
     ModeDetail.findOne({'id_device' : new ObjectId(id_device)}, (err, data) =>{
-      if(err) return reject(new Error('Cannot get data!' + '\n' + err));
+      if(err) return reject(new Error('Error! An error occurred. Please try again later'));
       if(data && data.length ==0)
         return reject('No ModeDetail can find');
       return resolve(data);
@@ -72,7 +59,7 @@ Tìm kiếm dựa vào _id (truyền vào kiểu String) của modeDetail (kiể
 ModeDetail.findBy_id = (_id) =>{
   return new Promise((resolve, reject) =>{
     ModeDetail.findById(new ObjectId(_id), (error, data) =>{
-      if(error) return reject(new Error('Cannot get data!' + '\n' + error));
+      if(error) return reject(new Error('Error! An error occurred. Please try again later'));
       if(data.length ==0) return reject(new Error('No Mode can find'))
         return resolve(data);
     });
@@ -82,30 +69,38 @@ ModeDetail.findBy_id = (_id) =>{
 // var DeviceOnRoom = require('./Device_In_Room');
 // var Mode = require('./Mode');
 
-ModeDetail.mInsert = (id_mode, id_device) =>{
+ModeDetail.mInsert = (data) =>{
   return new Promise((resolve, reject) =>{
     let mModeDetail = new ModeDetail();
-    mModeDetail.id_mode = new ObjectId(id_mode);
-    mModeDetail.id_device = new ObjectId(id_device);
+    mModeDetail.id_mode = new ObjectId(data.id_mode);
+    mModeDetail.id_device = new ObjectId(data.id_device);
     mModeDetail.save((err) =>{
-      if(err) return reject(new Error('Cannot insert ModeDetail: ' + JSON.stringify(mModeDetail) + '\n' + err));
+      if(err) return reject(new Error('Error! An error occurred. Please try again later'));
       return resolve(true);
     });
   });
 }
 
-// ModeDetail.mInsert(new ObjectId('5ab47f0d52b9ed7bf00ed1c6'), new ObjectId('5ab5c49fadfc4664640c883a'));
-// ModeDetail.mInsert(new ObjectId('5ab47f0d52b9ed7bf00ed1c6'), new ObjectId('5ab5c49fadfc4664640c883c'));
-// ModeDetail.mInsert(new ObjectId('5ab480050dd33e6804b27e3d'), new ObjectId('5ab5c49fadfc4664640c883b'));
-// ModeDetail.mInsert(new ObjectId('5ab480050dd33e6804b27e3d'), new ObjectId('5ab5c49fadfc4664640c883a'));
-// ModeDetail.mInsert(new ObjectId('5ab480050dd33e6804b27e3e'), new ObjectId('5ab5c49fadfc4664640c883f'));
-// ModeDetail.mInsert(new ObjectId('5ab480050dd33e6804b27e3e'), new ObjectId('5ab5c49fadfc4664640c883e'));
-// ModeDetail.mInsert(new ObjectId('5ab480050dd33e6804b27e3e'), new ObjectId('5ab5c49fadfc4664640c8840'));
+// ModeDetail.mInsert({'id_mode' : '5ab47f0d52b9ed7bf00ed1c6', 'id_device' : '5ad69946c28bc8368823b6a0'});
+// ModeDetail.mInsert({'id_mode' : '5ab47f0d52b9ed7bf00ed1c6', 'id_device' : '5ad69946c28bc8368823b6a1'});
+// ModeDetail.mInsert({'id_mode' : '5ab47f0d52b9ed7bf00ed1c6', 'id_device' : '5ad69946c28bc8368823b6a2'});
+// ModeDetail.mInsert({'id_mode' : '5ab47f0d52b9ed7bf00ed1c6', 'id_device' : '5ad69946c28bc8368823b6a4'});
+// ModeDetail.mInsert({'id_mode' : '5ab480050dd33e6804b27e3d', 'id_device' : '5ad69946c28bc8368823b6a3'});
+// ModeDetail.mInsert({'id_mode' : '5ab480050dd33e6804b27e3d', 'id_device' : '5ad69946c28bc8368823b6a5'});
+// ModeDetail.mInsert({'id_mode' : '5ab480050dd33e6804b27e3d', 'id_device' : '5ad69946c28bc8368823b6a7'});
+// ModeDetail.mInsert({'id_mode' : '5ab480050dd33e6804b27e3d', 'id_device' : '5ad69946c28bc8368823b6a8'});
+// ModeDetail.mInsert({'id_mode' : '5ab480050dd33e6804b27e3e', 'id_device' : '5ad69946c28bc8368823b6a8'});
+// ModeDetail.mInsert({'id_mode' : '5ab480050dd33e6804b27e3e', 'id_device' : '5ad69946c28bc8368823b6a6'});
+// ModeDetail.mInsert({'id_mode' : '5ab480050dd33e6804b27e3e', 'id_device' : '5ad69946c28bc8368823b6a9'});
 
-ModeDetail.mUpdate = (mModeDetail) => {
+ModeDetail.mUpdate = (data) => {
   return new Promise((resolve, reject) =>{
+    let mModeDetail = new ModeDetail();
+    mModeDetail._id = new ObjectId(data._id);
+    mModeDetail.id_mode = new ObjectId(data.id_mode);
+    mModeDetail.id_device = new ObjectId(data.id_device);
     mModeDetail.save((err, data) =>{
-      if(err) return reject(new Error('Cannot update ModeDetail: '+JSON.stringify(mModeDetail) + '\n' + err));
+      if(err) return reject(new Error('Error! An error occurred. Please try again later'));
       return resolve(true);
     });
   });
@@ -113,10 +108,8 @@ ModeDetail.mUpdate = (mModeDetail) => {
 
 ModeDetail.mDelete = (_id) =>{
   return new Promise((resolve, reject) =>{
-    if(typeof _id != 'string')
-      return reject(new Error('_id must be a String'));
     ModeDetail.remove({'_id' : new ObjectId(_id)}, (err) =>{
-      if (err) return reject(new Error('Cannot delete ModeDetail has _id: ' + modeDetail_id));
+      if (err) return reject(new Error('Error! An error occurred. Please try again later'));
       return resolve(true);
     });
   });
@@ -127,12 +120,14 @@ Lấy về tất cả các ModeDetail
 
 ModeDetail.getAllModeDetail = () => {
   return new Promise((resolve, reject) => {
-    ModeDetail.find((err, data) =>{
+    ModeDetail.find()
+    .exec((err, data) =>{
       if(err) return reject(new Error('Cannot get data'));
       return resolve(data);
     });
   });
 }
+// ModeDetail.getAllModeDetail().then(data =>console.log(JSON.stringify(data)), err =>console.log(err));
 /**
 Lấy danh sách thiết bị theo số lượng và trang
 (dùng cho phân trang)
@@ -149,5 +144,4 @@ ModeDetail.getByPage = (quantity, page) =>{
     });
   });
 }
-
 module.exports = exports = ModeDetail;

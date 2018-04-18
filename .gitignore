@@ -1,3 +1,5 @@
+*/Server/node_modules/*
+
 #################
 ## Eclipse
 #################
@@ -214,3 +216,5 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+
+
