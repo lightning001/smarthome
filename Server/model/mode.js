@@ -77,6 +77,7 @@ Mode.mInsert = (data) =>{
 Mode.mUpdate = (data) => {
   return new Promise((resolve, reject) =>{
     let mMode = new Mode();
+    mMode._id =  new mongoose.Types.ObjectId(data._id);
     mMode.mode_name = data.mode_name,
     mMode.id_user   = new mongoose.Types.ObjectId(data.id_user);
     mMode.status    = data.status;

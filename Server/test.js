@@ -28,6 +28,6 @@ User.getRoom_Mode_User = (userID)=>{
         }
       }
     ]);
-    return resolve(u.toString());
+    return resolve(u);
   });
 }

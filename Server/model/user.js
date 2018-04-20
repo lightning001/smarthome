@@ -1,6 +1,8 @@
 'use strict'
 
 var mongoose = require('./connection');
+require('./Mode');
+require('./Room');
 
 var SchemaTypes = mongoose.Schema.Types;
 
@@ -19,7 +21,12 @@ var schemaUser = new mongoose.Schema({
   status : {type : Boolean, default : false},
   startdateregister : {type : Date, default : Date.now()},
   img : {type : String, default : 'person.png'},
-});
+}, { toJSON : {virtuals: true}});
+
+schemaUser.virtual(  'listMode', {ref : 'Mode', localField : '_id', foreignField : 'id_user', justOne : false});
+schemaUser.virtual(  'listRoom', {ref : 'Room', localField : '_id', foreignField : 'id_user', justOne : false});
+schemaUser.virtual('listDevice', {ref : 'DeviceInRoom', localField : '_id', foreignField : 'user', justOne : false});
+
 schemaUser.set('toObject', { getters: true });
 
 var User = mongoose.model('User', schemaUser, 'USER');
@@ -31,6 +38,8 @@ User.login = (email, password) => {
     .where('email').equals(email)
     .where('password').equals(password)
     .where('status').equals(true)
+    .populate('listMode')
+    .populate('listRoom')
     .exec((err, data) =>{
       if(err) return reject(new Error('Login unsuccessfully!\n' +err ));
       if(!data || typeof data == undefined) return reject('Email or password is incorrected');
@@ -38,6 +47,8 @@ User.login = (email, password) => {
     });
   });
 }
+
+
 
 /**
 Tìm kiếm dựa vào _id của user (kiểu ObjectId) truyền vào string
@@ -54,6 +65,8 @@ User.findBy_ID = (userID) =>{
   });
 }
 
+User.findBy_ID('5ad95080734d1d2de1f48f1d').then(data =>console.log('My data: ' + JSON.stringify(data)), err =>console.log(err.toString()));
+
 User.findByName = (name) =>{
   return new Promise((resolve, reject) =>{
     User.find({'name': {$regex: name}}, (err, data) =>{
@@ -69,7 +82,7 @@ User.findByName = (name) =>{
 User.findByEmail = (mEmail) =>{
   return new Promise((resolve, reject) =>{
     User.findOne({email : mEmail}, (err, data) =>{
-      if(err) return reject(new Error('Cannot get data!' + '\n' + err));
+      if(err) return reject(new Error('Error! An error occurred. Please try again later'));
       if(!data || data.length ==0) return reject('Can\'t find email: '+mEmail);
       else return resolve(data);
     });
@@ -90,7 +103,7 @@ User.mInsert = (data) =>{
         mUser.name = data.name;
         mUser.save((err) =>{
           if(err){
-            return reject(new Error('Cannot insert User: ' + JSON.stringify(mUser) + '\n' + err));
+            return reject(new Error('Error! An error occurred. Please try again later'));
           }else{
             return resolve(true);
           }
@@ -122,13 +135,12 @@ User.mInsert = (data) =>{
         mUser.startdateregister = data.startdateregister;
         mUser.img               = data.img;
         mUser.save((err) =>{
-          if(err) return reject(new Error('Error! An error occurred. Please try again later'));
+          if(err) return reject(false);
           return resolve(true);
         });
       });
     });
 }
-
 
 /**
 @param mUser: 1 thiết bị đầy đủ thuộc tính
@@ -154,7 +166,7 @@ User.mUpdate = (mUser) => {
 
     u.save((err, data) =>{
       if(err){
-        return reject(new Error('Error! An error occurred. Please try again later'));
+        return reject(false);
       }else{
         return resolve(true);
       }
@@ -170,10 +182,9 @@ User.mDelete = (user_ID) =>{
   return new Promise((resolve, reject) =>{
     User.remove({'_id' : new mongoose.Type.ObjectId(user_ID)}, (err) =>{
       if (err) {
-        return reject(new Error('Error! An error occurred. Please try again later'));
+        return reject(false);
       }
       else {
-        console.log('Delete Successfully!');
         return resolve(true);
       }
     });
@@ -187,7 +198,7 @@ User.getAllUser = () => {
   return new Promise((resolve, reject) => {
     User.find((err, data) =>{
       if(err){
-        return reject(new Error('Cannot get data'));
+        return reject(new Error('Error! An error occurred. Please try again later'));
       }else{
         return resolve(data);
       }
@@ -205,80 +216,13 @@ User.getByPage = (quantity, page) =>{
     .limit(quantity)
     .sort({name : 1, type : 1, price : -1})
     .exec((err, data) =>{
-      if(err) return reject(new Error('Cannot get data. Error: \n'+ err));
+      if(err) return reject(new Error('Error! An error occurred. Please try again later'));
       return resolve(data);
     });
   });
 }
 
-User.getRoom_Mode_User_Login = (email, password)=>{
-  return new Promise((resolve, reject) =>{
-    User.findOne({'email' : email, 'password' : password, 'status' : true})
-    .exec((err, data) =>{
-      if(err) return reject(new Error(err));
-      if(!data || typeof data == undefined) return reject('Email or password is incorrected');
-      User.aggregate([
-        {
-          $lookup:{
-            from : 'MODE',
-            localField : '_id',
-            foreignField: 'id_user',
-            as: 'listMode'
-          }
-        },{
-          $lookup:{
-            from : 'ROOM',
-            localField : '_id',
-            foreignField: 'id_user',
-            as: 'listRoom'
-          }
-        },{
-          $match:{
-              '_id' : new mongoose.Types.ObjectId(data._id),
-              'listMode' : { $ne: [] },
-              'listRoom' : { $ne: [] }
-          }
-        }
-      ]).exec((err, data) =>{
-        if(err)return reject(new Error(err));
-        else return resolve(data);
-      });
-    });
-  });
-}
-
-User.getRoom_Mode_User = (userID)=>{
-  return new Promise((resolve, reject) =>{
-    User.aggregate([
-      {
-        $lookup:{
-          from : 'MODE',
-          localField : '_id',
-          foreignField: 'id_user',
-          as: 'listMode'
-        }
-      },{
-        $lookup:{
-          from : 'ROOM',
-          localField : '_id',
-          foreignField: 'id_user',
-          as: 'listRoom'
-        }
-      },{
-        $match:{
-            '_id' : new mongoose.Types.ObjectId(userID),
-            'listMode' : { $ne: [] },
-            'listRoom' : { $ne: [] }
-        }
-      }
-    ]).exec((err, data) =>{
-      if(err)return reject(new Error(err));
-      else return resolve(data);
-    });
-  });
-}
-
-// User.getRoom_Mode_User_Login('linhdanit1512@gmail.com', '123456')
+// User.login('test01@gmail.com', '123456')
 // .then(data =>{
 //   console.log('My data: ' + JSON.stringify(data));
 // }).catch(err =>console.log(err.toString()));
@@ -288,7 +232,7 @@ User.getRoom_Mode_User = (userID)=>{
 //   console.log('My data: ' + data.toString());
 // }).catch(err =>console.log(err.toString()));
 
-// User.login('linhdanit@gmail.com', '123456').then(data => console.log(data), err => console.log(err));
+// User.login('linhdanit1512@gmail.com', '123456').then(data => console.log(data), err => console.log(err));
 // User.findByEmail('linhdanit@gmail.com').then(data => console.log(data), err => console.log(err));
 // User.mInsert(2, 'linhdanit1512@gmail.com', '123456', 'Linh Dan', '101/53/10 Mach Thi Lieu', 'Di An', 'Binh Duong', 821111,
 //                 '0977933807', '02633873877', new Date(1995, 12, 15), 'VIP', 1, Date.now(), 'person.png')

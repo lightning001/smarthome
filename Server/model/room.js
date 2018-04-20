@@ -19,7 +19,7 @@ Room.getAllDeviceUser = (userID)=>{
         $lookup :{
           from : 'DEVICEINROOM',
           localField : '_id',
-          foreignField : 'id_room',
+          foreignField : 'room',
           as : 'listDevice'
         }
       },{
@@ -47,7 +47,7 @@ var getUser = function(id_user){
           }
         ]).exec((err, data) =>{
           if(err) return reject(new Error('Error' +err));
-          return resolve(JSON.stringify(data));
+          return resolve(data);
         });
   });
 }

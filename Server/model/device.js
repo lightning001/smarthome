@@ -68,8 +68,15 @@ Device.mInsert = (data) =>{
 /**
 @param mDevice: 1 thiết bị đầy đủ thuộc tính
 */
-Device.mUpdate = (mDevice) => {
+Device.mUpdate = (data) => {
   return new Promise((resolve, reject) =>{
+    let mDevice = new Device();
+    mDevice._id = new mongoose.Types.ObjectId(data._id);
+    mDevice.name = data.name;
+    mDevice.img = data.img;
+    mDevice.description = data.description;
+    mDevice.price = data.price;
+    mDevice.type = data.type;
     mDevice.save((err, data) =>{
       if(err){
         return reject(new Error('Error! An error occurred. Please try again later'));

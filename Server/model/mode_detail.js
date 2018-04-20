@@ -8,29 +8,45 @@ require('./Device_In_Room');
 var ObjectId = mongoose.Types.ObjectId;
 
 var schemaModeDetail = new mongoose.Schema({
-  id_mode : {type : mongoose.Schema.Types.ObjectId, require : true, ref : 'Mode'},
-  id_device : {type : mongoose.Schema.Types.ObjectId, require : true, ref : 'DeviceInRoom'},
+  mode : {type : mongoose.Schema.Types.ObjectId, require : true, ref : 'Mode'},
+  device : {type : mongoose.Schema.Types.ObjectId, require : true, ref : 'DeviceInRoom'},
 });
 
 var ModeDetail = mongoose.model('ModeDetail', schemaModeDetail, 'MODEDETAIL');
 
-ModeDetail.getDetailMode = (id_mode) =>{
+ModeDetail.getDetailMode = (mode) =>{
   return new Promise((resolve, reject) =>{
-    ModeDetail.find({'id_mode' : new ObjectId(id_mode)}, {'group': 'id_mode'})
-    .populate('id_mode')
-    .populate('id_device')
+    ModeDetail.find({'mode' : new ObjectId(mode)}, {'group': 'mode'})
+    .populate('mode')
+    .populate('device')
     .exec(function(err, data) {
       if(err) return reject(new Error('Error! An error occurred. Please try again later'));
       return resolve(data);
     });
   });
 }
+// ModeDetail.getDetailMode('5ab47f0d52b9ed7bf00ed1c6').then(data =>console.log(JSON.stringify(data), err =>console.log(err)));
 
-ModeDetail.getDetailMode('5ab47f0d52b9ed7bf00ed1c6').then(data =>console.log(JSON.stringify(data), err =>console.log(err)));
-
-ModeDetail.findByMode = (id_mode) =>{
+ModeDetail.unused = (mode, id_user) =>{
   return new Promise((resolve, reject) =>{
-    ModeDetail.find({'id_mode' : new ObjectId(id_mode)})
+    ModeDetail.find()
+    .populate({
+      path : 'mode',
+      match : {'_id' : {$nin : [new ObjectId(mode)]}, 'id_user' : new ObjectId(id_user)}
+    })
+    .populate('device')
+    .exec(function(err, data) {
+      if(err) return reject(new Error('Error! An error occurred. Please try again later'));
+      return resolve(data);
+    });
+  });
+}
+// ModeDetail.unused('5ab47f0d52b9ed7bf00ed1c6', '5ab3333038b9043e4095ff84')
+// .then(data =>console.log(JSON.stringify(data)), err =>console.log(err));
+
+ModeDetail.findByMode = (mode) =>{
+  return new Promise((resolve, reject) =>{
+    ModeDetail.find({'mode' : new ObjectId(mode)})
     .exec((error, data) =>{
       if(error) return reject(new Error('Error! An error occurred. Please try again later'));
       if(!data || data.length == 0)
@@ -40,11 +56,11 @@ ModeDetail.findByMode = (id_mode) =>{
   });
 }
 
-ModeDetail.findByDevice = (id_device) =>{
+ModeDetail.findByDevice = (device) =>{
   return new Promise((resolve, reject) =>{
-    if(typeof id_device != 'string')
+    if(typeof device != 'string')
       return reject(new Error('ModeId must be a number'));
-    ModeDetail.findOne({'id_device' : new ObjectId(id_device)}, (err, data) =>{
+    ModeDetail.findOne({'device' : new ObjectId(device)}, (err, data) =>{
       if(err) return reject(new Error('Error! An error occurred. Please try again later'));
       if(data && data.length ==0)
         return reject('No ModeDetail can find');
@@ -72,8 +88,8 @@ ModeDetail.findBy_id = (_id) =>{
 ModeDetail.mInsert = (data) =>{
   return new Promise((resolve, reject) =>{
     let mModeDetail = new ModeDetail();
-    mModeDetail.id_mode = new ObjectId(data.id_mode);
-    mModeDetail.id_device = new ObjectId(data.id_device);
+    mModeDetail.mode = new ObjectId(data.mode);
+    mModeDetail.device = new ObjectId(data.device);
     mModeDetail.save((err) =>{
       if(err) return reject(new Error('Error! An error occurred. Please try again later'));
       return resolve(true);
@@ -81,24 +97,24 @@ ModeDetail.mInsert = (data) =>{
   });
 }
 
-// ModeDetail.mInsert({'id_mode' : '5ab47f0d52b9ed7bf00ed1c6', 'id_device' : '5ad69946c28bc8368823b6a0'});
-// ModeDetail.mInsert({'id_mode' : '5ab47f0d52b9ed7bf00ed1c6', 'id_device' : '5ad69946c28bc8368823b6a1'});
-// ModeDetail.mInsert({'id_mode' : '5ab47f0d52b9ed7bf00ed1c6', 'id_device' : '5ad69946c28bc8368823b6a2'});
-// ModeDetail.mInsert({'id_mode' : '5ab47f0d52b9ed7bf00ed1c6', 'id_device' : '5ad69946c28bc8368823b6a4'});
-// ModeDetail.mInsert({'id_mode' : '5ab480050dd33e6804b27e3d', 'id_device' : '5ad69946c28bc8368823b6a3'});
-// ModeDetail.mInsert({'id_mode' : '5ab480050dd33e6804b27e3d', 'id_device' : '5ad69946c28bc8368823b6a5'});
-// ModeDetail.mInsert({'id_mode' : '5ab480050dd33e6804b27e3d', 'id_device' : '5ad69946c28bc8368823b6a7'});
-// ModeDetail.mInsert({'id_mode' : '5ab480050dd33e6804b27e3d', 'id_device' : '5ad69946c28bc8368823b6a8'});
-// ModeDetail.mInsert({'id_mode' : '5ab480050dd33e6804b27e3e', 'id_device' : '5ad69946c28bc8368823b6a8'});
-// ModeDetail.mInsert({'id_mode' : '5ab480050dd33e6804b27e3e', 'id_device' : '5ad69946c28bc8368823b6a6'});
-// ModeDetail.mInsert({'id_mode' : '5ab480050dd33e6804b27e3e', 'id_device' : '5ad69946c28bc8368823b6a9'});
+// ModeDetail.mInsert({'mode' : '5ad76f967b86c1a68133bb98', 'device' : '5ad76742bfe73f5740c9cf24'});
+// ModeDetail.mInsert({'mode' : '5ad76f967b86c1a68133bb98', 'device' : '5ad76742bfe73f5740c9cf20'});
+// ModeDetail.mInsert({'mode' : '5ad76f967b86c1a68133bb98', 'device' : '5ad76742bfe73f5740c9cf22'});
+// ModeDetail.mInsert({'mode' : '5ad76f967b86c1a68133bb98', 'device' : '5ad76742bfe73f5740c9cf1e'});
+// ModeDetail.mInsert({'mode' : '5ad76f967b86c1a68133bb98', 'device' : '5ad76742bfe73f5740c9cf1c'});
+// ModeDetail.mInsert({'mode' : '5ab480050dd33e6804b27e3d', 'device' : '5ad69946c28bc8368823b6a5'});
+// ModeDetail.mInsert({'mode' : '5ab480050dd33e6804b27e3d', 'device' : '5ad69946c28bc8368823b6a7'});
+// ModeDetail.mInsert({'mode' : '5ab480050dd33e6804b27e3d', 'device' : '5ad69946c28bc8368823b6a8'});
+// ModeDetail.mInsert({'mode' : '5ab480050dd33e6804b27e3e', 'device' : '5ad69946c28bc8368823b6a8'});
+// ModeDetail.mInsert({'mode' : '5ab480050dd33e6804b27e3e', 'device' : '5ad69946c28bc8368823b6a6'});
+// ModeDetail.mInsert({'mode' : '5ab480050dd33e6804b27e3e', 'device' : '5ad69946c28bc8368823b6a9'});
 
 ModeDetail.mUpdate = (data) => {
   return new Promise((resolve, reject) =>{
     let mModeDetail = new ModeDetail();
     mModeDetail._id = new ObjectId(data._id);
-    mModeDetail.id_mode = new ObjectId(data.id_mode);
-    mModeDetail.id_device = new ObjectId(data.id_device);
+    mModeDetail.mode = new ObjectId(data.mode);
+    mModeDetail.device = new ObjectId(data.device);
     mModeDetail.save((err, data) =>{
       if(err) return reject(new Error('Error! An error occurred. Please try again later'));
       return resolve(true);
