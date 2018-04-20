@@ -65,7 +65,7 @@ User.findBy_ID = (userID) =>{
   });
 }
 
-User.findBy_ID('5ad95080734d1d2de1f48f1d').then(data =>console.log('My data: ' + JSON.stringify(data)), err =>console.log(err.toString()));
+// User.findBy_ID('5ad95080734d1d2de1f48f1d').then(data =>console.log('My data: ' + JSON.stringify(data)), err =>console.log(err.toString()));
 
 User.findByName = (name) =>{
   return new Promise((resolve, reject) =>{
@@ -81,7 +81,7 @@ User.findByName = (name) =>{
 
 User.findByEmail = (mEmail) =>{
   return new Promise((resolve, reject) =>{
-    User.findOne({email : mEmail}, (err, data) =>{
+    User.findOne({'email' : mEmail}, (err, data) =>{
       if(err) return reject(new Error('Error! An error occurred. Please try again later'));
       if(!data || data.length ==0) return reject('Can\'t find email: '+mEmail);
       else return resolve(data);
@@ -147,24 +147,8 @@ User.mInsert = (data) =>{
 */
 User.mUpdate = (mUser) => {
   return new Promise((resolve, reject) =>{
-    let u = new User();
-    u._id               = mUser._id;
-    u.email             = mUser.email;
-    u.password          = mUser.password;
-    u.name              = mUser.name;
-    u.street            = mUser.street;
-    u.distric           = mUser.distric;
-    u.city              = mUser.city;
-    u.postcode          = mUser.postcode;
-    u.phonenumber       = mUser.phonenumber;
-    u.homephone         = mUser.homephone;
-    u.dob               = mUser.dob;
-    u.type              = mUser.type;
-    u.status            = mUser.status;
-    u.startdateregister = mUser.startdateregister;
-    u.img               = mUser.img;
-
-    u.save((err, data) =>{
+    User.update({'_id' : new mongoose.Types.ObjectId(mUser._id)}, {$set : mUser},
+     (err, data) =>{
       if(err){
         return reject(false);
       }else{
@@ -221,6 +205,9 @@ User.getByPage = (quantity, page) =>{
     });
   });
 }
+
+// User.mInsert({"status":true,"startdateregister":"2018-04-13T17:00:00.000Z","img":"https://image.ibb.co/cKgWz7/m_i.png","street":"101/53/10 Mach Thi Lieu","district":"Di An","city":"Binh Duong","postcode":821111,"phonenumber":"0977933807","homephone":"02633873877","dob":"1995-12-15T17:00:00.000Z","type":"Normal","email":"testing02@gmail.com","password":"123456","name":"Linh Dan"})
+// .then(data =>{console.log('My data: ' + JSON.stringify(data));}).catch(err =>console.log(err.toString()));
 
 // User.login('test01@gmail.com', '123456')
 // .then(data =>{

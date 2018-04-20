@@ -8,7 +8,9 @@
   },
   "author": "Linh Dan",
   "dependencies": {
+    "connect": "^3.6.6",
     "express": "^4.16.3",
+    "fs": "0.0.1-security",
     "import": "0.0.6",
     "mongodb": "^3.0.6",
     "mongoose": "^5.0.14",

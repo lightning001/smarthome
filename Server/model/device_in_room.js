@@ -97,7 +97,7 @@ DeviceInRoom.mInsert = (data) =>{
     mDeviceInRoom.status = data.status;
 
     mDeviceInRoom.save((err) =>{
-      if(err) return reject(new Error('Error! An error occurred. Please try again later'));
+      if(err) return reject(false);
       return resolve(true);
     });
   });
@@ -125,17 +125,9 @@ DeviceInRoom.mInsert = (data) =>{
 */
 DeviceInRoom.mUpdate = (data) => {
   return new Promise((resolve, reject) =>{
-    let mDeviceInRoom = new DeviceInRoom();
-    mDeviceInRoom._id = new mongoose.Types.ObjectId(data._id);
-    mDeviceInRoom.device = new mongoose.Types.ObjectId(data.device);
-    mDeviceInRoom.room = new mongoose.Types.ObjectId(data.room);
-    mDeviceInRoom.user = new mongoose.Types.ObjectId(data.user);
-    mDeviceInRoom.device_name = data.device_name;
-    mDeviceInRoom.status = data.status;
-
-    mDeviceInRoom.update({'_id' : data._id}, {$set : data})
+    DeviceInRoom.update({'_id' : data._id}, {$set : data})
     .exec((err, data) =>{
-      if(err) return reject(new Error('Error! An error occurred. Please try again later'));
+      if(err) return reject(false);
       return resolve(true);
     });
   });
@@ -149,7 +141,7 @@ DeviceInRoom.mUpdate = (data) => {
 DeviceInRoom.mDelete = (_ID) =>{
   return new Promise((resolve, reject) =>{
     DeviceInRoom.remove({_id : new mongoose.Types.ObjectId(_ID)}, (err) =>{
-      if (err) return reject(new Error('Error! An error occurred. Please try again later'));
+      if (err) return reject(false);
       return resolve(true);
     });
   });

@@ -2,8 +2,8 @@
 
 var mongoose = require('mongoose');
 
-// const uri = 'mongodb://localhost:27017/SmartHome';
-const uri = 'mongodb://smarthome2018:123456@ds040877.mlab.com:40877/smarthome'
+const uri = 'mongodb://localhost:27017/SmartHome';
+// const uri = 'mongodb://smarthome2018:123456@ds040877.mlab.com:40877/smarthome'
 
 const options = {
   reconnectTries: 30, // trying to reconnect

@@ -63,9 +63,8 @@ Mode.mInsert = (data) =>{
     mMode.circle    = data.circle;
     mMode.starttime = data.starttime;
     mMode.stoptime  = data.stoptime;
-
     mMode.save((err) =>{
-      if(err) return reject(new Error('Error! An error occurred. Please try again later'));
+      if(err) return reject(false);
       return resolve(true);
     });
   });
@@ -76,16 +75,8 @@ Mode.mInsert = (data) =>{
 */
 Mode.mUpdate = (data) => {
   return new Promise((resolve, reject) =>{
-    let mMode = new Mode();
-    mMode._id =  new mongoose.Types.ObjectId(data._id);
-    mMode.mode_name = data.mode_name,
-    mMode.id_user   = new mongoose.Types.ObjectId(data.id_user);
-    mMode.status    = data.status;
-    mMode.circle    = data.circle;
-    mMode.starttime = data.starttime;
-    mMode.stoptime  = data.stoptime;
-    mMode.save((err, data) =>{
-      if(err) return reject(new Error('Error! An error occurred. Please try again later'));
+    Mode.update({'_id' : new mongoose.Types.ObjectId(data._id)}, {$set : data}, (err, data) =>{
+      if(err) return reject(false);
       return resolve(true);
     });
   });
@@ -101,8 +92,8 @@ Mode.mDelete = (mode_ID) =>{
   return new Promise((resolve, reject) =>{
     if(typeof mode_ID != 'string')
       return reject(new Error('Mode_ID must be a String'));
-    Mode.remove({_id : new mongoose.Types.ObjectId(mode_ID)}, (err) =>{
-      if (err) return reject(new Error('Error! An error occurred. Please try again later'));
+    Mode.remove({'_id' : new mongoose.Types.ObjectId(mode_ID)}, (err) =>{
+      if (err) return reject(false);
       return resolve(true);
     });
   });

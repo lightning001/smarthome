@@ -51,7 +51,7 @@ Device.mInsert = (data) =>{
     mDevice.type = data.type;
     mDevice.save((err) =>{
       if(err){
-        return reject(new Error('Error! An error occurred. Please try again later'));
+        return reject(false);
       }else{
         return resolve(true);
       }
@@ -70,16 +70,9 @@ Device.mInsert = (data) =>{
 */
 Device.mUpdate = (data) => {
   return new Promise((resolve, reject) =>{
-    let mDevice = new Device();
-    mDevice._id = new mongoose.Types.ObjectId(data._id);
-    mDevice.name = data.name;
-    mDevice.img = data.img;
-    mDevice.description = data.description;
-    mDevice.price = data.price;
-    mDevice.type = data.type;
-    mDevice.save((err, data) =>{
+    Device.update({'_id' : new mongoose.Types.ObjectId(mUser._id)}, {$set : mUser},(err, data) =>{
       if(err){
-        return reject(new Error('Error! An error occurred. Please try again later'));
+        return reject(false);
       }else{
         return resolve(true);
       }
@@ -95,8 +88,8 @@ Device.mUpdate = (data) => {
 */
 Device.mDelete = (device_ID) =>{
   return new Promise((resolve, reject) =>{
-    Device.remove({_id : new mongoose.Types.ObjectId(device_ID)}, (err) =>{
-      if (err) return reject(new Error('Error! An error occurred. Please try again later'));
+    Device.remove({'_id' : new mongoose.Types.ObjectId(device_ID)}, (err) =>{
+      if (err) return reject(false);
       return resolve(true);
     });
   });

@@ -92,7 +92,7 @@ Room.mInsert = (data) =>{
     mRoom.room_name = data.room_name;
     mRoom.img       = data.img;
     mRoom.save((err) =>{
-      if(err) return reject(new Error('Error! An error occurred. Please try again later'));
+      if(err) return reject(false);
       return resolve(true);
     });
   });
@@ -108,13 +108,8 @@ Room.mInsert = (data) =>{
 */
 Room.mUpdate = (data) => {
   return new Promise((resolve, reject) =>{
-    let room = new Room();
-    room._id       = new mongoose.Types.ObjectId(data._id);
-    room.id_user   = new mongoose.Types.ObjectId(data.id_user);
-    room.room_name = data.room_name;
-    room.img       = data.img;
-    room.save((err, data) =>{
-      if(err) return reject(new Error('Error! An error occurred. Please try again later'));
+    Room.update({'_id' : new mongoose.Types.ObjectId(data._id)}, {$set : data}, (err, data) =>{
+      if(err) return reject(false));
       return resolve(true);
     });
   });
@@ -126,8 +121,8 @@ Room.mUpdate = (data) => {
 */
 Room.mDelete = (room_ID) =>{
   return new Promise((resolve, reject) =>{
-    Room.remove({_id : new mongoose.Types.ObjectId(room_ID)}, (err) =>{
-      if (err) return reject(new Error('Error! An error occurred. Please try again later'));
+    Room.remove({'_id' : new mongoose.Types.ObjectId(room_ID)}, (err) =>{
+      if (err) return reject(false);
       return resolve(true);
     });
   });

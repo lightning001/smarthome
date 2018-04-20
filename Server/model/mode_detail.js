@@ -91,32 +91,16 @@ ModeDetail.mInsert = (data) =>{
     mModeDetail.mode = new ObjectId(data.mode);
     mModeDetail.device = new ObjectId(data.device);
     mModeDetail.save((err) =>{
-      if(err) return reject(new Error('Error! An error occurred. Please try again later'));
+      if(err) return reject(false);
       return resolve(true);
     });
   });
 }
 
-// ModeDetail.mInsert({'mode' : '5ad76f967b86c1a68133bb98', 'device' : '5ad76742bfe73f5740c9cf24'});
-// ModeDetail.mInsert({'mode' : '5ad76f967b86c1a68133bb98', 'device' : '5ad76742bfe73f5740c9cf20'});
-// ModeDetail.mInsert({'mode' : '5ad76f967b86c1a68133bb98', 'device' : '5ad76742bfe73f5740c9cf22'});
-// ModeDetail.mInsert({'mode' : '5ad76f967b86c1a68133bb98', 'device' : '5ad76742bfe73f5740c9cf1e'});
-// ModeDetail.mInsert({'mode' : '5ad76f967b86c1a68133bb98', 'device' : '5ad76742bfe73f5740c9cf1c'});
-// ModeDetail.mInsert({'mode' : '5ab480050dd33e6804b27e3d', 'device' : '5ad69946c28bc8368823b6a5'});
-// ModeDetail.mInsert({'mode' : '5ab480050dd33e6804b27e3d', 'device' : '5ad69946c28bc8368823b6a7'});
-// ModeDetail.mInsert({'mode' : '5ab480050dd33e6804b27e3d', 'device' : '5ad69946c28bc8368823b6a8'});
-// ModeDetail.mInsert({'mode' : '5ab480050dd33e6804b27e3e', 'device' : '5ad69946c28bc8368823b6a8'});
-// ModeDetail.mInsert({'mode' : '5ab480050dd33e6804b27e3e', 'device' : '5ad69946c28bc8368823b6a6'});
-// ModeDetail.mInsert({'mode' : '5ab480050dd33e6804b27e3e', 'device' : '5ad69946c28bc8368823b6a9'});
-
 ModeDetail.mUpdate = (data) => {
   return new Promise((resolve, reject) =>{
-    let mModeDetail = new ModeDetail();
-    mModeDetail._id = new ObjectId(data._id);
-    mModeDetail.mode = new ObjectId(data.mode);
-    mModeDetail.device = new ObjectId(data.device);
-    mModeDetail.save((err, data) =>{
-      if(err) return reject(new Error('Error! An error occurred. Please try again later'));
+    mModeDetail.update({'_id' : new mongoose.Types.ObjectId(mUser._id)}, {$set : mUser}, (err, data) =>{
+      if(err) return reject(false));
       return resolve(true);
     });
   });
@@ -125,7 +109,7 @@ ModeDetail.mUpdate = (data) => {
 ModeDetail.mDelete = (_id) =>{
   return new Promise((resolve, reject) =>{
     ModeDetail.remove({'_id' : new ObjectId(_id)}, (err) =>{
-      if (err) return reject(new Error('Error! An error occurred. Please try again later'));
+      if (err) return reject(false);
       return resolve(true);
     });
   });
