@@ -1,0 +1,35 @@
+[{
+    "_id" : { "$oid" : "5ad9586d734d1d2de1f4920e"},
+    "room_name" : "Living room",
+    "img" : "https://image.ibb.co/cz71XS/phongkhach.jpg",
+    "id_user" : { "$oid" : "5ad955f8734d1d2de1f4911c"},
+    "__v" : 0
+},{
+    "_id" : { "$oid" : "5ad9589a734d1d2de1f49214"},
+    "room_name" : "Bed room",
+    "img" : "https://image.ibb.co/mCfoCS/phongngu2.jpg",
+    "id_user" : { "$oid" : "5ad955f8734d1d2de1f4911c"},
+    "__v" : 0
+},{
+    "_id" : { "$oid" : "5ad958a3734d1d2de1f49217"},
+    "room_name" : "Kitchen",
+    "img" : "https://image.ibb.co/hEwvsS/phongbep.jpg",
+    "id_user" : { "$oid" : "5ad955f8734d1d2de1f4911c"},
+    "__v" : 0
+},{
+    "_id" : { "$oid" : "5ad958ab734d1d2de1f49218"},
+    "room_name" : "Bathroom",
+    "img" : "https://image.ibb.co/dDMjmn/nha_o.jpg",
+    "id_user" : { "$oid" : "5ad955f8734d1d2de1f4911c"},
+    "__v" : 0
+},{
+    "_id" : { "$oid" : "5ad958b2734d1d2de1f49219"},
+    "room_name" : "Bed room 2",
+    "img" : "https://image.ibb.co/mvTasS/phongngu1.jpg",
+    "id_user" : { "$oid" : "5ad955f8734d1d2de1f4911c"}
+},{
+    "_id" : { "$oid" : "5ad958b8734d1d2de1f4921a"},
+    "room_name" : "Bed room 3",
+    "img" : "https://image.ibb.co/mvTasS/phongngu1.jpg",
+    "id_user" : { "$oid" : "5ad955f8734d1d2de1f4911c"}
+}]

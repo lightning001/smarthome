@@ -1,0 +1,1 @@
+mongoimport -h ds040877.mlab.com:40877 -d smarthome -c USER -u smarthome2018 -p 123456 --file E:\dan\hoctap\SmartHome\smarthome\DataSet\user.json

@@ -1,36 +1,82 @@
 'use strict'
 
-var mongoose = require('mongoose');
-
-const uri = 'mongodb://localhost:27017/SmartHome';
-
-const options = {
-  reconnectTries: 30, // trying to reconnect
-  reconnectInterval: 500, // Reconnect every 500ms
-  poolSize: 10 // Maintain up to 10 socket connections
-  // If not connected, return errors immediately rather than waiting for reconnect
-};
-
-mongoose.connect(uri, options);
-
-var SchemaTypes = mongoose.Schema.Types;
+var mongoose = require('./connection');
+// require('./device');
+// require('./user');
+// require('./room');
 
 var schemaDeviceInRoom = new mongoose.Schema({
-  deviceInRoom_id : {type : Number, require : true},
-  room_id : {type : Number, require : true},
-  deviceInRoom_name : {type : String},
-  status : {type : Number, require : true}
-});
+  device : {type : mongoose.Schema.Types.ObjectId, require : true, ref : 'Device'},
+  room : {type : mongoose.Schema.Types.ObjectId, ref : 'Room'},
+  user : {type : mongoose.Schema.Types.ObjectId, require : true, ref : 'User'},
+  device_name : {type : String},
+  status : {type : Boolean, require : true}});
 
-schemaDeviceInRoom.set('toObject', { getters: true });
+var DeviceInRoom = mongoose.model('DeviceInRoom', schemaDeviceInRoom, 'DEVICEINROOM');
 
-var DeviceInRoom = mongoose.model('DeviceInRoom', schemaDeviceInRoom, 'DEVICE_IN_ROOM');
 /**
 Tìm kiếm dựa vào _id của deviceInRoom (kiểu ObjectId)
 */
-DeviceInRoom.findBy_ID = (deviceInRoomID) =>{
+DeviceInRoom.findBy_ID = (_ID) =>{
   return new Promise((resolve, reject) =>{
-    DeviceInRoom.findById(new mongoose.Types.ObjectId(deviceInRoomID), (error, data) =>{
+    DeviceInRoom.findById(new mongoose.Types.ObjectId(_ID), (error, data) =>{
+      if(error){
+        return reject(new Error('Cannot get data!' + '\n' + error));
+      }else{
+        return resolve(data);
+      }
+    });
+  });
+};
+
+DeviceInRoom.getDeviceInRoom = (roomID) =>{
+  return new Promise((resolve, reject) =>{
+    DeviceInRoom.find({'room' : new mongoose.Types.ObjectId(roomID)})
+    // .populate('room')
+    .populate('device')
+    // .populate('user')
+
+    .exec((err, data) =>{
+      if(err) {return reject(new Error(err));}
+      return resolve(data);
+    });
+  });
+}
+// DeviceInRoom.getDeviceInRoom('5ab5bcba66a8743898db512c').then(data => console.log(JSON.stringify(data)), err =>console.log(err.toString()));
+
+DeviceInRoom.unused = (userID) =>{
+  return new Promise((resolve, reject) =>{
+    DeviceInRoom.find({'user' : new mongoose.Types.ObjectId(userID)})
+    .or([{'room' : null}, {'room' : { $exists: false }}])
+    .populate('device')
+    .exec((err, data) =>{
+      if(err) {return reject(new Error(err));}
+      return resolve(data);
+    });
+  });
+}
+
+// DeviceInRoom.unused('5ab3333038b9043e4095ff84').then(data => console.log(JSON.stringify(data)), err =>console.log(err.toString()));
+
+DeviceInRoom.search = (data) =>{
+  return new Promise((resolve, reject) =>{
+    DeviceInRoom.find({
+      'device_name': {$regex: data.device_name},
+      'room' : new mongoose.Types.ObjectId(data.room),
+      'user' : new mongoose.Types.ObjectId(data.user)})
+      .exec((err, data) =>{
+      if(err) return reject(new Error('Cannot get data!' + '\n' + err.toString()));
+      return resolve(data);
+    });
+  });
+}
+
+// DeviceInRoom.search({'device_name' : 'den'}).then(data => console.log(JSON.stringify(data)), err =>console.log(err.toString()));
+
+DeviceInRoom.findByUser = (userID) =>{
+  return new Promise((resolve, reject) =>{
+    DeviceInRoom.find({'user': new mongoose.Types.ObjectId(userID)})
+    .exec((error, data) =>{
       if(error){
         return reject(new Error('Cannot get data!' + '\n' + err));
       }else{
@@ -40,40 +86,48 @@ DeviceInRoom.findBy_ID = (deviceInRoomID) =>{
   });
 }
 
-DeviceInRoom.findByName = (name, roomID) =>{
-  return new Promise((resolve, reject) =>{
-    //find({ 'name' : { $regex: /Ghost/, $options: 'i' } }, function(){});
-    DeviceInRoom.find({'device_name': {$regex: name}, room_id : roomID}, (err, data) =>{
-      if(err) return reject(new Error('Cannot get data!' + '\n' + err));
-      return resolve(data);
-    });
-  });
-}
-
-DeviceInRoom.mInsert = (device_id, room_id, device_name, status) =>{
+DeviceInRoom.mInsert = (data) =>{
   return new Promise((resolve, reject) =>{
 
     let mDeviceInRoom = new DeviceInRoom();
-    mDeviceInRoom.device_id = device_id;
-    mDeviceInRoom.room_id = room_id;
-    mDeviceInRoom.device_name = device_name;
-    mDeviceInRoom.status = status;
+    mDeviceInRoom.device = new mongoose.Types.ObjectId(data.device);
+    mDeviceInRoom.room = new mongoose.Types.ObjectId(data.room);
+    mDeviceInRoom.user = new mongoose.Types.ObjectId(data.user);
+    mDeviceInRoom.device_name = data.device_name;
+    mDeviceInRoom.status = data.status;
 
     mDeviceInRoom.save((err) =>{
-      if(err) return reject(new Error('Cannot insert DeviceInRoom: ' + JSON.stringify(mDeviceInRoom) + '\n' + err));
+      if(err) return reject(false);
       return resolve(true);
     });
   });
 };
 
+// DeviceInRoom.mInsert({'device' : '5ad695bb8ccca527b0176399', 'user' : '5ab3333038b9043e4095ff84', 'device_name' : 'Quat phong ngu 2-1', 'status' : 0 });
+// DeviceInRoom.mInsert({'device' : '5ad695bb8ccca527b0176399', 'user' : '5ab3333038b9043e4095ff84', 'device_name' : 'Quat phong ngu 2-2', 'status' : 0 });
+// DeviceInRoom.mInsert({'device' : '5ad695ba8ccca527b0176398', 'user' : '5ab3333038b9043e4095ff84', 'device_name' : 'Bong den 11', 'status' : 0 });
+// DeviceInRoom.mInsert({'device' : '5ad695ba8ccca527b0176398', 'user' : '5ab3333038b9043e4095ff84', 'device_name' : 'Bong den 12', 'status' : 0 });
+// DeviceInRoom.mInsert({'device' : '5ad695ba8ccca527b0176398', 'user' : '5ab3333038b9043e4095ff84', 'device_name' : 'Bong den 13', 'status' : 0 });
+// DeviceInRoom.mInsert({'device' : '5ad695ba8ccca527b0176398', 'room' : '5ab5bcba66a8743898db512c', 'device_name' : 'Bong den 4', 'status' : 0 });
+// DeviceInRoom.mInsert({'device' : '5ad695bb8ccca527b0176399', 'room' : '5ab5bd2c413df81ccc5ca8b8', 'device_name' : 'Quat phong ngu', 'status' : 0 });
+// DeviceInRoom.mInsert({'device' : '5ad695bb8ccca527b017639a', 'room' : '5ab5bd2c413df81ccc5ca8b8', 'device_name' : 'Tu lanh', 'status' : 0 });
+// DeviceInRoom.mInsert({'device' : '5ad695ba8ccca527b0176398', 'room' : '5ab5bd2c413df81ccc5ca8b8', 'device_name' : 'Bong den 5', 'status' : 0 });
+// DeviceInRoom.mInsert({'device' : '5ad695ba8ccca527b0176398', 'room' : '5ab5bd2c413df81ccc5ca8b8', 'device_name' : 'Bong den 6', 'status' : 0 });
+// DeviceInRoom.mInsert({'device' : '5ad695bb8ccca527b0176399', 'room' : '5ab5bd2c413df81ccc5ca8b9', 'device_name' : 'Quat nha bep', 'status' : 0 });
+// DeviceInRoom.mInsert({'device' : '5ad695ba8ccca527b0176398', 'room' : '5ab5bd2c413df81ccc5ca8b9', 'device_name' : 'Bong den 7', 'status' : 0 });
+// DeviceInRoom.mInsert({'device' : '5ad695ba8ccca527b0176398', 'room' : '5ab5bd2c413df81ccc5ca8b9', 'device_name' : 'Bong den 8', 'status' : 0 });
+// DeviceInRoom.mInsert({'device' : '5ad695ba8ccca527b0176398', 'room' : '5ab5bd2c413df81ccc5ca8ba', 'device_name' : 'Bong den 9', 'status' : 0 });
+// DeviceInRoom.mInsert({'device' : '5ad695ba8ccca527b0176398', 'room' : '5ab5bd2c413df81ccc5ca8ba', 'device_name' : 'Bong den 10', 'status' : 0 });
+
 
 /**
-@param mDeviceInRoom: 1 thiết bị đầy đủ thuộc tính
+@param mDeviceInRoom:
 */
-DeviceInRoom.mUpdate = (mDeviceInRoom) => {
+DeviceInRoom.mUpdate = (data) => {
   return new Promise((resolve, reject) =>{
-    mDeviceInRoom.save((err, data) =>{
-      if(err) return reject(new Error('Cannot update DeviceInRoom: '+JSON.stringify(mDeviceInRoom) + '\n' + err));
+    DeviceInRoom.update({'_id' : data._id}, {$set : data})
+    .exec((err, data) =>{
+      if(err) return reject(false);
       return resolve(true);
     });
   });
@@ -81,13 +135,13 @@ DeviceInRoom.mUpdate = (mDeviceInRoom) => {
 
 
 /**
-@param deviceInRoom_ID: mã _id của thiết bị (kiểu ObjectId)
+@param deviceInRoom_ID: mã _id của thiết bị
 @objective : thực hiện xóa 1 DeviceInRoom
 */
-DeviceInRoom.mDelete = (deviceInRoom_ID) =>{
+DeviceInRoom.mDelete = (_ID) =>{
   return new Promise((resolve, reject) =>{
-    DeviceInRoom.remove({_id : new mongoose.Type.OnjectId(deviceInRoom_ID)}, (err) =>{
-      if (err) return reject(new Error('Cannot delete DeviceInRoom has _id: ' + deviceInRoom_ID));
+    DeviceInRoom.remove({_id : new mongoose.Types.ObjectId(_ID)}, (err) =>{
+      if (err) return reject(false);
       return resolve(true);
     });
   });
@@ -104,6 +158,7 @@ DeviceInRoom.getAllDeviceInRoom = () => {
     });
   });
 }
+// DeviceInRoom.getAllDeviceInRoom().then(data =>console.log(JSON.stringify(data)), err =>console.log(err));
 /**
 Lấy danh sách thiết bị theo số lượng và trang
 (dùng cho phân trang)
@@ -113,7 +168,7 @@ DeviceInRoom.getByPage = (quantity, page) =>{
     DeviceInRoom.find()
     .skip((page-1)*quantity)
     .limit(quantity)
-    .sort({id : 1, name : 1, type : 1, price : -1})
+    .sort({name : 1, type : 1, price : -1})
     .exec((err, data) =>{
       if(err) return reject(new Error('Cannot get data. Error: \n'+ err));
       return resolve(data);

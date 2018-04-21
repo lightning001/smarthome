@@ -1,44 +1,56 @@
 'use strict'
 
-var mongoose = require('mongoose');
-
-const uri = 'mongodb://localhost:27017/SmartHome';
-
-const options = {
-  reconnectTries: 30, // trying to reconnect
-  reconnectInterval: 500, // Reconnect every 500ms
-  poolSize: 10 // Maintain up to 10 socket connections
-  // If not connected, return errors immediately rather than waiting for reconnect
-};
-
-mongoose.connect(uri, options);
+var mongoose = require('./connection');
 
 var SchemaTypes = mongoose.Schema.Types;
 
 var schemaRoom = new mongoose.Schema({
-  id : {type : Number, required: true, index: { unique: true }},
-  user_id : {type: Number, required : true},
+  id_user : {type: mongoose.Schema.Types.ObjectId, required : true, ref : 'User'},
   room_name : {type : String, required : true, default : 'Unknown Room'},
   img : {type : String, default : 'room.png'}
 });
 
-
 var Room = mongoose.model('Room', schemaRoom, 'ROOM');
 
-Room.findByID = (roomID) =>{
+Room.getAllDeviceUser = (userID)=>{
   return new Promise((resolve, reject) =>{
-    if(typeof id != 'number')
-      return reject(new Error('RoomID must be a number'));
-    Room.findOne({id : roomID}, (error, data) =>{
-      if(error){
-        return reject(new Error('Cannot get data!' + '\n' + err));
-      }else{
-        return resolve(data);
+    Room.aggregate([
+      {
+        $lookup :{
+          from : 'DEVICEINROOM',
+          localField : '_id',
+          foreignField : 'room',
+          as : 'listDevice'
+        }
+      },{
+        $match:{
+            'listDevice' : { $ne: [] },
+        }
       }
-    });
+    ]).exec((err, data) =>{
+      if(err) return reject(new Error('Error' +err));
+        return resolve(data);
+      });
   });
 }
 
+var getUser = function(id_user){
+  return new Promise((resolve, reject) =>{
+        Room.aggregate([
+          {
+            $lookup :{
+              from : 'User',// join voi bang Mode
+              localField : 'id_user', //truong join o bang Room
+              foreignField : '_id', // truong join o bang User
+              as : 'User'
+            }
+          }
+        ]).exec((err, data) =>{
+          if(err) return reject(new Error('Error' +err));
+          return resolve(data);
+        });
+  });
+}
 
 /**
 Tìm kiếm dựa vào _id của room (kiểu ObjectId)
@@ -46,18 +58,15 @@ Tìm kiếm dựa vào _id của room (kiểu ObjectId)
 Room.findBy_ID = (roomID) =>{
   return new Promise((resolve, reject) =>{
     Room.findById(new mongoose.Types.ObjectId(roomID), (error, data) =>{
-      if(error){
-        return reject(new Error('Cannot get data!' + '\n' + err));
-      }else{
-        return resolve(data);
-      }
+      if(error) return reject(new Error('Cannot get data!' + '\n' + err));
+      return resolve(data);
     });
   });
 }
 
 Room.findByName = (name, userID) =>{
   return new Promise((resolve, reject) =>{
-    Room.find({'room_name': {$regex: name}, 'user_id' : userID}, (err, data) =>{
+    Room.find({'room_name': {$regex: name}, 'id_user' : new mongoose.Types.ObjectId(userID)}, (err, data) =>{
       if(err){
         return reject(new Error('Cannot get data!' + '\n' + err));
       }else{
@@ -67,39 +76,40 @@ Room.findByName = (name, userID) =>{
   });
 }
 
-Room.findByUser = (userID) =>{
+Room.findByUser = (id_user) =>{
   return new Promise((resolve, reject) =>{
-    Room.find({user_id : userID}, (err, data) =>{
-      if(err){
-        return reject(new Error('Cannot get data!' + '\n' + err));
-      }else{
-        return resolve(data);
-      }
+    Room.find({'id_user' : new mongoose.Types.ObjectId(id_user)}, (err, data) =>{
+      if(err) return reject(new Error('Cannot get data!' + '\n' + err));
+      return resolve(data);
     });
   });
 }
 
-Room.mInsert = (id, user_id, room_name, img) =>{
+Room.mInsert = (data) =>{
   return new Promise((resolve, reject) =>{
     let mRoom = new Room();
-    mRoom.id = id;
-    mRoom.user_id = user_id;
-    mRoom.room_name = room_name;
-    mRoom.img = img;
+    mRoom.id_user   = new mongoose.Types.ObjectId(data.id_user);
+    mRoom.room_name = data.room_name;
+    mRoom.img       = data.img;
     mRoom.save((err) =>{
-      if(err) return reject(new Error('Cannot insert Room: ' + JSON.stringify(mRoom) + '\n' + err));
+      if(err) return reject(false);
       return resolve(true);
     });
   });
 }
 
+// Room.mInsert(2, '5ab3333038b9043e4095ff84', 'Bed room', 'bedroom.png');
+// Room.mInsert(3, '5ab3333038b9043e4095ff84', 'Kitchen', 'kitchen.png');
+// Room.mInsert(4, '5ab3333038b9043e4095ff84', 'Bathroom', 'bathroom.png');
+
+
 /**
 @param mRoom: 1 thiết bị đầy đủ thuộc tính
 */
-Room.mUpdate = (mRoom) => {
+Room.mUpdate = (data) => {
   return new Promise((resolve, reject) =>{
-    mRoom.save((err, data) =>{
-      if(err) return reject(new Error('Cannot update Room: '+JSON.stringify(mRoom) + '\n' + err));
+    Room.update({'_id' : new mongoose.Types.ObjectId(data._id)}, {$set : data}, (err, data) =>{
+      if(err) return reject(false));
       return resolve(true);
     });
   });
@@ -111,18 +121,14 @@ Room.mUpdate = (mRoom) => {
 */
 Room.mDelete = (room_ID) =>{
   return new Promise((resolve, reject) =>{
-    Room.remove({_id : new mongoose.Type.OnjectId(room_ID)}, (err) =>{
-      if (err) return reject(new Error('Cannot delete Room has _id: ' + room_ID));
+    Room.remove({'_id' : new mongoose.Types.ObjectId(room_ID)}, (err) =>{
+      if (err) return reject(false);
       return resolve(true);
     });
   });
 };
 /**
 Lấy về tất cả các Room
-cach dung:
-  Room.getAllRoom().then(func1(data), func2(err)).catch(func(err));
-  func1(data) là giá trị khi thực hiện thành công, trả về data
-  func2(err) là xảy ra lỗi khi thực hiện
 */
 
 Room.getAllRoom = () => {
@@ -142,12 +148,17 @@ Room.getByPage = (quantity, page) =>{
     Room.find()
     .skip((page-1)*quantity)
     .limit(quantity)
-    .sort({user_id : 1, room_name : 1})
+    .sort({id_user : 1, room_name : 1})
     .exec((err, data) =>{
       if(err) return reject(new Error('Cannot get data. Error: \n'+ err));
       return resolve(data);
     });
   });
 }
+
+// Room.getAllDeviceUser('5ab3333038b9043e4095ff84')
+// .then(data =>console.log(JSON.stringify(data)))
+// .catch(err =>console.log(err.toString()));
+
 
 module.exports = exports = Room;
