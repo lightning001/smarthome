@@ -1,6 +1,10 @@
 #################
 ## Eclipse
 #################
+*Uploadfile/*
+
+*Test/*
+
 
 *.pydevproject
 .project
