@@ -14,6 +14,11 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+    <!-- Strings related to register -->
+    <string name="error_invalid_cfpassword">This password is incorrect</string>
+    <string name="error_invalid_phonenumber">This phonenumber is incorrect</string>
+
+
     <string name="title_activity_main"></string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>

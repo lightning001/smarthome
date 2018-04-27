@@ -141,8 +141,8 @@
 
                 <ImageButton
                     android:id="@+id/imgt2"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
                     android:layout_marginTop="5dp"
                     android:layout_toLeftOf="@id/imgt3"
                     android:layout_marginRight="10dp"
@@ -150,8 +150,8 @@
 
                 <ImageButton
                     android:id="@+id/imgt3"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
                     android:layout_marginTop="5dp"
                     android:layout_marginRight="10dp"
                     android:layout_toLeftOf="@id/imgt4"
@@ -159,8 +159,8 @@
 
                 <ImageButton
                     android:id="@+id/imgt4"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
                     android:layout_marginTop="5dp"
                     android:layout_marginRight="10dp"
                     android:layout_toLeftOf="@id/imgt5"
@@ -168,8 +168,8 @@
 
                 <ImageButton
                     android:id="@+id/imgt5"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
                     android:layout_marginTop="5dp"
                     android:layout_marginRight="10dp"
                     android:layout_alignParentRight="true"
@@ -183,8 +183,8 @@
 
                 <ImageButton
                     android:id="@+id/imgt6"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
                     android:layout_toLeftOf="@id/imgt7"
                     android:layout_marginTop="5dp"
                     android:layout_marginRight="10dp"
@@ -192,8 +192,8 @@
 
                 <ImageButton
                     android:id="@+id/imgt7"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
                     android:layout_marginTop="5dp"
                     android:layout_marginRight="10dp"
                     android:layout_toLeftOf="@id/imgcn"
@@ -201,8 +201,8 @@
 
                 <ImageButton
                     android:id="@+id/imgcn"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
                     android:layout_marginRight="10dp"
                     android:layout_alignParentRight="true"
                     app:srcCompat="@drawable/ic_sunday1" />

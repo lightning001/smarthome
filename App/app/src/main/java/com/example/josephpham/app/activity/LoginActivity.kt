@@ -13,7 +13,10 @@ import android.widget.TextView
 
 import android.content.Intent
 import android.os.AsyncTask
+import android.os.Handler
+import android.support.v7.app.AlertDialog
 import android.util.Log
+import android.view.LayoutInflater
 import android.widget.Toast
 import com.example.josephpham.app.R
 import com.example.josephpham.app.connect.Connect
@@ -23,6 +26,7 @@ import io.socket.emitter.Emitter
 
 
 import kotlinx.android.synthetic.main.activity_login.*
+import kotlinx.android.synthetic.main.progress_dialog.*
 import org.json.JSONException
 import org.json.JSONObject
 import java.security.NoSuchAlgorithmException
@@ -37,6 +41,12 @@ class LoginActivity : AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
+        addEvent()
+        msocket.connect()
+        thuchien().execute()
+
+    }
+    fun addEvent(){
         password.setOnEditorActionListener(TextView.OnEditorActionListener { _, id, _ ->
             if (id == EditorInfo.IME_ACTION_DONE || id == EditorInfo.IME_NULL) {
                 attemptLogin()
@@ -44,9 +54,24 @@ class LoginActivity : AppCompatActivity(){
             }
             false
         })
-        msocket.connect()
-        thuchien().execute()
+        linkregister.setOnClickListener {
+            val intent = Intent(this@LoginActivity, RegisterUserActivity::class.java)
+            startActivity(intent)
+        }
     }
+    fun propressDialog(){
+        val builder = AlertDialog.Builder(this@LoginActivity)
+        val dialogView = layoutInflater.inflate(R.layout.progress_dialog, null)
+        val message = dialogView.findViewById<TextView>(R.id.loading)
+        message.text = "loading...."
+        builder.setView(dialogView)
+        builder.setCancelable(false)
+        val dialog = builder.create()
+        dialog.show()
+
+        Handler().postDelayed({dialog.dismiss()}, 3000)
+    }
+
 
 
     var onretrieveDateLogin: Emitter.Listener = Emitter.Listener { args ->
@@ -60,6 +85,8 @@ class LoginActivity : AppCompatActivity(){
                     Toast.makeText(this@LoginActivity, "login", Toast.LENGTH_LONG).show()
                     var intent = Intent(this@LoginActivity, MainActivity::class.java)
                     startActivity(intent)
+                    propressDialog()
+
                 }else{
                     val err = data1.getString("Result")
                     Toast.makeText(this@LoginActivity, err.toString(), Toast.LENGTH_LONG).show()
@@ -154,8 +181,6 @@ class LoginActivity : AppCompatActivity(){
         override fun doInBackground(vararg params: Unit?): String {
             email_sign_in_button.setOnClickListener { attemptLogin() }
             msocket.on("LoginResult", onretrieveDateLogin)
-//            var intent = Intent(this@LoginActivity, MainActivity::class.java)
-//            startActivity(intent)
             return ""
         }
 

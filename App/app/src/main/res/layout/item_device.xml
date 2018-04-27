@@ -11,7 +11,7 @@
         android:layout_height="38dp"
         android:layout_marginLeft="16dp"
         android:layout_alignParentTop="true"
-        app:srcCompat="@drawable/ic_device" />
+        android:src="@drawable/ic_device" />
 
     <TextView
         android:id="@+id/tvdevice"
@@ -19,6 +19,15 @@
         android:layout_height="48dp"
         android:layout_marginRight="16dp"
         android:layout_marginLeft="72dp"
+        android:layout_toLeftOf="@+id/cbox"
         android:text="TextView"
         android:textSize="25sp" />
+    <CheckBox
+        android:focusable="false"
+        android:id="@+id/cbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="16dp"
+        />
 </RelativeLayout>

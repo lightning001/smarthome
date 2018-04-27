@@ -5,4 +5,6 @@
     <color name="colorAccent">#c26644</color>
     <color name="white">#ffffff</color>
     <color name="backgroud_room">#a78e8e</color>
+    <color name="red">#ef0707</color>
+    <color name="black">#121111</color>
 </resources>
