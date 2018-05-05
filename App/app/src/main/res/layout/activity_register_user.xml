@@ -232,7 +232,8 @@
                     android:imeOptions="actionUnspecified"
                     android:inputType="textPassword"
                     android:maxLines="1"
-                    android:singleLine="true" />
+                    android:singleLine="true"
+                    android:fontFamily="sans-serif"/>
 
             </LinearLayout>
             <LinearLayout
@@ -253,7 +254,8 @@
                     android:imeOptions="actionUnspecified"
                     android:inputType="textPassword"
                     android:maxLines="1"
-                    android:singleLine="true" />
+                    android:singleLine="true"
+                    android:fontFamily="sans-serif"/>
 
             </LinearLayout>>
 

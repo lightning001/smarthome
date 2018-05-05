@@ -58,18 +58,14 @@ class Main2Activity : AppCompatActivity() {
         setSupportActionBar(toolbar2)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         initToolbar()
-
-//        val bundle = intent.getExtras()
-//        listmode  = bundle.getSerializable("listmode") as ArrayList<Mode>
-//        listDeviceInRoom  = bundle.getSerializable("listDeviceInRoom") as ArrayList<DeviceInRoom>
-//        Log.d("listdevice", listDeviceInRoom.toString())
-
-
+        addEvent()
+        initViews()
+    }
+    fun addEvent(){
         val mHideButton = AnimationUtils.loadAnimation(this, R.anim.hide_button)
         val mShowButton = AnimationUtils.loadAnimation(this, R.anim.show_button)
         val mHideLayout = AnimationUtils.loadAnimation(this, R.anim.hide_layout)
         val mShowLayout = AnimationUtils.loadAnimation(this, R.anim.show_layout)
-        initViews()
         fab2.setOnClickListener { view ->
             if(adddevicelayout.visibility == View.VISIBLE &&
                     addmodelayout.visibility == View.VISIBLE){
@@ -95,17 +91,6 @@ class Main2Activity : AppCompatActivity() {
             mSocket.emit("allDevice", idUsser)
             mSocket.on("allDeviceResult", onretrieveDataAllDevice)
         }
-        tabLayout.setupWithViewPager(view_pager)
-        tabLayout.getTabAt(0)!!.setIcon(R.drawable.ic_room_key)
-        tabLayout.getTabAt(1)!!.setIcon(R.drawable.ic_mode)
-        tabLayout.getTabAt(2)!!.setIcon(R.drawable.ic_camera_alt_black_24dp)
-//        listmode.add(Mode("1", "dilam1",true,1324, 1341))
-//        listmode.add(Mode("1", "dilam2",true,541, 1300))
-//        listmode.add(Mode("1", "dilam3",false,100, 431))
-//        listmode.add(Mode("1", "dilam4",true,741, 1000))
-
-
-
     }
     fun openDialog(v: View){
         val mBuilder = AlertDialog.Builder(this@Main2Activity)
@@ -129,6 +114,11 @@ class Main2Activity : AppCompatActivity() {
     }
 
     private fun initViews() {
+        tabLayout.setupWithViewPager(view_pager)
+        tabLayout.getTabAt(0)!!.setIcon(R.drawable.ic_room_key)
+        tabLayout.getTabAt(1)!!.setIcon(R.drawable.ic_mode)
+        tabLayout.getTabAt(2)!!.setIcon(R.drawable.ic_camera_alt_black_24dp)
+
         val viewPager = findViewById<View>(R.id.view_pager) as ViewPager
         viewPager.adapter = MainPagerAdapter(supportFragmentManager)
     }
