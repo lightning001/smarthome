@@ -12,6 +12,9 @@ const options = {
   // If not connected, return errors immediately rather than waiting for reconnect
 };
 
-mongoose.connect(uri, options);
-
-module.exports = exports = mongoose;
+// mongoose.connect(uri, options);
+module.exports = exports = {
+  uri : uri,
+  options : options,
+  secret_key : 'smarthome_itnls'
+};
