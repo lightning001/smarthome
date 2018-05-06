@@ -1,7 +1,7 @@
 var User = require('../model/user');
-const config = require('../DAO/config');
-require('./model/Mode');
-require('./model/Room');
+const config = require('./config');
+// require('../model/Mode');
+// require('../model/Room');
 const msg = require('../msg').en;
 var jwt = require('jsonwebtoken');
 
@@ -17,18 +17,19 @@ User.login = (email, password, socket, _) => {
   populate('listRoom').
   exec((error, data) => {
     if (error) {
-      socket.emit('LoginResult', {'success': false, 'message': msg.error.occur});
+      socket.emit('loginResult', {'success': false, 'message': msg.error.occur});
     }
     if (!data || typeof data == undefined) {
-      socket.emit('LoginResult', {'success': false, 'message': msg.not_exist.account});
+      socket.emit('loginResult', {'success': false, 'message': msg.not_exist.account});
     }
     if (data && data.length != 0) {
       if (data.password != password) {
-        socket.emit('LoginResult', {'success': false, 'message': msg.error.login_incorrect});
+        socket.emit('loginResult', {'success': false, 'message': msg.error.login_incorrect});
       } else {
-        var token = jwt.sign(data, config.secret_key), {expiresInMinutes: 1440});
+        var token = jwt.sign(data, config.secret_key, {expiresIn: 86400});
         socket.auth = true;
-        socket.emit('LoginResult', {'success': true, 'token': token});
+        console.log(data);
+        socket.emit('loginResult', {'success': true, 'token': token});
         _.each(io.nsps, function(nsp) {
           if (_.findWhere(nsp.sockets, {id: socket.id})) {
             console.log("restoring socket to", nsp.name);
@@ -48,29 +49,31 @@ User.findBy_ID = (token, socket) => {
     if (error) {
       socket.emit('FindUserIDResult', {'success': false, 'message': msg.error.occur});
     } else if (!error && data) {
-      User.findById(new mongoose.Types.ObjectId(data.userID), (error, data2) => {
+      User.findById(new mongoose.Types.ObjectId(data._id), (error2, data2) => {
+        if(error2){
           socket.emit('FindUserIDResult', {'success': false, 'message': msg.empty.cant_find});
-        } else if (!error && data2) {
+        } else if (!error2 && data2) {
           let token2 = jwt.sign(data2, config.secret_key, {});
           socket.emit('FindUserIDResult', {'success': true, 'token': token2});
         }
       });
+    }
   });
 }
 
 // User.findBy_ID('5ad95080734d1d2de1f48f1d').then(data =>console.log('My data: ' + JSON.stringify(data)), error =>console.log(error.toString()));
 
 User.findByName = (token, socket) => {
-  jwt.verify(token, config.secret_key, function(error, data2) {
+  jwt.verify(token, config.secret_key, function(error, data) {
     if (error) {
       socket.emit('FindUserNameResult', {'success': false, 'message': msg.error.occur});
-    } else if (data2) {
-      User.find({'name': {$regex: data2.name}}, (error, data2) => {
-        if (error) {
+    } else if (data) {
+      User.find({'name': {$regex: data.name}}, (error2, data2) => {
+        if (error2) {
           socket.emit('FindUserNameResult', {'success': false,'message': msg.error.occur});
         } else if (!data2) {
           socket.emit('FindUserNameResult', {'success': false,'message': msg.empty.cant_find});
-        } else if (!error && data2) {
+        } else if (!error2 && data2) {
           let token2 = jwt.sign(data2, config.secret_key, {});
           socket.emit('FindUserNameResult', {'success': true,'token': token2});
         }
@@ -84,12 +87,12 @@ User.findByEmail = (token, socket) => {
     if (error) {
       socket.emit('FindUserEmailResult', {'success': false,'message': msg.error.occur});
     } else if (data) {
-      User.find({'email': data.email}, (error, data2) => {
-        if (error) {
+      User.find({'email': data.email}, (error2, data2) => {
+        if (error2) {
           socket.emit('FindUserEmailResult', {'success': false,'message': msg.error.occur});
         } else if (!data2) {
           socket.emit('FindUserEmailResult', {'success': false,'message': msg.empty.cant_find});
-        } else if (!error && data2) {
+        } else if (!error2 && data2) {
           let token2 = jwt.sign(data2, config.secret_key, {});
           socket.emit('FindUserEmailResult', {'success': true,'token': token2});
         }
@@ -98,24 +101,23 @@ User.findByEmail = (token, socket) => {
   });
 }
 
-
-
 User.mInsert = (token, socket) => {
   jwt.verify(token, config.secret_key, function(error, data) {
     if (error) {
-      socket.emit('InsertUserResult', {'success': false,'message': msg.error.occur});
+      socket.emit('createUserResult', {'success': false,'message': msg.error.occur});
     } else if (data) {
-      User.find({'email': data.email}, (error, data2) => {
-        if (!error && (data2 typeof undefined || data2.length == 0)) {
+      User.find({'email': data.email}, (error2, data2) => {
+        if (!error2 && (typeof data2 == undefined || data2.length == 0)) {
           let mUser = new User();
           mUser.email = data2.email;
           mUser.password = data2.password;
           mUser.name = data2.name;
-          mUser.save((error) => {
-            if (error) {
-              socket.emit('InsertUserResult', {'success': false,'message': msg.error.occur});
+          mUser.save((error3) => {
+            if (error3) {
+              socket.emit('createUserResult', {'success': false,'message': msg.error.occur});
             } else {
-              socket.emit('InsertUserResult', {'success': true});
+              console.log('insert '+ true);
+              socket.emit('createUserResult', {'success': true});
             }
           });
         }
@@ -127,10 +129,10 @@ User.mInsert = (token, socket) => {
 User.mInsert2 = (token, socket) => {
   jwt.verify(token, config.secret_key, function(error, data) {
     if (error) {
-      socket.emit('InsertUserResult', {'success': false,'message': msg.error.occur});
+      socket.emit('createUserResult', {'success': false,'message': msg.error.occur});
     } else if (data) {
-      User.find({'email': data.email}, (error, data2) => {
-        if (!error && (data2 typeof undefined || data2.length == 0)) {
+      User.find({'email': data.email}, (error2, data2) => {
+        if (!error2 && (typeof data2 == undefined || data2.length == 0)) {
           let mUser = new User();
           mUser.email = data2.email;
           mUser.password = data2.password;
@@ -146,11 +148,12 @@ User.mInsert2 = (token, socket) => {
           mUser.status = data2.status;
           mUser.startdateregister = data2.startdateregister;
           mUser.img = data2.img;
-          mUser.save((error) => {
-            if (error) {
-              socket.emit('InsertUserResult', {'success': false,'message': msg.error.occur});
+          mUser.save((error3) => {
+            if (error3) {
+              socket.emit('createUserResult', {'success': false,'message': msg.error.occur});
             } else {
-              socket.emit('InsertUserResult', {'success': true});
+              console.log('insert true');
+              socket.emit('createUserResult', {'success': true});
             }
           });
         }
@@ -165,14 +168,16 @@ User.mInsert2 = (token, socket) => {
 User.mUpdate = (token, socket) => {
   jwt.verify(token, config.secret_key, function(error, data) {
     if (error) {
-      socket.emit('UpdateUserResult', {'success': false,'message': msg.error.occur});
+      socket.emit('updateUserResult', {'success': false,'message': msg.error.occur});
     } else if (data) {
       User.update({'_id': new mongoose.Types.ObjectId(data._id)}, {$set: data}).
-      exec((error) => {
-        if (error) {
-          socket.emit('UpdateUserResult', {'success': false,'message': msg.error.occur});
+      exec((error2) => {
+        if (error2) {
+          console.log(error2);
+          socket.emit('updateUserResult', {'success': false,'message': msg.error.occur});
         } else {
-          socket.emit('UpdateUserResult', {'success': true});
+          console.log('update' + true);
+          socket.emit('updateUserResult', {'success': true});
         }
       });
     }
@@ -186,13 +191,16 @@ User.mUpdate = (token, socket) => {
 User.mDelete = (token, socket) => {
   jwt.verify(token, config.secret_key, function(error, data) {
     if (error) {
-      socket.emit('DeleteUserResult', {'success': false,'message': msg.error.occur});
+      socket.emit('deleteUserResult', {'success': false,'message': msg.error.occur});
     } else if (data) {
-      User.remove({'_id': new mongoose.Type.ObjectId(data._id), (error) => {
-        if (error) {
-          socket.emit('DeleteUserResult', {'success': false,'message': msg.error.occur});
+      User.remove({'_id': new mongoose.Type.ObjectId(data._id)}).
+      exec((error2) => {
+        if (error2) {
+          console.log(error2);
+          socket.emit('deleteUserResult', {'success': false,'message': msg.error.occur});
         } else {
-          socket.emit('DeleteUserResult', {'success': true});
+          console.log(true);
+          socket.emit('deleteUserResult', {'success': true});
         }
       });
     }
@@ -225,19 +233,19 @@ User.getAllUser = (token, socket) => {
 Lấy danh sách thiết bị theo số lượng và trang
 (dùng cho phân trang)
 */
-User.getByPage = (quantity, page) => {
+User.getByPage = (token, socket) => {
   jwt.verify(token, config.secret_key, function(error, data) {
     if (error) {
       console.log(error);
       socket.emit('GetUserPageResult', {'success': false, 'message': msg.error.occur});
     } else {
       User.find().
-      skip((page - 1) * quantity).
-      limit(quantity).
+      skip((data.page - 1) * data.quantity).
+      limit(data.quantity).
       sort({name: 1, type: 1, price: -1}).
-      exec((error, data2) => {
-        if (error) {
-          console.log(error);
+      exec((error2, data2) => {
+        if (error2) {
+          console.log(error2);
           socket.emit('GetUserPageResult', {'success': false,'message': msg.error.occur});
         } else {
           console.log(data2);

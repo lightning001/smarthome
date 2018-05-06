@@ -1,14 +1,17 @@
 var Room = require('../model/room');
+const msg = require('../msg').en;
+const config = require('./config');
+var jwt = require('jsonwebtoken');
 
 Room.getAllDeviceUser = (token, socket) => {
   jwt.verify(token, config.secret_key, (error, data) => {
     if (error) {
       socket.emit('AllDeviceUserResult', {'success': false, 'message': msg.error.occur});
     } else if (data) {
-      Room.find({'id_user': data2.id_user}).
+      Room.find({'id_user': data.id_user}).
       populate('listDevice').
-      exec((error, data2) => {
-        if (error) {
+      exec((error2, data2) => {
+        if (error2) {
           socket.emit('AllDeviceUserResult', {'success': false, 'message': msg.error.occur});
         } else {
           let token2 = jwt.sign(data2, config.secret_key, {});
@@ -25,11 +28,11 @@ var getUser = function(token, socket) {
       console.log(error);
       socket.emit('GetUserRoomResult', {'success': false,'message': msg.error.occur});
     } else if (data) {
-      Room.find({'_id' = data._id}).
+      Room.find({'_id' : data._id}).
       populate('id_user').
-      exec((error, data2) => {
-        if (error) {
-          console.log(error);
+      exec((error2, data2) => {
+        if (error2) {
+          console.log(error2);
           socket.emit('GetUserRoomResult', {'success': false,'message': msg.error.occur});
         } else {
           let token2 = jwt.sign(data2, config.secret_key, {});
@@ -50,9 +53,9 @@ Room.findBy_ID = (token, socket) => {
       socket.emit('FindRoomByIdResult', {'success': false,'message': msg.error.occur});
     }else{
       Room.findById(new mongoose.Types.ObjectId(data._id)).
-      exec((error, data2) => {
-        if (error){
-          console.log(error);
+      exec((error2, data2) => {
+        if (error2){
+          console.log(error2);
           socket.emit('FindRoomByIdResult', {'success': false, 'message': msg.error.occur});
         } else{
           let token2 = jwt.sign(data2, config.secret_key, {});
@@ -71,9 +74,9 @@ Room.findByName = (token, socket) => {
       socket.emit('FindRoomByNameResult', {'success': false,'message': msg.error.occur});
     }else{
       Room.find({'room_name': {$regex: data.name},'id_user': new mongoose.Types.ObjectId(data.id_user)}).
-      exec((error, data2) =>  {
-        if (error){
-          console.log(error);
+      exec((error2, data2) =>  {
+        if (error2){
+          console.log(error2);
           socket.emit('FindRoomByNameResult', {'success': false, 'message': msg.error.occur});
         } else{
           let token2 = jwt.sign(data2, config.secret_key, {});
@@ -91,9 +94,9 @@ Room.findByUser = (token, socket) => {
       socket.emit('FindRoomByUserResult', {'success': false,'message': msg.error.occur});
     }else{
       Room.find({'id_user': new mongoose.Types.ObjectId(data.id_user)}).
-      exec((error, data2) =>  {
-        if (error){
-          console.log(error);
+      exec((error2, data2) =>  {
+        if (error2){
+          console.log(error2);
           socket.emit('FindRoomByUserResult', {'success': false, 'message': msg.error.occur});
         } else{
           let token2 = jwt.sign(data2, config.secret_key, {});
@@ -104,22 +107,22 @@ Room.findByUser = (token, socket) => {
   });
 }
 
-Room.mInsert = (token) => {
+Room.mInsert = (token, socket) => {
   jwt.verify(token, config.secret_key, (error, data) => {
     if (error) {
       console.log(error);
-      socket.emit('InsertRoomResult', {'success': false,'message': msg.error.occur});
+      socket.emit('createRoomResult', {'success': false,'message': msg.error.occur});
     }else{
       let mRoom = new Room();
       mRoom.id_user = new mongoose.Types.ObjectId(data.id_user);
       mRoom.room_name = data.room_name;
       mRoom.img = data.img;
-      mRoom.save((error) => {
-        if (error){
-          console.log(error);
-          socket.emit('InsertRoomResult', {'success': false, 'message': msg.error.occur});
+      mRoom.save((error2) => {
+        if (error2){
+          console.log(error2);
+          socket.emit('createRoomResult', {'success': false, 'message': msg.error.occur});
         } else{
-          socket.emit('InsertRoomResult', {'success': true});
+          socket.emit('createRoomResult', {'success': true});
         }
       });
     }
@@ -129,20 +132,20 @@ Room.mInsert = (token) => {
 /**
 @param mRoom: 1 thiết bị đầy đủ thuộc tính
 */
-Room.mUpdate = (data) => {
-  jwt.verify(token, config.secret_key, (error, data1) => {
+Room.mUpdate = (token, socket) => {
+  jwt.verify(token, config.secret_key, (error, data) => {
     if (error) {
       console.log(error);
-      socket.emit('UpdateRoomResult', {'success': false,'message': msg.error.occur});
+      socket.emit('updateRoomResult', {'success': false,'message': msg.error.occur});
     }else{
-      Room.update({'_id': new mongoose.Types.ObjectId(data1._id)}, {$set: data1}).
-      exec((error) =>  {
-        if (error){
-          console.log(error);
-          socket.emit('UpdateRoomResult', {'success': false, 'message': msg.error.occur});
+      Room.update({'_id': new mongoose.Types.ObjectId(data._id)}, {$set: data}).
+      exec((error2) =>  {
+        if (error2){
+          console.log(error2);
+          socket.emit('updateRoomResult', {'success': false, 'message': msg.error.occur});
         } else{
           console.log(true);
-          socket.emit('UpdateRoomResult', {'success': true});
+          socket.emit('updateRoomResult', {'success': true});
         }
       });
     }
@@ -153,20 +156,20 @@ Room.mUpdate = (data) => {
 @param room_ID: mã _id của thiết bị (kiểu ObjectId)
 @objective : thực hiện xóa 1 room
 */
-Room.mDelete = (room_ID) => {
+Room.mDelete = (token, socket) => {
   jwt.verify(token, config.secret_key, (error, data) => {
     if (error) {
       console.log(error);
-      socket.emit('DeleteRoomResult', {'success': false,'message': msg.error.occur});
+      socket.emit('deleteRoomResult', {'success': false,'message': msg.error.occur});
     }else{
-      Room.remove({'_id': new mongoose.Types.ObjectId(room_ID)}).
-      exec((error) =>  {
-        if (error){
-          console.log(error);
-          socket.emit('DeleteRoomResult', {'success': false, 'message': msg.error.occur});
+      Room.remove({'_id': new mongoose.Types.ObjectId(data._id)}).
+      exec((error2) =>  {
+        if (error2){
+          console.log(error2);
+          socket.emit('deleteRoomResult', {'success': false, 'message': msg.error.occur});
         } else{
           console.log(true);
-          socket.emit('DeleteRoomResult', {'success': true});
+          socket.emit('deleteRoomResult', {'success': true});
         }
       });
     }
@@ -176,15 +179,15 @@ Room.mDelete = (room_ID) => {
 Lấy về tất cả các Room
 */
 
-Room.getAllRoom = () => {
+Room.getAllRoom = (token, socket) => {
   jwt.verify(token, config.secret_key, (error, data) => {
     if (error) {
       console.log(error);
       socket.emit('AllRoomResult', {'success': false,'message': msg.error.occur});
     }else{
-      Room.find().exec((error, data2) =>  {
-        if (error){
-          console.log(error);
+      Room.find().exec((error2, data2) =>  {
+        if (error2){
+          console.log(error2);
           socket.emit('AllRoomResult', {'success': false, 'message': msg.error.occur});
         } else{
           console.log(data2);
@@ -199,24 +202,24 @@ Room.getAllRoom = () => {
 Lấy danh sách thiết bị theo số lượng và trang
 (dùng cho phân trang)
 */
-Room.getByPage = (quantity, page) => {
+Room.getByPage = (token, socket) => {
   jwt.verify(token, config.secret_key, (error, data) => {
     if (error) {
       console.log(error);
-      socket.emit('FindRoomByUserResult', {'success': false,'message': msg.error.occur});
+      socket.emit('GetRommPageResult', {'success': false,'message': msg.error.occur});
     }else{
       Room.find().
-      skip((page - 1) * quantity).
-      limit(quantity).
+      skip((data.page - 1) * data.quantity).
+      limit(data.quantity).
       sort({id_user: 1,room_name: 1}).
-      exec((error, data2) =>  {
-        if (error){
-          console.log(error);
-          socket.emit('FindRoomByUserResult', {'success': false, 'message': msg.error.occur});
+      exec((error2, data2) =>  {
+        if (error2){
+          console.log(error2);
+          socket.emit('GetRommPageResult', {'success': false, 'message': msg.error.occur});
         } else{
           console.log(data2);
           let token2 = jwt.sign(data2, config.secret_key, {});
-          socket.emit('FindRoomByUserResult', {'success': true,'token': token2});
+          socket.emit('GetRommPageResult', {'success': true,'token': token2});
         }
       });
     }

@@ -1,116 +1,159 @@
 var DeviceInRoom = require('../model/device_in_room');
+const msg = require('../msg').en;
+const config = require('./config');
+var jwt = require('jsonwebtoken');
 /**
 Tìm kiếm dựa vào _id của deviceInRoom (kiểu ObjectId)
 */
-DeviceInRoom.findBy_ID = (_ID) => {
-  return new Promise((resolve, reject) => {
-    DeviceInRoom.findById(new mongoose.Types.ObjectId(_ID), (error, data) => {
-      if (error) {
-        return reject(new Error('Cannot get data!' + '\n' + error));
-      } else {
-        return resolve(data);
-      }
-    });
+DeviceInRoom.findBy_ID = (token, socket) => {
+  jwt.verify(token, config.secret_key, function(error, data) {
+    if (error) {
+      socket.emit('FindDeviceInRoomByIDResult', {'success': false, 'message': msg.error.occur});
+    } else if (!error && data) {
+      DeviceInRoom.findById(new mongoose.Types.ObjectId(data._id)).
+      exec((error2, data2) => {
+        if(error2){
+          console.log(error2);
+          socket.emit('FindDeviceInRoomByIDResult', {'success': false, 'message': msg.error.occur});
+        } else if (!error2 && data2) {
+          console.log(data2);
+          let token2 = jwt.sign(data2, config.secret_key, {});
+          socket.emit('FindDeviceInRoomByIDResult', {'success': true, 'token': token2});
+        }
+      });
+    }
   });
 };
 
-DeviceInRoom.getDeviceInRoom = (roomID) => {
-  return new Promise((resolve, reject) => {
-    DeviceInRoom.find({'room': new mongoose.Types.ObjectId(roomID)})
-      .populate('device')
-      .exec((err, data) => {
-        if (err) {
-          return reject(new Error(err));
+DeviceInRoom.getDeviceInRoom = (token, socket) => {
+  jwt.verify(token, config.secret_key, function(error, data) {
+    if (error) {
+      socket.emit('deviceInRoomResult', {'success': false, 'message': msg.error.occur});
+    } else if (!error && data) {
+      DeviceInRoom.find({'room': new mongoose.Types.ObjectId(data.room)}).
+      populate('device').
+      exec((error2, data2) => {
+        if(error2){
+          console.log(error2);
+          socket.emit('deviceInRoomResult', {'success': false, 'message': msg.error.occur});
+        } else if (!error2 && data2) {
+          console.log(data2);
+          let token2 = jwt.sign(data2, config.secret_key, {});
+          socket.emit('deviceInRoomResult', {'success': true, 'token': token2});
         }
-        return resolve(data);
       });
+    }
   });
 }
 
-DeviceInRoom.unused = (userID) => {
-  return new Promise((resolve, reject) => {
-    DeviceInRoom.find({
-        'user': new mongoose.Types.ObjectId(userID)
-      })
-      .or([{
-        'room': null
-      }, {
-        'room': {
-          $exists: false
+DeviceInRoom.unused = (token, socket) => {
+  jwt.verify(token, config.secret_key, function(error, data) {
+    if (error) {
+      socket.emit('deviceUnusedResult', {'success': false, 'message': msg.error.occur});
+    } else if (!error && data) {
+      DeviceInRoom.find({'user': new mongoose.Types.ObjectId(data.user)}).
+      or([{'room': null}, {'room': {$exists: false}}]).
+      populate('device').
+      exec((error2, data2) => {
+        if(error2){
+          console.log(error2);
+          socket.emit('deviceUnusedResult', {'success': false, 'message': msg.error.occur});
+        } else if (!error2 && data2) {
+          console.log(data2);
+          let token2 = jwt.sign(data2, config.secret_key, {});
+          socket.emit('deviceUnusedResult', {'success': true, 'token': token2});
         }
-      }])
-      .populate('device')
-      .exec((err, data) => {
-        if (err) {
-          return reject(new Error(err));
-        }
-        return resolve(data);
       });
+    }
   });
 }
 
-DeviceInRoom.search = (data) => {
-  return new Promise((resolve, reject) => {
-    DeviceInRoom.find({
-        'device_name': {
-          $regex: data.device_name
-        },
-        'room': new mongoose.Types.ObjectId(data.room),
-        'user': new mongoose.Types.ObjectId(data.user)
-      })
-      .exec((err, data) => {
-        if (err) return reject(new Error('Cannot get data!' + '\n' + err.toString()));
-        return resolve(data);
-      });
-  });
-}
-
-DeviceInRoom.findByUser = (userID) => {
-  return new Promise((resolve, reject) => {
-    DeviceInRoom.find({
-        'user': new mongoose.Types.ObjectId(userID)
-      })
-      .exec((error, data) => {
-        if (error) {
-          return reject(new Error('Cannot get data!' + '\n' + err));
-        } else {
-          return resolve(data);
+DeviceInRoom.search = (token, socket) => {
+  jwt.verify(token, config.secret_key, function(error, data) {
+    if (error) {
+      socket.emit('SearchResult', {'success': false, 'message': msg.error.occur});
+    } else if (!error && data) {
+      DeviceInRoom.find({'device_name': {$regex: data.device_name},
+      'room': new mongoose.Types.ObjectId(data.room),
+      'user': new mongoose.Types.ObjectId(data.user)}).
+      exec((error2, data2) => {
+        if(error2){
+          console.log(error2);
+          socket.emit('SearchResult', {'success': false, 'message': msg.error.occur});
+        } else if (!error2 && data2) {
+          console.log(data2);
+          let token2 = jwt.sign(data2, config.secret_key, {});
+          socket.emit('SearchResult', {'success': true, 'token': token2});
         }
       });
+    }
   });
 }
 
-DeviceInRoom.mInsert = (data) => {
-  return new Promise((resolve, reject) => {
+DeviceInRoom.findByUser = (token, socket) => {
+  jwt.verify(token, config.secret_key, function(error, data) {
+    if (error) {
+      socket.emit('FindDeviceInRoomByUserResult', {'success': false, 'message': msg.error.occur});
+    } else if (!error && data) {
+      DeviceInRoom.find({'user': new mongoose.Types.ObjectId(data.user)}).
+      exec((error2, data2) => {
+        if(error2){
+          console.log(error2);
+          socket.emit('FindDeviceInRoomByUserResult', {'success': false, 'message': msg.error.occur});
+        } else if (!error2 && data2) {
+          console.log(data2);
+          let token2 = jwt.sign(data2, config.secret_key, {});
+          socket.emit('FindDeviceInRoomByUserResult', {'success': true, 'token': token2});
+        }
+      });
+    }
+  });
+}
 
-    let mDeviceInRoom = new DeviceInRoom();
-    mDeviceInRoom.device = new mongoose.Types.ObjectId(data.device);
-    mDeviceInRoom.room = new mongoose.Types.ObjectId(data.room);
-    mDeviceInRoom.user = new mongoose.Types.ObjectId(data.user);
-    mDeviceInRoom.device_name = data.device_name;
-    mDeviceInRoom.status = data.status;
+DeviceInRoom.mInsert = (token, socket) => {
+  jwt.verify(token, config.secret_key, function(error, data) {
+    if (error) {
+      socket.emit('createDeviceResult', {'success': false, 'message': msg.error.occur});
+    } else if (!error && data) {
+      let mDeviceInRoom = new DeviceInRoom();
+      mDeviceInRoom.device = new mongoose.Types.ObjectId(data.device);
+      mDeviceInRoom.room = new mongoose.Types.ObjectId(data.room);
+      mDeviceInRoom.user = new mongoose.Types.ObjectId(data.user);
+      mDeviceInRoom.device_name = data.device_name;
+      mDeviceInRoom.status = data.status;
 
-    mDeviceInRoom.save((err) => {
-      if (err) return reject(false);
-      return resolve(true);
-    });
+      mDeviceInRoom.save((err) => {
+        if (err){
+          console.log(err);
+          socket.emit('createDeviceResult', {'success': false, 'message': msg.error.occur});
+        }else{
+          console.log(err);
+          socket.emit('createDeviceResult', {'success': true});
+        }
+      });
+    }
   });
 };
 
 /**
 @param mDeviceInRoom:
 */
-DeviceInRoom.mUpdate = (data) => {
-  return new Promise((resolve, reject) => {
-    DeviceInRoom.update({
-        '_id': data._id
-      }, {
-        $set: data
-      })
-      .exec((err, data) => {
-        if (err) return reject(false);
-        return resolve(true);
+DeviceInRoom.mUpdate = (token, socket) => {
+  jwt.verify(token, config.secret_key, function(error, data) {
+    if (error) {
+      socket.emit('updateDeviceResult', {'success': false, 'message': msg.error.occur});
+    } else if (!error && data) {
+      DeviceInRoom.update({'_id': data._id}, {$set: data}).
+      exec((error2) => {
+        if(error2){
+          console.log(error2);
+          socket.emit('updateDeviceResult', {'success': false, 'message': msg.error.occur});
+        } else {
+          console.log(true);
+          socket.emit('updateDeviceResult', {'success': true});
+        }
       });
+    }
   });
 };
 
@@ -118,46 +161,71 @@ DeviceInRoom.mUpdate = (data) => {
 @param deviceInRoom_ID: mã _id của thiết bị
 @objective : thực hiện xóa 1 DeviceInRoom
 */
-DeviceInRoom.mDelete = (_ID) => {
-  return new Promise((resolve, reject) => {
-    DeviceInRoom.remove({
-      _id: new mongoose.Types.ObjectId(_ID)
-    }, (err) => {
-      if (err) return reject(false);
-      return resolve(true);
-    });
+DeviceInRoom.mDelete = (token, socket) => {
+  jwt.verify(token, config.secret_key, function(error, data) {
+    if (error) {
+      socket.emit('deleteDeviceResult', {'success': false, 'message': msg.error.occur});
+    } else if (!error && data) {
+      DeviceInRoom.remove({'_id': new mongoose.Types.ObjectId(data._id)}).
+      exec((error2) => {
+        if(error2){
+          console.log(error2);
+          socket.emit('deleteDeviceResult', {'success': false, 'message': msg.error.occur});
+        } else {
+          console.log(true);
+          socket.emit('deleteDeviceResult', {'success': true});
+        }
+      });
+    }
   });
 };
 /**
 Lấy về tất cả các DeviceInRoom
 */
 
-DeviceInRoom.getAllDeviceInRoom = () => {
-  return new Promise((resolve, reject) => {
-    DeviceInRoom.find((err, data) => {
-      if (err) return reject(new Error('Cannot get data'));
-      return resolve(data);
-    });
+DeviceInRoom.getAllDeviceInRoom = (token, socket) => {
+  jwt.verify(token, config.secret_key, function(error, data) {
+    if (error) {
+      socket.emit('AllDeviceInRoomResult', {'success': false, 'message': msg.error.occur});
+    } else if (!error && data) {
+      DeviceInRoom.find().
+      exec((error2, data2) => {
+        if(error2){
+          console.log(error2);
+          socket.emit('AllDeviceInRoomResult', {'success': false, 'message': msg.error.occur});
+        } else if (!error2 && data2) {
+          console.log(data2);
+          let token2 = jwt.sign(data2, config.secret_key, {});
+          socket.emit('AllDeviceInRoomResult', {'success': true, 'token': token2});
+        }
+      });
+    }
   });
 }
 /**
 Lấy danh sách thiết bị theo số lượng và trang
 (dùng cho phân trang)
 */
-DeviceInRoom.getByPage = (quantity, page) => {
-  return new Promise((resolve, reject) => {
-    DeviceInRoom.find()
-      .skip((page - 1) * quantity)
-      .limit(quantity)
-      .sort({
-        name: 1,
-        type: 1,
-        price: -1
-      })
-      .exec((err, data) => {
-        if (err) return reject(new Error('Cannot get data. Error: \n' + err));
-        return resolve(data);
+DeviceInRoom.getByPage = (token, socket) => {
+  jwt.verify(token, config.secret_key, function(error, data) {
+    if (error) {
+      socket.emit('DeviceRoomPageResult', {'success': false, 'message': msg.error.occur});
+    } else if (!error && data) {
+      DeviceInRoom.find().
+      skip((data.page - 1) * data.quantity).
+      limit(data.quantity).
+      sort({name: 1, type: 1, price: -1}).
+      exec((error2, data2) => {
+        if(error2){
+          console.log(error2);
+          socket.emit('DeviceRoomPageResult', {'success': false, 'message': msg.error.occur});
+        } else if (!error2 && data2) {
+          console.log(data2);
+          let token2 = jwt.sign(data2, config.secret_key, {});
+          socket.emit('DeviceRoomPageResult', {'success': true, 'token': token2});
+        }
       });
+    }
   });
 }
 

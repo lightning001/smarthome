@@ -1,116 +1,196 @@
 var ModeDetail = require('../model/mode_detail');
 
-ModeDetail.getDetailMode = (mode) =>{
-  return new Promise((resolve, reject) =>{
-    ModeDetail.find({'mode' : new ObjectId(mode)}, {'group': 'mode'})
-    .populate('mode')
-    .populate('device')
-    .exec(function(err, data) {
-      if(err) return reject(new Error('Error! An error occurred. Please try again later'));
-      return resolve(data);
-    });
+ModeDetail.getDetailMode = (token, socket) =>{
+  jwt.verify(token, config.secret_key, function(error, data) {
+    if (error) {
+      socket.emit('deviceInModeResult', {'success': false, 'message': msg.error.occur});
+    } else if (!error && data) {
+      ModeDetail.find({'mode' : new mongoose.Types.ObjectId(data.mode)}, {'group': 'mode'}).
+      populate('mode').
+      populate('device').
+      exec((error2, data2) => {
+        if(error2){
+          console.log(error2);
+          socket.emit('deviceInModeResult', {'success': false, 'message': msg.empty.cant_find});
+        } else if (!error && data2) {
+          console.log(data2);
+          let token2 = jwt.sign(data2, config.secret_key, {});
+          socket.emit('deviceInModeResult', {'success': true, 'token': token2});
+        }
+      });
+    }
   });
 }
 // ModeDetail.getDetailMode('5ab47f0d52b9ed7bf00ed1c6').then(data =>console.log(JSON.stringify(data), err =>console.log(err)));
 
-ModeDetail.unused = (mode, id_user) =>{
-  return new Promise((resolve, reject) =>{
-    ModeDetail.find()
-    .populate({
-      path : 'mode',
-      match : {'_id' : {$nin : [new ObjectId(mode)]}, 'id_user' : new ObjectId(id_user)}
-    })
-    .populate('device')
-    .exec(function(err, data) {
-      if(err) return reject(new Error('Error! An error occurred. Please try again later'));
-      return resolve(data);
-    });
+ModeDetail.unused = (token, socket) =>{
+  jwt.verify(token, config.secret_key, function(error, data) {
+    if (error) {
+      socket.emit('ModeDetailUnusedResult', {'success': false, 'message': msg.error.occur});
+    } else if (!error && data) {
+      ModeDetail.find().
+      populate({
+        path : 'mode',
+        match : {
+          '_id' : {$nin : [new mongoose.Types.ObjectId(data.mode)]},
+          'id_user' : new mongoose.Types.ObjectId(data.id_user)
+        }
+      }).
+      populate('device').
+      exec((error2, data2) => {
+        if(error2){
+          console.log(error2);
+          socket.emit('ModeDetailUnusedResult', {'success': false, 'message': msg.error.occur});
+        } else if (!error2 && data2) {
+          console.log(data2);
+          let token2 = jwt.sign(data2, config.secret_key, {});
+          socket.emit('ModeDetailUnusedResult', {'success': true, 'token': token2});
+        }
+      });
+    }
   });
 }
 // ModeDetail.unused('5ab47f0d52b9ed7bf00ed1c6', '5ab3333038b9043e4095ff84')
 // .then(data =>console.log(JSON.stringify(data)), err =>console.log(err));
 
-ModeDetail.findByMode = (mode) =>{
-  return new Promise((resolve, reject) =>{
-    ModeDetail.find({'mode' : new ObjectId(mode)})
-    .exec((error, data) =>{
-      if(error) return reject(new Error('Error! An error occurred. Please try again later'));
-      if(!data || data.length == 0)
-        return reject('No ModeDetail can find');
-      return resolve(data);
-    });
+ModeDetail.findByMode = (ModeDetail) =>{
+  jwt.verify(token, config.secret_key, function(error, data) {
+    if (error) {
+      socket.emit('FindModeDeatilByModeResult', {'success': false, 'message': msg.error.occur});
+    } else if (!error && data) {
+      ModeDetail.find({'mode' : new mongoose.Types.ObjectId(data.mode)}).
+      exec((error2, data2) => {
+        if(error2){
+          console.log(error2);
+          socket.emit('FindModeDeatilByModeResult', {'success': false, 'message': msg.error.occur});
+        } else if (!error2 && data2) {
+          console.log(data2);
+          let token2 = jwt.sign(data2, config.secret_key, {});
+          socket.emit('FindModeDeatilByModeResult', {'success': true, 'token': token2});
+        }
+      });
+    }
   });
 }
 
-ModeDetail.findByDevice = (device) =>{
-  return new Promise((resolve, reject) =>{
-    if(typeof device != 'string')
-      return reject(new Error('ModeId must be a number'));
-    ModeDetail.findOne({'device' : new ObjectId(device)}, (err, data) =>{
-      if(err) return reject(new Error('Error! An error occurred. Please try again later'));
-      if(data && data.length ==0)
-        return reject('No ModeDetail can find');
-      return resolve(data);
-    });
+ModeDetail.findByDevice = (token, socket) =>{
+  jwt.verify(token, config.secret_key, function(error, data) {
+    if (error) {
+      socket.emit('FindModeDetailByDeviceResult', {'success': false, 'message': msg.error.occur});
+    } else if (!error && data) {
+      ModeDetail.find({'device' : new mongoose.Types.ObjectId(data.device)}).
+      exec((error2, data2) => {
+        if(error2){
+          console.log(error2);
+          socket.emit('FindModeDetailByDeviceResult', {'success': false, 'message': msg.error.occur});
+        } else if (!error2 && data2) {
+          console.log(data2);
+          let token2 = jwt.sign(data2, config.secret_key, {});
+          socket.emit('FindModeDetailByDeviceResult', {'success': true, 'token': token2});
+        }
+      });
+    }
   });
 }
 
-/**
-Tìm kiếm dựa vào _id (truyền vào kiểu String) của modeDetail (kiểu ObjectId)
-*/
-ModeDetail.findBy_id = (_id) =>{
-  return new Promise((resolve, reject) =>{
-    ModeDetail.findById(new ObjectId(_id), (error, data) =>{
-      if(error) return reject(new Error('Error! An error occurred. Please try again later'));
-      if(data.length ==0) return reject(new Error('No Mode can find'))
-        return resolve(data);
-    });
+ModeDetail.findBy_id = (token, socket) =>{
+  jwt.verify(token, config.secret_key, function(error, data) {
+    if (error) {
+      socket.emit('FindModeDetailByIDResult', {'success': false, 'message': msg.error.occur});
+    } else if (!error && data) {
+      ModeDetail.findById(new mongoose.Types.ObjectId(data._id)).
+      exec((error2, data2) => {
+        if(error2){
+          console.log(error2);
+          socket.emit('FindModeDetailByIDResult', {'success': false, 'message': msg.empty.cant_find});
+        } else if (!error2 && data2) {
+          console.log(data2);
+          let token2 = jwt.sign(data2, config.secret_key, {});
+          socket.emit('FindModeDetailByIDResult', {'success': true, 'token': token2});
+        }
+      });
+    }
   });
 }
 
-// var DeviceOnRoom = require('./Device_In_Room');
-// var Mode = require('./Mode');
-
-ModeDetail.mInsert = (data) =>{
-  return new Promise((resolve, reject) =>{
-    let mModeDetail = new ModeDetail();
-    mModeDetail.mode = new ObjectId(data.mode);
-    mModeDetail.device = new ObjectId(data.device);
-    mModeDetail.save((err) =>{
-      if(err) return reject(false);
-      return resolve(true);
-    });
+ModeDetail.mInsert = (token, socket) =>{
+  jwt.verify(token, config.secret_key, function(error, data) {
+    if (error) {
+      socket.emit('InsertModeDetailResult', {'success': false, 'message': msg.error.occur});
+    } else if (!error && data) {
+      let mModeDetail = new ModeDetail();
+      mModeDetail.mode = new mongoose.Types.ObjectId(data.mode);
+      mModeDetail.device = new mongoose.Types.ObjectId(data.device);
+      mModeDetail.save((err) =>{
+        if(err) {
+          console.log(err);
+          socket.emit('InsertModeDetailResult', {'success' : false, 'message' : msg.error.occur})
+        }else{
+          console.log(true);
+          socket.emit('InsertModeDetailResult', {'success': true});
+        }
+      });
+    }
   });
 }
 
-ModeDetail.mUpdate = (data) => {
-  return new Promise((resolve, reject) =>{
-    mModeDetail.update({'_id' : new mongoose.Types.ObjectId(mUser._id)}, {$set : mUser}, (err, data) =>{
-      if(err) return reject(false);
-      return resolve(true);
-    });
+ModeDetail.mUpdate = (token, socket) => {
+  jwt.verify(token, config.secret_key, function(error, data) {
+    if (error) {
+      socket.emit('UpdateModeDetailResult', {'success': false, 'message': msg.error.occur});
+    } else if (!error && data) {
+      ModeDetail.update({'_id' : new mongoose.Types.ObjectId(data._id)}, {$set : data}).
+      exec((error2) => {
+        if(error2){
+          console.log(error2);
+          socket.emit('UpdateModeDetailResult', {'success': false, 'message': msg.error.occur});
+        } else {
+          console.log(true);
+          socket.emit('UpdateModeDetailResult', {'success': true});
+        }
+      });
+    }
   });
 };
 
-ModeDetail.mDelete = (_id) =>{
-  return new Promise((resolve, reject) =>{
-    ModeDetail.remove({'_id' : new ObjectId(_id)}, (err) =>{
-      if (err) return reject(false);
-      return resolve(true);
-    });
+ModeDetail.mDelete = (token, socket) =>{
+  jwt.verify(token, config.secret_key, function(error, data) {
+    if (error) {
+      socket.emit('DeleteModeDetailResult', {'success': false, 'message': msg.error.occur});
+    } else if (!error && data) {
+      ModeDetail.remove({'_id' : new ObjectId(data._id)}).
+      exec((error2) => {
+        if(error2){
+          console.log(error2);
+          socket.emit('DeleteModeDetailResult', {'success': false, 'message': msg.error.occur});
+        } else {
+          socket.emit('DeleteModeDetailResult', {'success': true});
+        }
+      });
+    }
   });
 };
 /**
 Lấy về tất cả các ModeDetail
 */
 
-ModeDetail.getAllModeDetail = () => {
-  return new Promise((resolve, reject) => {
-    ModeDetail.find()
-    .exec((err, data) =>{
-      if(err) return reject(new Error('Cannot get data'));
-      return resolve(data);
-    });
+ModeDetail.getAllModeDetail = (token, socket) => {
+  jwt.verify(token, config.secret_key, function(error, data) {
+    if (error) {
+      socket.emit('AllModeDetailResult', {'success': false, 'message': msg.error.occur});
+    } else if (!error && data) {
+      ModeDetail.find().
+      exec((error2, data2) => {
+        if(error2){
+          console.log(error2);
+          socket.emit('AllModeDetailResult', {'success': false, 'message': msg.error.occur});
+        } else if (!error2 && data2) {
+          console.log(data2);
+          let token2 = jwt.sign(data2, config.secret_key, {});
+          socket.emit('AllModeDetailResult', {'success': true, 'token': token2});
+        }
+      });
+    }
   });
 }
 // ModeDetail.getAllModeDetail().then(data =>console.log(JSON.stringify(data)), err =>console.log(err));
@@ -118,16 +198,26 @@ ModeDetail.getAllModeDetail = () => {
 Lấy danh sách thiết bị theo số lượng và trang
 (dùng cho phân trang)
 */
-ModeDetail.getByPage = (quantity, page) =>{
-  return new Promise((resolve, reject) =>{
-    ModeDetail.find()
-    .skip((page-1)*quantity)
-    .limit(quantity)
-    .sort({id : 1, name : 1, type : 1, price : -1})
-    .exec((err, data) =>{
-      if(err) return reject(new Error('Cannot get data. Error: \n'+ err));
-      return resolve(data);
-    });
+ModeDetail.getByPage = (token, socket) =>{
+  jwt.verify(token, config.secret_key, function(error, data) {
+    if (error) {
+      socket.emit('GetModeDetailPageResult', {'success': false, 'message': msg.error.occur});
+    } else if (!error && data) {
+      ModeDetail.find().
+      skip((data.page-1) * data.quantity).
+      limit(data.quantity).
+      sort({id : 1, name : 1, type : 1, price : -1}).
+      exec((error2, data2) => {
+        if(error2){
+          console.log(error2);
+          socket.emit('GetModeDetailPageResult', {'success': false, 'message': msg.error.occur});
+        } else if (!error2 && data2) {
+          console.log(data2);
+          let token2 = jwt.sign(data2, config.secret_key, {});
+          socket.emit('GetModeDetailPageResult', {'success': true, 'token': token2});
+        }
+      });
+    }
   });
 }
 module.exports = exports = ModeDetail;

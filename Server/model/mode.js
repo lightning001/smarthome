@@ -1,8 +1,6 @@
 'use strict'
 var mongoose = require('mongoose');
 
-var mongoose = require('./connection');
-
 var schemaMode = new mongoose.Schema({
   mode_name : {type : String},
   id_user : {type : mongoose.Schema.Types.ObjectId, ref : 'User'},
