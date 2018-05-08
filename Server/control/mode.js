@@ -17,7 +17,7 @@ Mode.findBy_ID = (token, socket) =>{
           socket.emit('FindModeIDResult', {'success': false, 'message': msg.error.occur});
         } else if (!error2 && data2) {
           console.log(data2);
-          let token2 = jwt.sign(data2, config.secret_key, {});
+          let token2 = jwt.sign(JSON.stringify(data2), config.secret_key, {algorithm: 'HS256'});
           socket.emit('FindModeIDResult', {'success': true, 'token': token2});
         }
       });
@@ -37,7 +37,7 @@ Mode.findByUser = (token, socket) =>{
           socket.emit('FindModeUserResult', {'success': false, 'message': msg.error.occur});
         } else if (!error2 && data2) {
           console.log(data2);
-          let token2 = jwt.sign(data2, config.secret_key, {});
+          let token2 = jwt.sign(JSON.stringify(data2), config.secret_key, {algorithm: 'HS256'});
           socket.emit('FindModeUserResult', {'success': true, 'token': token2});
         }
       });
@@ -57,7 +57,7 @@ Mode.findByName = (token, socket) =>{
           socket.emit('FindModeNameResult', {'success': false, 'message': msg.error.occur});
         } else if (!error2 && data2) {
           console.log(data2);
-          let token2 = jwt.sign(data2, config.secret_key, {});
+          let token2 = jwt.sign(JSON.stringify(data2), config.secret_key, {algorithm: 'HS256'});
           socket.emit('FindModeNameResult', {'success': true, 'token': token2});
         }
       });
@@ -155,7 +155,7 @@ Mode.getAllMode = (token, socket) => {
         socket.emit('AllModeResult', {'success': false, 'message': msg.error.occur});
       } else if (!error2 && data2) {
           console.log(data2);
-          let token2 = jwt.sign(data2, config.secret_key, {});
+          let token2 = jwt.sign(JSON.stringify(data2), config.secret_key, {algorithm: 'HS256'});
           socket.emit('AllModeResult', {'success': true, 'token': token2});
         }
       });
@@ -181,7 +181,7 @@ Mode.getByPage = (token, socket) =>{
           socket.emit('GetModePageResult', {'success': false, 'message': msg.error.occur});
         } else if (!error2 && data2) {
           console.log(data2);
-          let token2 = jwt.sign(data2, config.secret_key, {});
+          let token2 = jwt.sign(JSON.stringify(data2), config.secret_key, {algorithm: 'HS256'});
           socket.emit('GetModePageResult', {'success': true, 'token': token2});
         }
       });

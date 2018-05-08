@@ -17,7 +17,7 @@ Device.findBy_ID = (deviceID) =>{
           socket.emit('FindDeviceIDResult', {'success': false, 'message': msg.error.occur});
         } else if (!error2 && data2) {
           console.log(data2);
-          let token2 = jwt.sign(data2, config.secret_key, {});
+          let token2 = jwt.sign(JSON.stringify(data2), config.secret_key, {algorithm: 'HS256'});
           socket.emit('FindDeviceIDResult', {'success': true, 'token': token2});
         }
       });
@@ -36,7 +36,7 @@ Device.findByName = (token, socket) =>{
           console.log(error2);
           socket.emit('FindDeviceNameResult', {'success': false, 'message': msg.error.occur});
         } else if (!error2 && data2) {
-          let token2 = jwt.sign(data2, config.secret_key, {});
+          let token2 = jwt.sign(JSON.stringify(data2), config.secret_key, {algorithm: 'HS256'});
           socket.emit('FindDeviceNameResult', {'success': true, 'token': token2});
         }
       });
@@ -134,7 +134,7 @@ Device.getAllDevice = (token, socket) => {
         if(error2){
         socket.emit('AllDeviceResult', {'success': false, 'message': msg.error.occur});
       } else if (!error2 && data2) {
-          let token2 = jwt.sign(data2, config.secret_key, {});
+          let token2 = jwt.sign(JSON.stringify(data2), config.secret_key, {algorithm: 'HS256'});
           socket.emit('AllDeviceResult', {'success': true, 'token': token2});
         }
       });
@@ -160,7 +160,7 @@ Device.getByPage = (token, socket) =>{
           socket.emit('GetDevicePageResult', {'success': false, 'message': msg.error.occur});
         } else if (!error2 && data2) {
           console.log(data2);
-          let token2 = jwt.sign(data2, config.secret_key, {});
+          let token2 = jwt.sign(JSON.stringify(data2), config.secret_key, {algorithm: 'HS256'});
           socket.emit('GetDevicePageResult', {'success': true, 'token': token2});
         }
       });

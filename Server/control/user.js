@@ -2,34 +2,40 @@ var User = require('../model/user');
 const config = require('./config');
 // require('../model/Mode');
 // require('../model/Room');
+var fs = require('fs');
 const msg = require('../msg').en;
 var jwt = require('jsonwebtoken');
 
 
-User.login = (email, password, socket, _) => {
+User.login = (email, password, socket, _, io) => {
   socket.auth = false;
+  console.log('Thuc hien login: '+socket.id);
   //xu ly ma hoa o day
   User.findOne().
   where('email').equals(email).
   // .where('password').equals(password)
-  where('status').equals(true).
+  // where('status').equals(true).
   populate('listMode').
   populate('listRoom').
   exec((error, data) => {
     if (error) {
-      socket.emit('loginResult', {'success': false, 'message': msg.error.occur});
+      console.log(error);
+      socket.emit('server_send_login', {'success': false, 'message': msg.error.occur});
     }
     if (!data || typeof data == undefined) {
-      socket.emit('loginResult', {'success': false, 'message': msg.not_exist.account});
+      console.log(msg.not_exist.account);
+      socket.emit('server_send_login', {'success': false, 'message': msg.not_exist.account});
     }
     if (data && data.length != 0) {
       if (data.password != password) {
-        socket.emit('loginResult', {'success': false, 'message': msg.error.login_incorrect});
+        console.log('Sai mat khau');
+        socket.emit('server_send_login', {'success': false, 'message': msg.error.login_incorrect});
       } else {
-        var token = jwt.sign(data, config.secret_key, {expiresIn: 86400});
-        socket.auth = true;
         console.log(data);
-        socket.emit('loginResult', {'success': true, 'token': token});
+        var token = jwt.sign(JSON.stringify(data), config.secret_key, {algorithm : 'HS256'});
+        socket.auth = true;
+        console.log('User: ' + token);
+        socket.emit('server_send_login', {'success': true, 'token': token});
         _.each(io.nsps, function(nsp) {
           if (_.findWhere(nsp.sockets, {id: socket.id})) {
             console.log("restoring socket to", nsp.name);
@@ -53,7 +59,7 @@ User.findBy_ID = (token, socket) => {
         if(error2){
           socket.emit('FindUserIDResult', {'success': false, 'message': msg.empty.cant_find});
         } else if (!error2 && data2) {
-          let token2 = jwt.sign(data2, config.secret_key, {});
+          let token2 = jwt.sign(JSON.stringify(data2), config.secret_key, {algorithm: 'HS256'});
           socket.emit('FindUserIDResult', {'success': true, 'token': token2});
         }
       });
@@ -74,7 +80,7 @@ User.findByName = (token, socket) => {
         } else if (!data2) {
           socket.emit('FindUserNameResult', {'success': false,'message': msg.empty.cant_find});
         } else if (!error2 && data2) {
-          let token2 = jwt.sign(data2, config.secret_key, {});
+          let token2 = jwt.sign(JSON.stringify(data2), config.secret_key, {algorithm: 'HS256'});
           socket.emit('FindUserNameResult', {'success': true,'token': token2});
         }
       });
@@ -93,7 +99,8 @@ User.findByEmail = (token, socket) => {
         } else if (!data2) {
           socket.emit('FindUserEmailResult', {'success': false,'message': msg.empty.cant_find});
         } else if (!error2 && data2) {
-          let token2 = jwt.sign(data2, config.secret_key, {});
+          let token2 = jwt.sign(JSON.stringify(data2), config.secret_key, {algorithm: 'HS256'});
+          console.log('Token: ' + token2);
           socket.emit('FindUserEmailResult', {'success': true,'token': token2});
         }
       });
@@ -101,63 +108,45 @@ User.findByEmail = (token, socket) => {
   });
 }
 
-User.mInsert = (token, socket) => {
-  jwt.verify(token, config.secret_key, function(error, data) {
-    if (error) {
-      socket.emit('createUserResult', {'success': false,'message': msg.error.occur});
-    } else if (data) {
-      User.find({'email': data.email}, (error2, data2) => {
-        if (!error2 && (typeof data2 == undefined || data2.length == 0)) {
-          let mUser = new User();
-          mUser.email = data2.email;
-          mUser.password = data2.password;
-          mUser.name = data2.name;
-          mUser.save((error3) => {
-            if (error3) {
-              socket.emit('createUserResult', {'success': false,'message': msg.error.occur});
-            } else {
-              console.log('insert '+ true);
-              socket.emit('createUserResult', {'success': true});
-            }
-          });
-        }
-      });
-    }
-  });
+getImageName = (id) => {
+  return id + new Date().getTime() + '.png';
 }
 
-User.mInsert2 = (token, socket) => {
-  jwt.verify(token, config.secret_key, function(error, data) {
-    if (error) {
-      socket.emit('createUserResult', {'success': false,'message': msg.error.occur});
-    } else if (data) {
-      User.find({'email': data.email}, (error2, data2) => {
-        if (!error2 && (typeof data2 == undefined || data2.length == 0)) {
-          let mUser = new User();
-          mUser.email = data2.email;
-          mUser.password = data2.password;
-          mUser.name = data2.name;
-          mUser.street = data2.street;
-          mUser.distric = data2.distric;
-          mUser.city = data2.city;
-          mUser.postcode = data2.postcode;
-          mUser.phonenumber = data2.phonenumber;
-          mUser.homephone = data2.homephone;
-          mUser.dob = data2.dob;
-          mUser.type = data2.type;
-          mUser.status = data2.status;
-          mUser.startdateregister = data2.startdateregister;
-          mUser.img = data2.img;
-          mUser.save((error3) => {
-            if (error3) {
-              socket.emit('createUserResult', {'success': false,'message': msg.error.occur});
-            } else {
-              console.log('insert true');
-              socket.emit('createUserResult', {'success': true});
-            }
-          });
+User.mInsert = (data, socket) => {
+  User.find({'email': data.email}, (error, findresult) => {
+    if(error){
+      socket.emit('server_send_register', {'success': false,'message': msg.error.occur});
+    }else if (!error && (typeof findresult == undefined || findresult.length == 0)) {
+      let mUser = new User();
+      mUser.email = data.email;
+      mUser.password = data.password;
+      mUser.name = data.name;
+      mUser.street = data.street;
+      mUser.district = data.district;
+      mUser.city = data.city;
+      mUser.postcode = data.postcode;
+      mUser.phonenumber = data.phonenumber;
+      mUser.homephone = data.homephone;
+      mUser.dob = data.dob;
+      mUser.type = 'Normal';
+      mUser.status = false;
+      mUser.startdateregister = new Date();
+      let fileName = getImageName(socket.id);
+      fs.writeFile(config.upload_path + fileName, data.img);
+
+      mUser.img = config.host + fileName;
+      mUser.save((error2) => {
+        console.log('User' + JSON.stringify(mUser));
+        if (error2) {
+          socket.emit('server_send_register', {'success': false,'message': msg.error.occur});
+        } else {
+          console.log('insert true');
+          socket.emit('server_send_register', {'success': true});
         }
       });
+    }else{
+      console.log('Email exist');
+      socket.emit('server_send_register', {'success': false, 'message' : msg.error.exist_email});
     }
   });
 }
@@ -166,20 +155,31 @@ User.mInsert2 = (token, socket) => {
 @param mUser: 1 thiết bị đầy đủ thuộc tính
 */
 User.mUpdate = (token, socket) => {
-  jwt.verify(token, config.secret_key, function(error, data) {
-    if (error) {
+  User.find({'email': data.email}, (error, findresult) => {
+    if(error){
       socket.emit('updateUserResult', {'success': false,'message': msg.error.occur});
-    } else if (data) {
-      User.update({'_id': new mongoose.Types.ObjectId(data._id)}, {$set: data}).
-      exec((error2) => {
-        if (error2) {
-          console.log(error2);
+    }else if(!error && (typeof findresult == undefined || findresult.length == 0)){
+      jwt.verify(token, config.secret_key, function(error, data) {
+        if (error) {
           socket.emit('updateUserResult', {'success': false,'message': msg.error.occur});
-        } else {
-          console.log('update' + true);
-          socket.emit('updateUserResult', {'success': true});
+        } else if (data) {
+          let fileName = getImageName(socket.id);
+          fs.writeFile(fileName, data.img);
+          mUser.img = config.host + fileName;
+          User.update({'_id': new mongoose.Types.ObjectId(data._id)}, {$set: data}).
+          exec((error2) => {
+            if (error2) {
+              console.log(error2);
+              socket.emit('updateUserResult', {'success': false,'message': msg.error.occur});
+            } else {
+              console.log('update' + true);
+              socket.emit('updateUserResult', {'success': true});
+            }
+          });
         }
       });
+    }else{
+        socket.emit('updateUserResult', {'success': false,'message': msg.error.exist_email});
     }
   });
 }
@@ -222,7 +222,7 @@ User.getAllUser = (token, socket) => {
           socket.emit('GetAllUserResult', {'success': false, 'message': msg.error.occur});
         } else {
           console.log(data2);
-          let token2 = jwt.sign(data2, config.secret_key, {});
+          let token2 = jwt.sign(JSON.stringify(data2), config.secret_key, {algorithm: 'HS256'});
           socket.emit('GetAllUserResult', {'success': true, 'token': token2});
         }
       });
@@ -249,7 +249,7 @@ User.getByPage = (token, socket) => {
           socket.emit('GetUserPageResult', {'success': false,'message': msg.error.occur});
         } else {
           console.log(data2);
-          let token2 = jwt.sign(data2, config.secret_key, {});
+          let token2 = jwt.sign(JSON.stringify(data2), config.secret_key, {algorithm: 'HS256'});
           socket.emit('GetUserPageResult', {'success': false,'token': token2});
         }
       });

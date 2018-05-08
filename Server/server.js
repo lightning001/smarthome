@@ -12,8 +12,8 @@ var mDevice = require('./control/Device'),
   mUser = require('./control/User'),
   mRoom = require('./control/Room'),
   mMode = require('./control/Mode'),
-  mModeDetail = require('./control/Mode_Detail'),
-  mDeviceInRoom = require('./control/Device_In_Room');
+  mModeDetail = require('./control/ModeDetail'),
+  mDeviceInRoom = require('./control/DeviceInRoom');
 
 server.listen(port, function() {
   console.log("Waiting statement...");

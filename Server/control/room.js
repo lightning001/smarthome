@@ -14,7 +14,7 @@ Room.getAllDeviceUser = (token, socket) => {
         if (error2) {
           socket.emit('AllDeviceUserResult', {'success': false, 'message': msg.error.occur});
         } else {
-          let token2 = jwt.sign(data2, config.secret_key, {});
+          let token2 = jwt.sign(JSON.stringify(data2), config.secret_key, {algorithm: 'HS256'});
           socket.emit('AllDeviceUserResult', {'success': true,'token': token2});
         }
       });
@@ -35,7 +35,7 @@ var getUser = function(token, socket) {
           console.log(error2);
           socket.emit('GetUserRoomResult', {'success': false,'message': msg.error.occur});
         } else {
-          let token2 = jwt.sign(data2, config.secret_key, {});
+          let token2 = jwt.sign(JSON.stringify(data2), config.secret_key, {algorithm: 'HS256'});
           socket.emit('GetUserRoomResult', {'success': true, 'token': token2});
         }
       });
@@ -58,7 +58,7 @@ Room.findBy_ID = (token, socket) => {
           console.log(error2);
           socket.emit('FindRoomByIdResult', {'success': false, 'message': msg.error.occur});
         } else{
-          let token2 = jwt.sign(data2, config.secret_key, {});
+          let token2 = jwt.sign(JSON.stringify(data2), config.secret_key, {algorithm: 'HS256'});
           socket.emit('FindRoomByIdResult', {'success': true,'token': token2});
         }
       });
@@ -79,7 +79,7 @@ Room.findByName = (token, socket) => {
           console.log(error2);
           socket.emit('FindRoomByNameResult', {'success': false, 'message': msg.error.occur});
         } else{
-          let token2 = jwt.sign(data2, config.secret_key, {});
+          let token2 = jwt.sign(JSON.stringify(data2), config.secret_key, {algorithm: 'HS256'});
           socket.emit('FindRoomByNameResult', {'success': true,'token': token2});
         }
       });
@@ -99,7 +99,7 @@ Room.findByUser = (token, socket) => {
           console.log(error2);
           socket.emit('FindRoomByUserResult', {'success': false, 'message': msg.error.occur});
         } else{
-          let token2 = jwt.sign(data2, config.secret_key, {});
+          let token2 = jwt.sign(JSON.stringify(data2), config.secret_key, {algorithm: 'HS256'});
           socket.emit('FindRoomByUserResult', {'success': true,'token': token2});
         }
       });
@@ -191,7 +191,7 @@ Room.getAllRoom = (token, socket) => {
           socket.emit('AllRoomResult', {'success': false, 'message': msg.error.occur});
         } else{
           console.log(data2);
-          let token2 = jwt.sign(data2, config.secret_key, {});
+          let token2 = jwt.sign(JSON.stringify(data2), config.secret_key, {algorithm: 'HS256'});
           socket.emit('AllRoomResult', {'success': true,'token': token2});
         }
       });
@@ -218,7 +218,7 @@ Room.getByPage = (token, socket) => {
           socket.emit('GetRommPageResult', {'success': false, 'message': msg.error.occur});
         } else{
           console.log(data2);
-          let token2 = jwt.sign(data2, config.secret_key, {});
+          let token2 = jwt.sign(JSON.stringify(data2), config.secret_key, {algorithm: 'HS256'});
           socket.emit('GetRommPageResult', {'success': true,'token': token2});
         }
       });

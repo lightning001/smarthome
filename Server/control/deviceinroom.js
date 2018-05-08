@@ -17,7 +17,7 @@ DeviceInRoom.findBy_ID = (token, socket) => {
           socket.emit('FindDeviceInRoomByIDResult', {'success': false, 'message': msg.error.occur});
         } else if (!error2 && data2) {
           console.log(data2);
-          let token2 = jwt.sign(data2, config.secret_key, {});
+          let token2 = jwt.sign(JSON.stringify(data2), config.secret_key, {algorithm: 'HS256'});
           socket.emit('FindDeviceInRoomByIDResult', {'success': true, 'token': token2});
         }
       });
@@ -38,7 +38,7 @@ DeviceInRoom.getDeviceInRoom = (token, socket) => {
           socket.emit('deviceInRoomResult', {'success': false, 'message': msg.error.occur});
         } else if (!error2 && data2) {
           console.log(data2);
-          let token2 = jwt.sign(data2, config.secret_key, {});
+          let token2 = jwt.sign(JSON.stringify(data2), config.secret_key, {algorithm: 'HS256'});
           socket.emit('deviceInRoomResult', {'success': true, 'token': token2});
         }
       });
@@ -60,7 +60,7 @@ DeviceInRoom.unused = (token, socket) => {
           socket.emit('deviceUnusedResult', {'success': false, 'message': msg.error.occur});
         } else if (!error2 && data2) {
           console.log(data2);
-          let token2 = jwt.sign(data2, config.secret_key, {});
+          let token2 = jwt.sign(JSON.stringify(data2), config.secret_key, {algorithm: 'HS256'});
           socket.emit('deviceUnusedResult', {'success': true, 'token': token2});
         }
       });
@@ -82,7 +82,7 @@ DeviceInRoom.search = (token, socket) => {
           socket.emit('SearchResult', {'success': false, 'message': msg.error.occur});
         } else if (!error2 && data2) {
           console.log(data2);
-          let token2 = jwt.sign(data2, config.secret_key, {});
+          let token2 = jwt.sign(JSON.stringify(data2), config.secret_key, {algorithm: 'HS256'});
           socket.emit('SearchResult', {'success': true, 'token': token2});
         }
       });
@@ -102,7 +102,7 @@ DeviceInRoom.findByUser = (token, socket) => {
           socket.emit('FindDeviceInRoomByUserResult', {'success': false, 'message': msg.error.occur});
         } else if (!error2 && data2) {
           console.log(data2);
-          let token2 = jwt.sign(data2, config.secret_key, {});
+          let token2 = jwt.sign(JSON.stringify(data2), config.secret_key, {algorithm: 'HS256'});
           socket.emit('FindDeviceInRoomByUserResult', {'success': true, 'token': token2});
         }
       });
@@ -195,7 +195,7 @@ DeviceInRoom.getAllDeviceInRoom = (token, socket) => {
           socket.emit('AllDeviceInRoomResult', {'success': false, 'message': msg.error.occur});
         } else if (!error2 && data2) {
           console.log(data2);
-          let token2 = jwt.sign(data2, config.secret_key, {});
+          let token2 = jwt.sign(JSON.stringify(data2), config.secret_key, {algorithm: 'HS256'});
           socket.emit('AllDeviceInRoomResult', {'success': true, 'token': token2});
         }
       });
@@ -221,7 +221,7 @@ DeviceInRoom.getByPage = (token, socket) => {
           socket.emit('DeviceRoomPageResult', {'success': false, 'message': msg.error.occur});
         } else if (!error2 && data2) {
           console.log(data2);
-          let token2 = jwt.sign(data2, config.secret_key, {});
+          let token2 = jwt.sign(JSON.stringify(data2), config.secret_key, {algorithm: 'HS256'});
           socket.emit('DeviceRoomPageResult', {'success': true, 'token': token2});
         }
       });

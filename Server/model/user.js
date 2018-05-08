@@ -11,7 +11,7 @@ var schemaUser = new mongoose.Schema({
   street : {type : String},
   district : {type : String},
   city : {type : String},
-  postcode : {type : Number},
+  postcode : {type : Number, default : 0},
   phonenumber : {type : String},
   homephone : {type : String},
   dob : {type : Date},

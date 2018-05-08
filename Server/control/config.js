@@ -16,5 +16,9 @@ const options = {
 module.exports = exports = {
   uri : uri,
   options : options,
-  secret_key : 'smarthome_itnls'
+  secret_key : 'smarthome_itnls',
+  upload_path : 'image/',
+  host : 'http://192.168.1.134:3000/',
+  emailFrom : 'smarthomeproject2018@gmail.com',
+  emailPassword : '100100.m'
 };
