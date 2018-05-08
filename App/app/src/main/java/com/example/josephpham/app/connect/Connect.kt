@@ -9,7 +9,7 @@ class Connect {
         var msocket: Socket? = null
         fun connect(): Socket{
             if(msocket == null){
-                msocket = IO.socket("http://192.168.1.14:3000")
+                msocket = IO.socket("http://192.168.1.134:3000")
                 msocket?.connect()
             }
             return msocket!!

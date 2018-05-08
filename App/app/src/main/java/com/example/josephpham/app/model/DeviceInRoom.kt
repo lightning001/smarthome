@@ -1,8 +1,6 @@
 package com.example.josephpham.app.model
 
-import com.example.josephpham.app.R.id.img
 import org.json.JSONObject
-import java.io.Serializable
 
 class DeviceInRoom {
     var id: String = ""

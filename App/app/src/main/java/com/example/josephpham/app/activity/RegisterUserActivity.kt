@@ -11,30 +11,39 @@ import android.view.View
 import com.example.josephpham.app.R
 import kotlinx.android.synthetic.main.activity_register_user.*
 import org.json.JSONObject
-import java.security.NoSuchAlgorithmException
 import java.text.SimpleDateFormat
 import java.util.*
 import android.graphics.Bitmap
+import android.net.Uri
 import android.provider.MediaStore
+import android.util.Log
+import android.widget.Toast
+import com.example.josephpham.app.interfaces.MD5
+import com.example.josephpham.app.interfaces.UploadIMG
+import io.socket.emitter.Emitter
+import org.json.JSONException
 import java.io.ByteArrayOutputStream
 
 
-class RegisterUserActivity : AppCompatActivity() {
+class RegisterUserActivity : AppCompatActivity(), MD5, UploadIMG {
 
     var mSocket = LoginActivity.msocket
     var dob = Date()
     val REQUEST_TAKE_PICTURE = 123
     var bitmap: Bitmap? = null
+    var random = Random()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register_user)
         event()
+        LoginActivity.msocket.on("server_send_register", onretrieveDateRegister)
 
     }
     fun event(){
         tvbirthday.setOnClickListener {
-            dob = dataPickerDialog() as Date
+            dob = dataPickerDialog()
         }
         imgsel.setOnClickListener {
             takePicture()
@@ -59,12 +68,7 @@ class RegisterUserActivity : AppCompatActivity() {
         }
     }
 
-    fun getByteArrayToByBitmap(bitmap: Bitmap): ByteArray {
-        val stream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-        return stream.toByteArray()
-    }
-    fun dataPickerDialog(): Calendar{
+    fun dataPickerDialog(): Date{
         val calendar: Calendar = Calendar.getInstance()
         val ngay = calendar.get(Calendar.DATE)
         val thang = calendar.get(Calendar.MONTH)
@@ -75,7 +79,7 @@ class RegisterUserActivity : AppCompatActivity() {
             tvbirthday.setText(simpleDateFormat.format(calendar.time))
         }, nam, thang, ngay)
         dialog.show()
-        return calendar
+        return calendar.time
     }
     private fun attemptRegister() {
         name.error = null
@@ -129,13 +133,8 @@ class RegisterUserActivity : AppCompatActivity() {
             cancel = true
         }
         if (!isCfPasswordValid(passwordStr, cfPassword)) {
-            password.error = getString(R.string.error_invalid_password)
+            cfpassword.error = getString(R.string.error_invalid_cfpassword)
             focusView = password
-            cancel = true
-        }
-        if(!isPhoneNumberValid(phonenumberStr)){
-            phonenumber.error = getString(R.string.error_invalid_phonenumber)
-            focusView = phonenumber
             cancel = true
         }
         // Check for a valid email address.
@@ -164,7 +163,7 @@ class RegisterUserActivity : AppCompatActivity() {
             data.put("dob", dob)
             data.put("password", md5(passwordStr))
             data.put("img", byte)
-            mSocket.emit("login", data)
+            mSocket.emit("client_send_register", data)
         }
     }
     private fun isEmailValid(email: String): Boolean {
@@ -182,16 +181,7 @@ class RegisterUserActivity : AppCompatActivity() {
             return true
         }
     }
-    private fun isPhoneNumberValid(phone: String): Boolean {
-        try {
-            Integer.parseInt(phone)
-            return true
-        } catch (e: NumberFormatException) {
-            return false
-            // xử lý khi số nhập vào ko đúng
-        }
 
-    }
     private fun isCfPasswordValid(password: String, cfPassword: String): Boolean {
         if (!password.equals(cfPassword)) {
             return false
@@ -199,54 +189,28 @@ class RegisterUserActivity : AppCompatActivity() {
             return true
         }
     }
-    fun md5(s: String): String {
-        val MD5 = "MD5"
-        try {
-            // Create MD5 Hash
-            val digest = java.security.MessageDigest
-                    .getInstance(MD5)
-            digest.update(s.toByteArray())
-            val messageDigest = digest.digest()
+    var onretrieveDateRegister: Emitter.Listener = Emitter.Listener { args ->
+        runOnUiThread {
+            val data1 = args[0] as JSONObject
+            try {
+                var correct = data1.getBoolean("success")
+                if (correct == true) {
+                    Toast.makeText(this@RegisterUserActivity, "register success", Toast.LENGTH_LONG).show()
+                    var intent = Intent(this@RegisterUserActivity, LoginActivity::class.java)
+                    startActivity(intent)
 
-            // Create Hex String
-            val hexString = StringBuilder()
-            for (aMessageDigest in messageDigest) {
-                var h = Integer.toHexString(0xFF and 0x100)
-                while (h.length < 2)
-                    h = "0" + h
-                hexString.append(h)
+                } else {
+                    val err = data1.getString("message")
+                    Toast.makeText(this@RegisterUserActivity, err.toString().trim(), Toast.LENGTH_LONG).show()
+                }
+            } catch (e: JSONException) {
+                Log.d("EEEE", e.toString())
             }
-            return hexString.toString()
-
-        } catch (e: NoSuchAlgorithmException) {
-            e.printStackTrace()
-        }
-
-        return ""
-    }
-
-    private fun resize(image: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
-        var image = image
-        if (maxHeight > 0 && maxWidth > 0) {
-            val width = image.width
-            val height = image.height
-            val ratioBitmap = width.toFloat() / height.toFloat()
-            val ratioMax = maxWidth.toFloat() / maxHeight.toFloat()
-
-            var finalWidth = maxWidth
-            var finalHeight = maxHeight
-            if (ratioMax > ratioBitmap) {
-                finalWidth = (maxHeight.toFloat() * ratioBitmap).toInt()
-            } else {
-                finalHeight = (maxWidth.toFloat() / ratioBitmap).toInt()
-            }
-            image = Bitmap.createScaledBitmap(image, finalWidth, finalHeight, true)
-            return image
-        } else {
-            return image
         }
     }
-
-
-
+    var key : Int? = null
+    fun rand(from: Int, to: Int) : Int {
+        key = random.nextInt(to - from) + from
+        return key as Int
+    }
 }

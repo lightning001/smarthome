@@ -10,7 +10,7 @@
             android:title="Import" />
         <item
             android:id="@+id/profile"
-            android:icon="@drawable/profile"
+            android:icon="@drawable/ic_supervisor_account_black_24dp"
             android:title="profile" />
         <item
             android:id="@+id/setting"

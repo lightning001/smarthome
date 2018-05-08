@@ -56,6 +56,7 @@ class User{
     }
 
     fun parseJson(data: JSONObject){
+        Log.d("Json", data.toString())
         var simpleDateFormat: SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm")
         val id: String = data.getString("_id")
         val email: String = data.getString("email")

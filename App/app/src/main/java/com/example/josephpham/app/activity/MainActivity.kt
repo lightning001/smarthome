@@ -45,9 +45,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
-        //event addroom
-//        val bundle = intent.getExtras()
-//        user  = bundle.getSerializable("user") as User
         fab.setOnClickListener { view ->
             mSocket.emit("deviceUnused", user.id)
             mSocket.on("deviceUnusedResult", onretrieveDataDeviceUnused)
@@ -71,33 +68,23 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             tvname.setText("josephpham")
             tvemail.setText("josephpham1996")
         }else {
-            Picasso.get().load(user!!.img).into(header.findViewById(R.id.imageView) as CircleImageView)
+            Picasso.get().load(user.img).into(header.findViewById(R.id.imageView) as CircleImageView)
             var tvname = header.findViewById(R.id.tvname) as TextView
             var tvemail = header.findViewById(R.id.tvemail) as TextView
-            tvname.setText(user!!.name)
-            tvemail.setText(user!!.email)
+            tvname.setText(user.name)
+            tvemail.setText(user.email)
         }
 
     }
     fun addControll() {
-        var listRoom: ArrayList<Room> = user!!.listRoom
-        //ddataa test
-//        var list = ArrayList<Room>()
-//        list.add(Room("1341","phong khach", "skna"))
-//        list.add(Room("1341","phong khach", "skna"))
-//        list.add(Room("1341","phong khach", "skna"))
-//        list.add(Room("1341","phong khach", "skna"))
-//        list.add(Room("1341","phong khach", "skna"))
-//        list.add(Room("1341","phong khach", "skna"))
+        var listRoom: ArrayList<Room> = user.listRoom
 
         adapter = RoomAdapter(this@MainActivity, listRoom)
         room.adapter = adapter
         room.setOnItemClickListener { adapterView, view, i, l ->
             mSocket.emit("deviceInRoom", listRoom.get(i).id)
             mSocket.on("deviceInRoomResult", onretrieveDataDeviceInRoom)
-
             Toast.makeText(this@MainActivity, listRoom.get(i).room, Toast.LENGTH_LONG).show()
-
         }
     }
 
