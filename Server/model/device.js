@@ -2,6 +2,7 @@
 
 var mongoose = require('mongoose');
 require('mongoose-double')(mongoose);
+var conn = require('../util/config').database;
 
 var schemaDevice = new mongoose.Schema({
   name : {type : String},
@@ -11,6 +12,6 @@ var schemaDevice = new mongoose.Schema({
   type : {type : Number}
 });
 
-var Device = mongoose.model('Device', schemaDevice, 'DEVICE');
+var Device = conn.model('Device', schemaDevice, 'DEVICE');
 
 module.exports = exports = Device;

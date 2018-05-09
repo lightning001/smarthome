@@ -1,6 +1,6 @@
 var Room = require('../model/room');
 const msg = require('../msg').en;
-const config = require('./config');
+const config = require('../util/config');
 var jwt = require('jsonwebtoken');
 
 Room.getAllDeviceUser = (token, socket) => {

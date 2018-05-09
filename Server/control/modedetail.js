@@ -1,4 +1,7 @@
 var ModeDetail = require('../model/mode_detail');
+const config = require('../util/config');
+const msg = require('../msg').en;
+var jwt = require('jsonwebtoken');
 
 ModeDetail.getDetailMode = (token, socket) =>{
   jwt.verify(token, config.secret_key, function(error, data) {

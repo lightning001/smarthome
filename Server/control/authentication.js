@@ -6,7 +6,7 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var jwt = require('jsonwebtoken');
 
-var config = require('./database/config');
+const config = require('../util/config');
 var mUser = require('./model/user');
 
 mongoose.connect(config.database, config.options);

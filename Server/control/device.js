@@ -1,6 +1,6 @@
 var Device = require('../model/device');
 const msg = require('../msg').en;
-const config = require('./config');
+const config = require('../util/config');
 var jwt = require('jsonwebtoken');
 /**
 Tìm kiếm dựa vào _id của device (kiểu ObjectId)

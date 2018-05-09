@@ -1,6 +1,6 @@
 var DeviceInRoom = require('../model/device_in_room');
 const msg = require('../msg').en;
-const config = require('./config');
+const config = require('../util/config');
 var jwt = require('jsonwebtoken');
 /**
 Tìm kiếm dựa vào _id của deviceInRoom (kiểu ObjectId)

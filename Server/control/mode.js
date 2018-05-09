@@ -1,6 +1,6 @@
 var Mode = require('../model/mode');
 const msg = require('../msg').en;
-const config = require('./config');
+const config = require('../util/config');
 var jwt = require('jsonwebtoken');
 /**
 Tìm kiếm dựa vào _id (truyền vào kiểu String) của mode (kiểu ObjectId)

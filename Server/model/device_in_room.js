@@ -1,6 +1,7 @@
 'use strict'
 
 var mongoose = require('mongoose');
+var conn = require('../util/config').database;
 
 var schemaDeviceInRoom = new mongoose.Schema({
   device: {type: mongoose.Schema.Types.ObjectId, require: true, ref: 'Device'},
@@ -10,6 +11,6 @@ var schemaDeviceInRoom = new mongoose.Schema({
   status: {type: Boolean, require: true}
 });
 
-var DeviceInRoom = mongoose.model('DeviceInRoom', schemaDeviceInRoom, 'DEVICEINROOM');
+var DeviceInRoom = conn.model('DeviceInRoom', schemaDeviceInRoom, 'DEVICEINROOM');
 
 module.exports = exports = DeviceInRoom;

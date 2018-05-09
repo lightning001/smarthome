@@ -1,11 +1,9 @@
 var User = require('../model/user');
-const config = require('./config');
-// require('../model/Mode');
-// require('../model/Room');
+const config = require('../util/config');
 var fs = require('fs');
 const msg = require('../msg').en;
 var jwt = require('jsonwebtoken');
-
+let base64url = require('base64url');
 
 User.login = (email, password, socket, _, io) => {
   socket.auth = false;
@@ -22,12 +20,12 @@ User.login = (email, password, socket, _, io) => {
       console.log(error);
       socket.emit('server_send_login', {'success': false, 'message': msg.error.occur});
     }
-    if (!data || typeof data == undefined) {
+    if (!data || typeof data === undefined) {
       console.log(msg.not_exist.account);
       socket.emit('server_send_login', {'success': false, 'message': msg.not_exist.account});
     }
-    if (data && data.length != 0) {
-      if (data.password != password) {
+    if (data && data.length !== 0) {
+      if (data.password !== password) {
         console.log('Sai mat khau');
         socket.emit('server_send_login', {'success': false, 'message': msg.error.login_incorrect});
       } else {
@@ -113,10 +111,10 @@ getImageName = (id) => {
 }
 
 User.mInsert = (data, socket) => {
-  User.find({'email': data.email}, (error, findresult) => {
+  User.count({'email': data.email}, (error, findresult) => {
     if(error){
       socket.emit('server_send_register', {'success': false,'message': msg.error.occur});
-    }else if (!error && (typeof findresult == undefined || findresult.length == 0)) {
+    }else if (!error && findresult === 0) {
       let mUser = new User();
       mUser.email = data.email;
       mUser.password = data.password;
@@ -151,35 +149,124 @@ User.mInsert = (data, socket) => {
   });
 }
 
+User.confirmRegister = (data, socket) =>{
+  socket.emit('server_send_confirm_register', {'success': false, 'message': msg.error.confirm_register});
+  let EmailManager = require('../util/Email');
+  //ma hoa TOKEN cho an toan
+  let token = jwt.sign(JSON.stringify({'data' : data}), config.secret_key, {algorithm : 'HS256'});
+  let encode = base64url.encode(token.toString(), 'binary');
+  EmailManager.confirmEmail(data.email, encode);
+  socket.emit('server_send_confirm_register', {'success' : true, 'message' : msg.success.confirm_register})
+}
+
+User.responseConfirm = (encode, request, response)=>{
+  let token = base64url.decode(encode, 'binary');
+  jwt.verify(token, config.secret_key, (error, data) => {
+    if(error){
+      response.write('<html>');
+      response.write('<body style="margin : auto; padding : 70px;">');
+      response.write('<h1>Ôi không!<hr/></h1> <h3>Hiện chúng tôi chưa thể thực hiện được yêu cầu này bây giờ. Vui lòng thực hiện lại sau ít phút<h3>');
+      // response.write('<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">');
+      // response.write('<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>');
+      // response.write('<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>');
+      response.write('</body>');
+      response.write('</html>');
+      response.end();
+    }else if(data){
+      let mData = data.data;
+      let email = mData.email;
+      User.find({'email' : email}).
+      exec((error2, data2)=>{
+        if(error2){
+          console.log(error2);
+          response.write('<html>');
+          response.write('<body>');
+          response.write('Ôi không. Hiện chúng tôi chưa thể thực hiện được yêu cầu này bây giờ. Vui lòng thực hiện lại sau ít phút');
+          // response.write('<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">');
+          // response.write('<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>');
+          // response.write('<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>');
+          response.write('</body>');
+          response.write('</html>');
+          response.end();
+        }else if(!error && data2){
+          User.update({'email' : data2.email}, {$set: {'status' : true}}).
+          exec((err)=>{
+            console.log(error2);
+            response.write('<html>');
+            response.write('<body>');
+            response.write('Ôi không. Hiện chúng tôi chưa thể thực hiện được yêu cầu này bây giờ. Vui lòng thực hiện lại sau ít phút');
+            // response.write('<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">');
+            // response.write('<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>');
+            // response.write('<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>');
+            response.write('</body>');
+            response.write('</html>');
+            response.end();
+            return;
+          });
+          let EmailManager = require('../util/Email');
+          EmailManager.thankConfirmRegister(mData.email);
+          response.write('<html>');
+          response.write('<body>');
+          response.write('Đăng ký thành công');
+          // response.write('<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">');
+          // response.write('<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>');
+          // response.write('<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>');
+          response.write('</body>');
+          response.write('</html>');
+          response.end();
+        }
+      });
+
+    }
+  });
+}
+
 /**
 @param mUser: 1 thiết bị đầy đủ thuộc tính
 */
 User.mUpdate = (token, socket) => {
-  User.find({'email': data.email}, (error, findresult) => {
-    if(error){
+  //verify token de lay data
+  jwt.verify(token, config.secret_key, (error, data) => {
+    if (error) {
       socket.emit('updateUserResult', {'success': false,'message': msg.error.occur});
-    }else if(!error && (typeof findresult == undefined || findresult.length == 0)){
-      jwt.verify(token, config.secret_key, function(error, data) {
-        if (error) {
+      return;
+    } else if (data) {
+      //kiem tra email da co hay chua
+      User.find({'email': data.email}, (error2, findresult) => {
+        if(error2){
           socket.emit('updateUserResult', {'success': false,'message': msg.error.occur});
-        } else if (data) {
-          let fileName = getImageName(socket.id);
-          fs.writeFile(fileName, data.img);
-          mUser.img = config.host + fileName;
-          User.update({'_id': new mongoose.Types.ObjectId(data._id)}, {$set: data}).
-          exec((error2) => {
-            if (error2) {
-              console.log(error2);
-              socket.emit('updateUserResult', {'success': false,'message': msg.error.occur});
-            } else {
-              console.log('update' + true);
-              socket.emit('updateUserResult', {'success': true});
-            }
-          });
+          return;
+        }else if(!error2 && findresult && findresult.length > 0){
+          //neu email nay da co thi kiem tra xem co trung _id ko
+          //neu trung thi cho phep chinh sua, do email do la cua nguoi dang yeu cau
+          if(data._id === findresult._id){
+            continue;
+          } else {
+            //khong trung thi email da ton tai, user co data._id ko dc phep dung email nay
+            console.log('Email da ton tai');
+            socket.emit('updateUserResult', {'success': false,'message': msg.error.exist_email});
+            return;
+          }
+        } else if(!error2 && (typeof findresult === undefined || findresult.length === 0)){
+          //ko tim thay ket qua, tuc la email nay chua co trong database, dc phep su dung
+          continue;
+        }else{
+          return;
         }
+        let fileName = getImageName(socket.id);
+        fs.writeFile(fileName, data.img);
+        mUser.img = config.host + fileName;
+        User.update({'_id': new mongoose.Types.ObjectId(data._id)}, {$set: data}).
+        exec((error2) => {
+          if (error2) {
+            console.log(error2);
+            socket.emit('updateUserResult', {'success': false,'message': msg.error.occur});
+          } else {
+            console.log('update' + true);
+            socket.emit('updateUserResult', {'success': true});
+          }
+        });
       });
-    }else{
-        socket.emit('updateUserResult', {'success': false,'message': msg.error.exist_email});
     }
   });
 }

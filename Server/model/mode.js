@@ -1,5 +1,6 @@
 'use strict'
 var mongoose = require('mongoose');
+var conn = require('../util/config').database;
 
 var schemaMode = new mongoose.Schema({
   mode_name : {type : String},
@@ -11,6 +12,6 @@ var schemaMode = new mongoose.Schema({
 
 });
 
-var Mode = mongoose.model('Mode', schemaMode, 'MODE');
+var Mode = conn.model('Mode', schemaMode, 'MODE');
 
 module.exports = exports = Mode;

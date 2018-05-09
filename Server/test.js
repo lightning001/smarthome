@@ -5,15 +5,16 @@ var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io').listen(server);
 var bodyParser = require('body-parser');
-var mongoose = require('mongoose');
+// var mongoose = require('mongoose');
 var jwt = require('jsonwebtoken');
 var _ = require('underscore');
+var base64url = require('base64url');
 var port = process.env.PORT || 3000;
 const timeout = 500;
 const argv = require('yargs').argv,
   contextPath = argv.contextPath;
-const config = require('./control/config');
-mongoose.connect(config.uri, config.options);
+// const config = require('./control/config');
+// mongoose.connect(config.uri, config.options);
 
 var mDevice = require('./control/Device');
 var mUser = require('./control/User');
@@ -29,16 +30,22 @@ server.listen(port, function() {
 
 const imageDir = require('path').join(__dirname, '/image');
 app.use(express.static(imageDir));
-app.get('/', function(req, res) {
+app.use( bodyParser.json() );       // to support JSON-encoded bodies
+app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+  extended: true
+}));
+app.use(express.json());       // to support JSON-encoded bodies
+app.use(express.urlencoded()); // to support URL-encoded bodies
+app.get('/', (req, res)=> {
   res.send('<h1>Hello world</h1>');
 });
 
-app.get('/confirmregister/:link', (req, res)=>{
-  let link = req.params.link;
+app.post('/' + config.confirm_register_path, (req, res)=>{
+  let data = req.body.data;
+  let encode = data.encode;
+  mUser.responseConfirm(encode, req, res);
 
 });
-
-var apiRoutes = express.Router();
 
 io.sockets.on('connection', (socket) => {
   socket.on('disconnect', ()=>{
@@ -53,6 +60,7 @@ io.sockets.on('connection', (socket) => {
 
   socket.on('confirm_register', (data)=>{
     console.log('confirm email');
+
 
   });
 
