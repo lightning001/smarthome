@@ -58,7 +58,7 @@
             android:id="@+id/addmode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_mode"
+            android:src="@drawable/ic_mode_while"
             android:backgroundTint="@color/white"
             app:fabSize="mini"
             android:clickable="true"

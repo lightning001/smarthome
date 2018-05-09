@@ -10,7 +10,7 @@
         android:id="@+id/imgnotification"
         android:layout_width="40sp"
         android:layout_height="40sp"
-        android:src="@drawable/ic_add_alert_black_24dp"
+        android:src="@drawable/ic_add_alert_brown_24dp"
         android:layout_marginLeft="16dp"
         />
     <LinearLayout

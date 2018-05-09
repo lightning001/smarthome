@@ -8,6 +8,7 @@ import android.graphics.Bitmap
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import com.example.josephpham.app.R
@@ -20,7 +21,6 @@ import kotlinx.android.synthetic.main.dialog_active_mail.view.*
 import kotlinx.android.synthetic.main.dialog_change_address.view.*
 import kotlinx.android.synthetic.main.dialog_change_email.view.*
 import kotlinx.android.synthetic.main.dialog_change_homephone.view.*
-import kotlinx.android.synthetic.main.dialog_change_name.*
 import kotlinx.android.synthetic.main.dialog_change_name.view.*
 import kotlinx.android.synthetic.main.dialog_change_phonenumber.view.*
 import kotlinx.android.synthetic.main.dialog_password.view.*
@@ -36,7 +36,7 @@ class UserActivity : AppCompatActivity(), UploadIMG {
     val REQUEST_TAKE_PICTURE = 123
     var bitmap: Bitmap? = null
     var user: User = User("ádad","josephpham1996","1234", "trần văn ơn", "dĩ an", "Bình DƯơng", 123,"0972992607","753327",
-            Date(1996,4,13),"normal",true, Date(8/5/2018),"phạm văn phát","https://www.facebook.com/photo.php?fbid=623771871120998&set=a.105654686266055.14204.100004645720534&type=3&theater", ArrayList(),ArrayList())
+            Date(1996,4,13),"normal",false, Date(8/5/2018),"phạm văn phát","https://www.facebook.com/photo.php?fbid=623771871120998&set=a.105654686266055.14204.100004645720534&type=3&theater", ArrayList(),ArrayList())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,12 +63,15 @@ class UserActivity : AppCompatActivity(), UploadIMG {
     }
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.menu_user, menu)
+        if (user.status == false) {
+            menuInflater.inflate(R.menu.menu_user, menu)
+        }else {
+            menuInflater.inflate(R.menu.menu_user_active, menu)
+        }
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (user.status == false) {
             when (item.itemId) {
                 R.id.action_update_name -> {
                     openDialogUpdateName()
@@ -83,18 +86,6 @@ class UserActivity : AppCompatActivity(), UploadIMG {
 
                 }
             }
-        }else{
-            when (item.itemId) {
-                R.id.action_update_name -> {
-                    openDialogUpdateName()
-
-                }
-                R.id.action_update_mail -> {
-                    openDialogUpdatEmail()
-
-                }
-            }
-        }
         return true
     }
 
@@ -168,23 +159,25 @@ class UserActivity : AppCompatActivity(), UploadIMG {
     private fun openDialogActiveEmail() {
         val mBundle = AlertDialog.Builder(this@UserActivity)
         val mView = layoutInflater.inflate(R.layout.dialog_active_mail, null)
-        mView.submitActiveUser.setOnClickListener {
-        }
-
         mBundle.setView(mView)
         val dialog = mBundle.create()
-        dialog.show()
-        mView.cancelActive.setOnClickListener {
-            dialog.cancel()
+        mView.submitActiveUser.setOnClickListener {
+            dialog.dismiss()
         }
+        mView.cancelActive.setOnClickListener {
+            dialog.dismiss()
+        }
+        dialog.show()
     }
+
+
     fun openDialogChangeAddress(): Boolean {
         val mBundle = AlertDialog.Builder(this@UserActivity)
         val mView = layoutInflater.inflate(R.layout.dialog_change_address, null)
         mView.streetupdate.setText(user.street)
         mView.districtupdate.setText(user.district)
         mView.cityupdate.setText(user.city)
-        mView.postcode.setText(user.postcode)
+        mView.postcode.setText(user.postcode.toString())
         mView.submitAddress.setOnClickListener {
             updateAddress(mView.streetupdate.text.toString(), mView.districtupdate.toString(),
                     mView.cityupdate.text.toString(), mView.postcode.text.toString())
@@ -228,11 +221,12 @@ class UserActivity : AppCompatActivity(), UploadIMG {
         var simpleDateFormat: SimpleDateFormat = SimpleDateFormat("dd/MM/yyyy")
         val dialog = DatePickerDialog(this@UserActivity, DatePickerDialog.OnDateSetListener { view, year, month, dayOfMonth ->
             calendar.set(year, month, dayOfMonth)
-
+            val date = calendar.time
+            Log.d("calendar", simpleDateFormat.format(date))
         }, nam, thang, ngay)
-        dialog.tvbirthday.setText(simpleDateFormat.format(calendar.time))
         dialog.show()
         dob = calendar.time
+        tvdob.setText(simpleDateFormat.format(dob).toString())
         return true
     }
     private fun updatemail(email: String) {

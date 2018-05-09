@@ -21,6 +21,7 @@ import android.widget.Toast
 import com.example.josephpham.app.interfaces.MD5
 import com.example.josephpham.app.interfaces.UploadIMG
 import io.socket.emitter.Emitter
+import kotlinx.android.synthetic.main.activity_add_device.*
 import org.json.JSONException
 import java.io.ByteArrayOutputStream
 
@@ -37,6 +38,8 @@ class RegisterUserActivity : AppCompatActivity(), MD5, UploadIMG {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register_user)
+        setSupportActionBar(toolbar_register)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
         event()
         LoginActivity.msocket.on("server_send_register", onretrieveDateRegister)
 
@@ -89,12 +92,14 @@ class RegisterUserActivity : AppCompatActivity(), MD5, UploadIMG {
         city.error = null
         password.error = null
         phonenumber.error = null
+        postcode.error = null
         // Store values at the time of the login attempt.
         val nameStr = name.text.toString()
         val emailStr = email.text.toString()
         val streetStr = street.text.toString()
         val districtStr = district.text.toString()
         val cityStr = city.text.toString()
+        val postcodeStr = postcode.text.toString()
         val passwordStr = password.text.toString()
         val cfPassword = cfpassword.text.toString()
         val phonenumberStr = phonenumber.text.toString()
@@ -120,6 +125,11 @@ class RegisterUserActivity : AppCompatActivity(), MD5, UploadIMG {
         if (TextUtils.isEmpty(cityStr)) {
             city.error = getString(R.string.error_field_required)
             focusView = city
+            cancel = true
+        }
+        if (TextUtils.isEmpty(cityStr)) {
+            postcode.error = getString(R.string.error_field_required)
+            focusView = postcode
             cancel = true
         }
         if (TextUtils.isEmpty(phonenumberStr.toString())) {
@@ -163,6 +173,7 @@ class RegisterUserActivity : AppCompatActivity(), MD5, UploadIMG {
             data.put("dob", dob)
             data.put("password", md5(passwordStr))
             data.put("img", byte)
+            data.put("postcode", postcodeStr)
             mSocket.emit("client_send_register", data)
         }
     }

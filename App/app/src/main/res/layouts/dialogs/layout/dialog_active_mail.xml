@@ -27,7 +27,7 @@
             android:text="cacel"
             android:background="@drawable/btn"
             android:textColor="@color/white"
-            android:layout_toLeftOf="@+id/submithomephone"
+            android:layout_toLeftOf="@+id/submitActiveUser"
             android:layout_marginRight="10dp"
             />
         <Button

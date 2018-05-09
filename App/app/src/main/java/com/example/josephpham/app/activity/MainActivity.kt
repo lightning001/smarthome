@@ -1,7 +1,6 @@
 package com.example.josephpham.app.activity
 
 import android.content.Intent
-import android.os.AsyncTask
 import android.os.Bundle
 import android.support.design.widget.NavigationView
 import android.support.v4.view.GravityCompat
@@ -13,7 +12,6 @@ import android.widget.TextView
 import android.widget.Toast
 import com.example.josephpham.app.R
 import com.example.josephpham.app.adapter.RoomAdapter
-import com.example.josephpham.app.connect.Connect
 import com.example.josephpham.app.model.DeviceInRoom
 import com.example.josephpham.app.model.Room
 import com.example.josephpham.app.model.User
@@ -21,7 +19,6 @@ import com.squareup.picasso.Picasso
 import de.hdodenhof.circleimageview.CircleImageView
 import io.socket.client.Socket
 import io.socket.emitter.Emitter
-import kotlinx.android.synthetic.main.activity_login.*
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*

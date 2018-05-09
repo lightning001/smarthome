@@ -83,7 +83,7 @@
                     android:id="@+id/img1"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:src="@drawable/ic_add_location_black_24dp" />
+                    android:src="@drawable/ic_add_location_blue_24dp" />
                 <TextView
                     android:layout_marginTop="10dp"
                     android:id="@+id/tvdiachi"
@@ -101,7 +101,7 @@
                     android:id="@+id/phonenumber"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:src="@drawable/ic_phone" />
+                    android:src="@drawable/ic_phone_blue" />
                 <TextView
                     android:id="@+id/tvphonenumber"
                     android:layout_width="match_parent"
@@ -120,7 +120,7 @@
                     android:id="@+id/phonehome"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:src="@drawable/ic_home_phone_" />
+                    android:src="@drawable/ic_home_phone_blue" />
                 <TextView
                     android:id="@+id/tvphonehome"
                     android:layout_width="match_parent"
@@ -139,7 +139,7 @@
                     android:id="@+id/dob"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:src="@drawable/ic_dob" />
+                    android:src="@drawable/ic_dob_blue" />
                 <TextView
                     android:id="@+id/tvdob"
                     android:layout_width="match_parent"
@@ -157,7 +157,7 @@
         android:id="@+id/fabuploadimg"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_add_a_photo_black_24dp"
+        android:src="@drawable/ic_add_a_photo_while_24dp"
         app:layout_anchor="@id/civimguser"
         app:layout_anchorGravity="bottom|center"
         />
@@ -167,5 +167,5 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/fab_margin"
         android:layout_gravity="bottom|end"
-        android:src="@drawable/ic_email" />
+        android:src="@drawable/ic_email_while" />
 </android.support.design.widget.CoordinatorLayout>

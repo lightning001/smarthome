@@ -13,7 +13,7 @@
         <ImageView
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="@drawable/ic_home_phone_"/>
+            android:src="@drawable/ic_home_phone_blue"/>
         <EditText
             android:id="@+id/updatehomephone"
             android:layout_width="match_parent"

@@ -56,7 +56,7 @@ class LoginActivity() : AppCompatActivity(), MD5, JWTUtils  {
             startActivity(intent)
         }
         linkforgotpw.setOnClickListener {
-            val intent = Intent(this@LoginActivity, UserActivity::class.java)
+            val intent = Intent(this@LoginActivity, AddDeviceActivity::class.java)
             startActivity(intent)
         }
     }

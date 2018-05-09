@@ -1,7 +1,6 @@
 package com.example.josephpham.app.activity
 
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.support.v4.app.Fragment
@@ -19,17 +18,12 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.animation.AnimationUtils
-import android.widget.ListView
 import android.widget.Toast
 
 import com.example.josephpham.app.R
 import com.example.josephpham.app.adapter.ListDeviceAdapter
-import com.example.josephpham.app.adapter.ModeAdapter
-import com.example.josephpham.app.connect.Connect
 import com.example.josephpham.app.frament.*
 import com.example.josephpham.app.model.DeviceInRoom
-import com.example.josephpham.app.model.Mode
-import io.socket.client.Socket
 import io.socket.emitter.Emitter
 import kotlinx.android.synthetic.main.activity_main2.*
 import kotlinx.android.synthetic.main.fablayout.*
@@ -115,9 +109,9 @@ class Main2Activity : AppCompatActivity() {
 
     private fun initViews() {
         tabLayout.setupWithViewPager(view_pager)
-        tabLayout.getTabAt(0)!!.setIcon(R.drawable.ic_room_key)
-        tabLayout.getTabAt(1)!!.setIcon(R.drawable.ic_mode)
-        tabLayout.getTabAt(2)!!.setIcon(R.drawable.ic_camera_alt_black_24dp)
+        tabLayout.getTabAt(0)!!.setIcon(R.drawable.ic_room_key_while)
+        tabLayout.getTabAt(1)!!.setIcon(R.drawable.ic_mode_while)
+        tabLayout.getTabAt(2)!!.setIcon(R.drawable.ic_camera_alt_while_24dp)
 
         val viewPager = findViewById<View>(R.id.view_pager) as ViewPager
         viewPager.adapter = MainPagerAdapter(supportFragmentManager)

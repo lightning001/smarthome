@@ -37,7 +37,7 @@
             </RelativeLayout>
 
             <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbarRegister"
+                android:id="@+id/toolbar_register"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:popupTheme="@style/AppTheme.PopupOverlay"
@@ -62,7 +62,7 @@
                 <ImageButton
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/ic_supervisor_account_black_24dp"/>
+                    android:src="@drawable/ic_account_blue_24dp"/>
 
                 <AutoCompleteTextView
                     android:layout_marginLeft="10dp"
@@ -83,7 +83,7 @@
                 <ImageButton
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/ic_email_black_24dp"/>
+                    android:src="@drawable/ic_mail_blue_24dp"/>
 
                 <AutoCompleteTextView
                     android:layout_marginLeft="10dp"
@@ -122,7 +122,7 @@
                 <ImageButton
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/ic_distric"
+                    android:src="@drawable/ic_distric_blue"
                     />
 
                 <AutoCompleteTextView
@@ -141,7 +141,7 @@
                 <ImageButton
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/ic_city_hall" />
+                    android:src="@drawable/ic_city_hall_black_24dp" />
 
                 <AutoCompleteTextView
                     android:layout_marginLeft="10dp"
@@ -149,6 +149,24 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="city or province (*)"
+                    android:maxLines="1"
+                    android:singleLine="true" />
+
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <ImageButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_postcode" />
+
+                <AutoCompleteTextView
+                    android:layout_marginLeft="10dp"
+                    android:id="@+id/postcode"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="posecode (*)"
                     android:maxLines="1"
                     android:singleLine="true" />
 
@@ -279,7 +297,7 @@
         android:id="@+id/imgsel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_add_a_photo_black_24dp"
+        android:src="@drawable/ic_add_a_photo_while_24dp"
         app:layout_anchor="@id/imgprofile"
         app:layout_anchorGravity="bottom|center"
         />
