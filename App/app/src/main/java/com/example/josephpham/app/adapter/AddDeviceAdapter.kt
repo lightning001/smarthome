@@ -30,6 +30,7 @@ class AddDeviceAdapter : RecyclerView.Adapter<AddDeviceAdapter.ViewHolder>{
         holder.tvdevice.setText(listAllDevice.get(position).name.toString())
         holder.itemView.setOnClickListener {
             val intent = Intent("custom-message")
+            intent.putExtra("_id", listAllDevice.get(position).id)
             intent.putExtra("img", listAllDevice.get(position).img)
             intent.putExtra("name", listAllDevice.get(position).name)
             intent.putExtra("price", listAllDevice.get(position).price.toString())

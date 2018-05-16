@@ -16,14 +16,11 @@ import kotlin.collections.ArrayList
 
 class ListDeviceAdapter : RecyclerView.Adapter<ListDeviceAdapter.ViewHolder>(){
 
-    var listDevice = MainActivity.listDeviceNotRoom
+    var listDeviceNotRoom = Main2Activity.listDeviceNotRoom
     var mInflater: LayoutInflater? = null
 
-//    constructor(listDevice: ArrayList<DeviceInRoom>) {
-//        this.listDevice = listDevice
-//    }
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        var device: DeviceInRoom = listDevice!!.get(position)
+        var device: DeviceInRoom = listDeviceNotRoom!!.get(position)
 
         holder.mTvDevice.text = device.device_name
         Picasso.get().load(device.device!!.img).into(holder.mImgDevice)
@@ -40,7 +37,7 @@ class ListDeviceAdapter : RecyclerView.Adapter<ListDeviceAdapter.ViewHolder>(){
     }
 
     override fun getItemCount(): Int {
-        return listDevice!!.size
+        return listDeviceNotRoom!!.size
     }
     inner class ViewHolder(mView: View) : RecyclerView.ViewHolder(mView) {
         val mImgDevice: ImageView = mView.imgdevice

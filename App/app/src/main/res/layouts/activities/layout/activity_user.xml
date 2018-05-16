@@ -58,7 +58,7 @@
             </RelativeLayout>
 
             <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbaruser"
+                android:id="@+id/toolbar_user"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:popupTheme="@style/AppTheme.PopupOverlay"
@@ -83,7 +83,7 @@
                     android:id="@+id/img1"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:src="@drawable/ic_add_location_blue_24dp" />
+                    app:srcCompat="@drawable/ic_add_location_blue_24dp" />
                 <TextView
                     android:layout_marginTop="10dp"
                     android:id="@+id/tvdiachi"

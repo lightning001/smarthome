@@ -54,61 +54,11 @@ class User{
         this.listMode = listMode
 
     }
-
-    fun parseJson(data: JSONObject){
-        Log.d("Json", data.toString())
-        var simpleDateFormat: SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm")
-        val id: String = data.getString("_id")
-        val email: String = data.getString("email")
-        val password: String = data.getString("password")
-        val name: String = data.getString("name")
-        val street: String = data.getString("street")
-        val district: String = data.getString("district")
-        val city: String = data.getString("city")
-        val postcode: Int = data.getInt("postcode")
-        val phonenumber: String = data.getString("phonenumber")
-        val homephone: String = data.getString("homephone")
-        val dob: Date = simpleDateFormat.parse(data.getString("dob"))
-        val type: String = data.getString("type")
-        val status: Boolean = data.getBoolean("status")
-        val startdateregister: Date = simpleDateFormat.parse(data.getString("startdateregister"))
-        val img: String = data.getString("img")
-        val listRoom = data.getJSONArray("listRoom")
-        var mListRoom: ArrayList<Room> = ArrayList()
-        for (i in 0.. listRoom.length() -1 ){
-            val room : JSONObject = listRoom.getJSONObject(i) as JSONObject
-            val id_Room = room.getString("_id")
-            val name_room = room.getString("room_name")
-            val img = room.getString("img")
-            val mRoom : Room = Room(id_Room, name_room, img)
-            mListRoom.add(mRoom)
-        }
-        val listMode = data.getJSONArray("listMode")
-        var arrmode: ArrayList<Mode> = ArrayList()
-        for (i in 0.. listMode.length() -1 ){
-            val mode : JSONObject = listMode.getJSONObject(i) as JSONObject
-
-            val id_Mode = mode.getString("_id")
-            val modename = mode.getString("mode_name")
-            val status = mode.getBoolean("status")
-            val starttime = mode.getInt("starttime")
-            val stoptime = mode.getInt("stoptime")
-            val circle : JSONArray = mode.getJSONArray("circle")
-            var mCircle: ArrayList<Int> = ArrayList()
-            for (j in 0.. circle.length() -1 ){
-                mCircle.add(circle.getInt(j))
-            }
-            var mMode: Mode = Mode(id_Mode,modename, status, starttime, stoptime, mCircle)
-            arrmode.add(mMode)
-        }
-//        var user = User(id,email,password,street,district,city,postcode,
-//                phonenumber,homephone,dob,type,status,startdateregister,name,img,mListRoom,arrmode)
-//        return user
-        Log.d("oke", listMode.toString())
-
+    constructor(id: String, email: String, street: String, district: String, city: String, postcode: Int, phonenumber: String,
+                homephone: String, dob : Date, type: String, status : Boolean, startdateregister : Date, name : String, img: String,
+                listRoom: ArrayList<Room>) {
         this.id = id
         this.email = email
-        this.password = password
         this.street = street
         this.district = district
         this.city = city
@@ -121,31 +71,61 @@ class User{
         this.startdateregister = startdateregister
         this.name = name
         this.img = img
-        this.listRoom = mListRoom
-        this.listMode = arrmode
+        this.listRoom = listRoom
 
     }
-//    override fun writeToParcel(dest: Parcel?, flags: Int) {
-//        dest?.writeInt(id)
-//        dest?.writeString(email)
-//        dest?.writeString(password)
-//        dest?.writeString(street)
-//        dest?.writeString(district)
-//        dest?.writeString(city)
-//        dest?.writeInt(postcode)
-//        dest?.writeString(phonenumber)
-//        dest?.writeString(homephone)
-//        dest?.writeSerializable(dob)
-//        dest?.writeString(type)
-//        dest?.writeByte((if (status!!) 1 else 0).toByte())
-//        dest?.writeSerializable(startdateregister)
-//        dest?.writeString(name)
-//        dest?.writeString(img)
-//    }
-
 
     companion object {
+        fun parseJson(data: JSONObject): User {
+            var simpleDateFormat: SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm")
+            val id: String = data.getString("_id")
+            val email: String = data.getString("email")
+            val name: String = data.getString("name")
+            val street: String = data.getString("street")
+            val district: String = data.getString("district")
+            val city: String = data.getString("city")
+            val postcode: Int = data.getInt("postcode")
+            val phonenumber: String = data.getString("phonenumber")
+            val homephone: String = data.getString("homephone")
+            val dob: Date = simpleDateFormat.parse(data.getString("dob"))
+            val type: String = data.getString("type")
+            val status: Boolean = data.getBoolean("status")
+            val startdateregister: Date = simpleDateFormat.parse(data.getString("startdateregister"))
+            val img: String = data.getString("img")
+            val listRoom = data.getJSONArray("listRoom")
+            var mListRoom: ArrayList<Room> = ArrayList()
+            for (i in 0..listRoom.length() - 1) {
+                val room: JSONObject = listRoom.getJSONObject(i) as JSONObject
+                val id_Room = room.getString("_id")
+                val name_room = room.getString("room_name")
+                val img = room.getString("img")
+                val mRoom: Room = Room(id_Room, name_room, img)
+                mListRoom.add(mRoom)
+            }
+//            val listMode = data.getJSONArray("listMode")
+//            var arrmode: ArrayList<Mode> = ArrayList()
+//            for (i in 0..listMode.length() - 1) {
+//                val mode: JSONObject = listMode.getJSONObject(i) as JSONObject
+//
+//                val id_Mode = mode.getString("_id")
+//                val modename = mode.getString("mode_name")
+//                val status = mode.getBoolean("status")
+//                val starttime = mode.getInt("starttime")
+//                val stoptime = mode.getInt("stoptime")
+//                val circle: JSONArray = mode.getJSONArray("circle")
+//                var mCircle: ArrayList<Int> = ArrayList()
+//                for (j in 0..circle.length() - 1) {
+//                    mCircle.add(circle.getInt(j))
+//                }
+//                var mMode: Mode = Mode(id_Mode, modename, status, starttime, stoptime, mCircle)
+//                arrmode.add(mMode)
+//            }
 
+            var user = User(id, email, street, district, city, postcode,
+                    phonenumber, homephone, dob, type, status, startdateregister, name, img, mListRoom)
+
+            return user
+        }
     }
 
 }

@@ -15,6 +15,7 @@ import android.view.ViewGroup
 import com.example.josephpham.app.R
 import com.example.josephpham.app.activity.LoginActivity
 import com.example.josephpham.app.activity.Main2Activity
+import com.example.josephpham.app.activity.MainActivity
 import com.example.josephpham.app.adapter.ModeAdapter
 import com.example.josephpham.app.model.Mode
 import java.io.Serializable
@@ -22,10 +23,7 @@ import kotlin.collections.ArrayList
 
 class Tab_Mode : Fragment(){
 
-    var listmode = LoginActivity.user.listMode
-//    constructor(arr: ArrayList<Mode>){
-//        this.arr = arr
-//    }
+    var listmode = MainActivity.user!!.listMode
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {

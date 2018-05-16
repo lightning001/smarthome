@@ -1,6 +1,7 @@
 package com.example.josephpham.app.activity
 
 import android.content.Intent
+import android.os.AsyncTask
 import android.os.Bundle
 import android.support.design.widget.NavigationView
 import android.support.v4.view.GravityCompat
@@ -12,9 +13,9 @@ import android.widget.TextView
 import android.widget.Toast
 import com.example.josephpham.app.R
 import com.example.josephpham.app.adapter.RoomAdapter
-import com.example.josephpham.app.model.DeviceInRoom
 import com.example.josephpham.app.model.Room
 import com.example.josephpham.app.model.User
+import com.example.josephpham.smarthome.sqlite.DatabaseHandler
 import com.squareup.picasso.Picasso
 import de.hdodenhof.circleimageview.CircleImageView
 import io.socket.client.Socket
@@ -27,63 +28,24 @@ import org.json.JSONObject
 import kotlin.collections.ArrayList
 
 
-class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+class MainActivity() : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+
     companion object {
-        var user: User = LoginActivity.user
+        var token: String = ""
         var adapter : RoomAdapter? = null
-        //    var user: User? = null
         var mSocket: Socket = LoginActivity.msocket
-        //        var mSocket: Socket = Connect.connect()
-        var listDeviceInRoom: ArrayList<DeviceInRoom>?  = null
-        var listDeviceNotRoom: ArrayList<DeviceInRoom>?  = null
+        var user = User()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
-        fab.setOnClickListener { view ->
-            mSocket.emit("deviceUnused", user.id)
-            mSocket.on("deviceUnusedResult", onretrieveDataDeviceUnused)
-        }
-        customHeadđer()
-        addControll()
-    }
-    //custom headder nagative
-    fun  customHeadđer(){
-        val toggle = ActionBarDrawerToggle(
-                this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
-        drawer_layout.addDrawerListener(toggle)
-        toggle.syncState()
-        nav_view.setNavigationItemSelectedListener(this)
-        val header = nav_view.getHeaderView(0)
-        if(user?.img == null){
-            var img = header.findViewById(R.id.imageView) as CircleImageView
-            img.setImageResource(R.drawable.profile)
-            var tvname = header.findViewById(R.id.tvname) as TextView
-            var tvemail = header.findViewById(R.id.tvemail) as TextView
-            tvname.setText("josephpham")
-            tvemail.setText("josephpham1996")
-        }else {
-            Picasso.get().load(user.img).into(header.findViewById(R.id.imageView) as CircleImageView)
-            var tvname = header.findViewById(R.id.tvname) as TextView
-            var tvemail = header.findViewById(R.id.tvemail) as TextView
-            tvname.setText(user.name)
-            tvemail.setText(user.email)
-        }
+        thucthi().execute()
+
 
     }
-    fun addControll() {
-        var listRoom: ArrayList<Room> = user.listRoom
 
-        adapter = RoomAdapter(this@MainActivity, listRoom)
-        room.adapter = adapter
-        room.setOnItemClickListener { adapterView, view, i, l ->
-            mSocket.emit("deviceInRoom", listRoom.get(i).id)
-            mSocket.on("deviceInRoomResult", onretrieveDataDeviceInRoom)
-            Toast.makeText(this@MainActivity, listRoom.get(i).room, Toast.LENGTH_LONG).show()
-        }
-    }
 
     override fun onBackPressed() {
         if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
@@ -104,9 +66,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         when (item.itemId) {
-            R.id.action_settings -> return true
-            else -> return super.onOptionsItemSelected(item)
+            R.id.action_list_device -> {
+
+            }
+            R.id.action_add_device ->{
+                val intent = Intent(this@MainActivity, AddDeviceActivity::class.java)
+//                intent.putExtra("id_user", user.id)
+                startActivity(intent)
+            }
         }
+        return true
+
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -133,55 +103,89 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
     }
-    var onretrieveDataDeviceInRoom: Emitter.Listener = Emitter.Listener { args ->
-        runOnUiThread {
-            val data1 = args[0] as JSONObject
-            try {
-                var correct = data1.getBoolean("error")
-                if(correct != true) {
-                    listDeviceInRoom = ArrayList<DeviceInRoom>()
-                    var roomJson = data1.getJSONArray("Result")
-                    for (i in 0.. roomJson.length()-1){
-                        var dataRoom: JSONObject = roomJson.getJSONObject(i)
-                        Log.d("HHHH", dataRoom.toString())
-                        val deviceinroom = DeviceInRoom.parseJson(dataRoom)
-                        listDeviceInRoom?.add(deviceinroom)
-                        Log.d("mmmm", listDeviceInRoom.toString())
-                    }
-//                    val listMode = user.listMode
-                    val intent: Intent = Intent(this@MainActivity, Main2Activity::class.java)
-                    startActivity(intent)
-                }else{
-                    val err = data1.getString("Result")
-                    Toast.makeText(this, err.toString(), Toast.LENGTH_LONG).show()
-                }
-            } catch (e: JSONException) {
-                Log.d("DeviceInRoom", e.toString())
-            }
-        }
-    }
-    var onretrieveDataDeviceUnused: Emitter.Listener = Emitter.Listener { args ->
-        runOnUiThread {
-            val data1 = args[0] as JSONObject
-            try {
-                var correct = data1.getBoolean("error")
-                if(correct != true) {
-                    listDeviceNotRoom = ArrayList<DeviceInRoom>()
-                    var roomJson = data1.getJSONArray("Result")
-                    for (i in 0.. roomJson.length()-1){
-                        var dataRoom: JSONObject = roomJson.getJSONObject(i)
-                        val deviceinroom = DeviceInRoom.parseJson(dataRoom)
-                        listDeviceNotRoom!!.add(deviceinroom)
-                    }
-                    val intent: Intent = Intent(this@MainActivity, AddRoomActivity::class.java)
-                    startActivity(intent)
 
-                }else{
-                    val err = data1.getString("Result")
+
+    var onretrieveDataUser: Emitter.Listener = Emitter.Listener { args ->
+        runOnUiThread {
+            val data = args[0] as JSONObject
+            try {
+                var correct = data.getBoolean("success")
+                if (correct == true) {
+                    var result = data.getJSONObject("result")
+                    Log.d("CCCC", result.toString())
+                    user = User.parseJson(result)
+                    Log.d("CCCC", user.toString())
+                    fab.setOnClickListener { view ->
+                        val intent: Intent = Intent(this@MainActivity, AddRoomActivity::class.java)
+                        startActivity(intent)
+                    }
+                    customHeadđer()
+                    addControll()
+                } else {
+                    val err = data.getString("message")
                     Toast.makeText(this, err.toString(), Toast.LENGTH_LONG).show()
                 }
             } catch (e: JSONException) {
                 Log.d("EEEE", e.toString())
+            }
+        }
+    }
+    //custom headder nagative
+    fun  customHeadđer(){
+        val toggle = ActionBarDrawerToggle(
+                this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
+        drawer_layout.addDrawerListener(toggle)
+        toggle.syncState()
+        nav_view.setNavigationItemSelectedListener(this)
+        val header = nav_view.getHeaderView(0)
+        if(user.img == null || user.img.isEmpty()){
+            var img = header.findViewById(R.id.imageView) as CircleImageView
+            img.setImageResource(R.drawable.profile)
+        }else {
+            Picasso.get().load(user.img).into(header.findViewById(R.id.imageView) as CircleImageView)
+            var tvname = header.findViewById(R.id.tvname) as TextView
+            var tvemail = header.findViewById(R.id.tvemail) as TextView
+            tvname.setText(user.name)
+            tvemail.setText(user.email)
+        }
+
+    }
+    fun addControll() {
+        var listRoom: ArrayList<Room> = user.listRoom
+        adapter = RoomAdapter(this@MainActivity, listRoom)
+        room.adapter = adapter
+        room.setOnItemClickListener { adapterView, view, i, l ->
+            val intent: Intent = Intent(this@MainActivity, Main2Activity::class.java)
+            intent.putExtra("id_room", listRoom.get(i).id)
+            intent.putExtra("id_user", user.id)
+            startActivity(intent)
+            Toast.makeText(this@MainActivity, listRoom.get(i).room, Toast.LENGTH_LONG).show()
+        }
+    }
+    inner class thucthi: AsyncTask<Void, Void, Boolean>() {
+
+
+        override fun doInBackground(vararg params: Void): Boolean? {
+            var db = DatabaseHandler(this@MainActivity)
+            token = db.readData()
+            var check = false
+            if(token.equals("")){
+                check = false
+                Log.d("AAAA", "sai")
+            }else{
+                check = true
+                Log.d("AAAA", "dung")
+            }
+            return check
+        }
+        override fun onPostExecute(result: Boolean?){
+            super.onPostExecute(result)
+            if (result == false){
+                val intent = Intent(this@MainActivity, LoginActivity::class.java)
+                startActivity(intent)
+            }else{
+                mSocket.emit("client_send_data_user", token)
+                mSocket.on("server_send_data_user", onretrieveDataUser)
             }
         }
     }

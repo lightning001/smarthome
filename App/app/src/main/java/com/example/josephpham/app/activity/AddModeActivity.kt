@@ -8,17 +8,24 @@ import android.support.v7.widget.Toolbar
 import android.util.Log
 import android.view.View
 import android.widget.TimePicker
+import android.widget.Toast
 import com.example.josephpham.app.R
 import com.example.josephpham.app.adapter.AddModeAdapter
 import com.example.josephpham.app.model.DeviceInRoom
 import com.example.josephpham.app.model.Mode
+import io.socket.emitter.Emitter
 import kotlinx.android.synthetic.main.activity_add_mode.*
+import org.json.JSONException
+import org.json.JSONObject
 import java.util.*
 import kotlin.collections.ArrayList
 
 class AddModeActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListener{
+    companion object {
+        var listDeviceNotRoom = ArrayList<DeviceInRoom>()
+    }
     var choose: Boolean= false
-    var listAllDevice = Main2Activity.listAllDevice
+
     override fun onTimeSet(view: TimePicker?, hourOfDay: Int, minute: Int) {
 
         if (choose == true) {
@@ -31,6 +38,29 @@ class AddModeActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListener{
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_mode)
+        emit()
+        addEvent()
+        addlist()
+
+        val toolbar = findViewById<View>(R.id.toolbar3) as Toolbar
+        setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+    }
+
+    private fun emit() {
+        val bundle = intent.extras
+        val idUser = bundle.getString("id_user")
+        val token = bundle.getString("token")
+        val json = JSONObject()
+        json.put("id_user", idUser)
+        json.put("token", token)
+        Main2Activity.mSocket.emit("client_send_device_no_room", json)
+        Main2Activity.mSocket.on("server_send_device_no_room", onretrieveDeviceNotRoom)
+
+    }
+
+    private fun addEvent() {
         textView6.setOnClickListener { view ->
             choose = true
             val calendar = Calendar.getInstance()
@@ -48,22 +78,19 @@ class AddModeActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListener{
             val timpickerend = TimePickerDialog(this@AddModeActivity, this@AddModeActivity as TimePickerDialog.OnTimeSetListener?, hourend, minuteend, android.text.format.DateFormat.is24HourFormat(this@AddModeActivity))
             timpickerend.show()
         }
-        addlist()
         val mCircle = circle()
         btnCreateMode.setOnClickListener(View.OnClickListener {
             btncreate(mCircle)
         })
-        val toolbar = findViewById<View>(R.id.toolbar3) as Toolbar
-        setSupportActionBar(toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
     }
+
+
     fun btncreate(mCircle:  ArrayList<Int>){
         val mName = tvNameMode.text.toString()
         var mListDevice = ArrayList<DeviceInRoom>()
-        for (i in 0.. listAllDevice!!.size -1) {
-            if (listAllDevice!!.get(i).status == true) {
-                mListDevice.add(listAllDevice!!.get(i))
+        for (i in 0.. listDeviceNotRoom.size -1) {
+            if (listDeviceNotRoom.get(i).status == true) {
+                mListDevice.add(listDeviceNotRoom.get(i))
             }
         }
         val startTime = textView6.text
@@ -99,8 +126,6 @@ class AddModeActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListener{
         list_device.layoutManager = LinearLayoutManager(this@AddModeActivity, LinearLayoutManager.HORIZONTAL, false)
         val adapter = AddModeAdapter(this@AddModeActivity)
         list_device.adapter = adapter
-
-
     }
     fun circle(): ArrayList<Int>{
         val mCircle = ArrayList<Int>()
@@ -171,6 +196,29 @@ class AddModeActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListener{
             }
         }
         return mCircle
+    }
+    var onretrieveDeviceNotRoom: Emitter.Listener = Emitter.Listener { args ->
+        runOnUiThread {
+            val data1 = args[0] as JSONObject
+            try {
+                var correct = data1.getBoolean("error")
+                if(correct != true) {
+                    var roomJson = data1.getJSONArray("Result")
+                    for (i in 0.. roomJson.length()-1){
+                        var dataDevice: JSONObject = roomJson.getJSONObject(i)
+                        val device = DeviceInRoom.parseJson(dataDevice)
+                        listDeviceNotRoom.add(device)
+                    }
+
+
+                }else{
+                    val err = data1.getString("Result")
+                    Toast.makeText(this, err.toString(), Toast.LENGTH_LONG).show()
+                }
+            } catch (e: JSONException) {
+                Log.d("EEEE", e.toString())
+            }
+        }
     }
 }
 

@@ -15,10 +15,18 @@ import kotlinx.android.synthetic.main.activity_add_device.*
 import kotlin.collections.ArrayList
 import android.util.Log
 import android.widget.Toast
+import com.example.josephpham.smarthome.sqlite.DatabaseHandler
 import com.squareup.picasso.Picasso
+import io.socket.client.Socket
+import io.socket.emitter.Emitter
+import org.json.JSONException
+import org.json.JSONObject
 
 
 class AddDeviceActivity : AppCompatActivity(){
+    var mSocket: Socket = LoginActivity.msocket
+    var token : String = ""
+    var list = ArrayList<Device>()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,34 +34,94 @@ class AddDeviceActivity : AppCompatActivity(){
         setContentView(R.layout.activity_add_device)
         setSupportActionBar(toolbar_add_device)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        val db = DatabaseHandler(this@AddDeviceActivity)
+        token = db.readData()
+        emit(token)
+        mSocket.on("server_send_list_device", onretrieveDataListDevice)
         controll()
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                  IntentFilter("custom-message"));
     }
+
+    private fun emit(token: String) {
+        mSocket.emit("client_send_list_device", token)
+    }
+
     private fun controll() {
-        var list: ArrayList<Device> = ArrayList()
-        list.add(Device("1", "bóng đèn", "https://scontent.fsgn2-1.fna.fbcdn.net/v/t1.0-9/13428509_623771871120998_7085848076689449338_n.jpg?_nc_cat=0&_nc_eui2=v1%3AAeFsKNT70bUY_hQ1tNAJhY6Ggjjyv4IIfYsmO6r64YZoInNmnUQJQI3FpScvxhxLl4lI5N-TmF6QX-bRATTATTQSb3ydt86DBRbbiQ8a4ptHXg&oh=c979f6539c941446191d4554de030ee6&oe=5B8AADF2", "đèn sáng", 21000.0, 1))
-        list.add(Device("1", "quạt", "https://scontent.fsgn2-1.fna.fbcdn.net/v/t1.0-9/13428509_623771871120998_7085848076689449338_n.jpg?_nc_cat=0&_nc_eui2=v1%3AAeFsKNT70bUY_hQ1tNAJhY6Ggjjyv4IIfYsmO6r64YZoInNmnUQJQI3FpScvxhxLl4lI5N-TmF6QX-bRATTATTQSb3ydt86DBRbbiQ8a4ptHXg&oh=c979f6539c941446191d4554de030ee6&oe=5B8AADF2", "đèn sáng", 21000.0, 1))
-        list.add(Device("1", "máy giặc", "https://scontent.fsgn2-1.fna.fbcdn.net/v/t1.0-9/31706461_998650070299841_1624526119346634752_n.jpg?_nc_cat=0&_nc_eui2=v1%3AAeEz06XSJZ84VZ9NJhnZhl6uzFa86TstrE53KPCMB7euGdTNRNpsCytU2R3DiDB42hrVz_OdeyExraaDU3uYbIu13TriCDnqwH8rj6FZeWaaNw&oh=3b059cbb95153443ca0751239e08cabf&oe=5B59DF00", "đèn sáng", 21000.0, 1))
-        list.add(Device("1", "máy lạnh", "https://scontent.fsgn2-1.fna.fbcdn.net/v/t1.0-9/31706461_998650070299841_1624526119346634752_n.jpg?_nc_cat=0&_nc_eui2=v1%3AAeEz06XSJZ84VZ9NJhnZhl6uzFa86TstrE53KPCMB7euGdTNRNpsCytU2R3DiDB42hrVz_OdeyExraaDU3uYbIu13TriCDnqwH8rj6FZeWaaNw&oh=3b059cbb95153443ca0751239e08cabf&oe=5B59DF00", "đèn sáng", 21000.0, 1))
-        list.add(Device("1", "tủ lạnh", "https://scontent.fsgn2-1.fna.fbcdn.net/v/t1.0-9/31706461_998650070299841_1624526119346634752_n.jpg?_nc_cat=0&_nc_eui2=v1%3AAeEz06XSJZ84VZ9NJhnZhl6uzFa86TstrE53KPCMB7euGdTNRNpsCytU2R3DiDB42hrVz_OdeyExraaDU3uYbIu13TriCDnqwH8rj6FZeWaaNw&oh=3b059cbb95153443ca0751239e08cabf&oe=5B59DF00", "đèn sáng", 21000.0, 1))
-        list.add(Device("1", "tivi", "https://scontent.fsgn2-1.fna.fbcdn.net/v/t1.0-9/29025740_969299196568262_4611680306120884224_n.jpg?_nc_cat=0&_nc_eui2=v1%3AAeGhPlJz8-LTljhpCEgoK2-Ddo2xTVZFA7IGi1BC2UcjhSTa-KhFjOwdALQ3DL3WSF9gt9MaDBYkWWCxaDn1hachM_BhD9AAb4xkLrsWYD8tjw&oh=6707b85975c1907d5f551078ef2dffc1&oe=5B9A5B78", "đèn sáng", 21000.0, 1))
-        list.add(Device("1", "bóng đèn dài", "https://scontent.fsgn2-1.fna.fbcdn.net/v/t1.0-9/29025740_969299196568262_4611680306120884224_n.jpg?_nc_cat=0&_nc_eui2=v1%3AAeGhPlJz8-LTljhpCEgoK2-Ddo2xTVZFA7IGi1BC2UcjhSTa-KhFjOwdALQ3DL3WSF9gt9MaDBYkWWCxaDn1hachM_BhD9AAb4xkLrsWYD8tjw&oh=6707b85975c1907d5f551078ef2dffc1&oe=5B9A5B78", "đèn sáng", 21000.0, 1))
         list_type_device.layoutManager = LinearLayoutManager(this@AddDeviceActivity, LinearLayoutManager.HORIZONTAL, false)
         val adapter = AddDeviceAdapter(this@AddDeviceActivity, list)
         list_type_device.adapter = adapter
     }
 
+    //get data from Adapter
     var mMessageReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             // Get extra data included in the Intent
-            val itemName = intent.getStringExtra("name")
+            val name = intent.getStringExtra("name")
+            val id = intent.getStringExtra("_id")
             val itemimg = intent.getStringExtra("img")
             val itemprice = intent.getStringExtra("price")
             Picasso.get().load(itemimg).into(img_type_device)
             tv_price.setText(itemprice)
-            Toast.makeText(this@AddDeviceActivity, itemName , Toast.LENGTH_SHORT).show()
+            tv_type_device.setText(name)
+            createDevice(name)
+            Toast.makeText(this@AddDeviceActivity, name , Toast.LENGTH_SHORT).show()
         }
     }
+
+    fun createDevice(id: String){
+        val bundle = intent.extras
+        val idUser = bundle.get("id_user")
+        val deviceName = edt_name_device.text
+        val json = JSONObject()
+        json.put("device",id)
+        json.put("device_name", deviceName)
+        json.put("user", idUser)
+        json.put("token", token)
+        mSocket.emit("clien_send_create_device_in_room", json)
+        mSocket.on("server_send_create_device_in_room", onretrieveReslt)
+
+    }
+    var onretrieveDataListDevice: Emitter.Listener = Emitter.Listener { args ->
+        runOnUiThread {
+            val data = args[0] as JSONObject
+            try {
+                var correct = data.getBoolean("success")
+                if(correct == true) {
+                    var jsonArr = data.getJSONArray("result")
+                    for (i in 0.. jsonArr.length()-1){
+                        var dataRoom: JSONObject = jsonArr.getJSONObject(i)
+                        val device = Device.parseJson(dataRoom)
+                        list.add(device)
+                    }
+//                    val listMode = user.listMode
+                    val intent: Intent = Intent(this@AddDeviceActivity, Main2Activity::class.java)
+                    startActivity(intent)
+                }else{
+                    val err = data.getString("message")
+                    Toast.makeText(this, err.toString(), Toast.LENGTH_LONG).show()
+                }
+            } catch (e: JSONException) {
+                Log.d("listDevice", e.toString())
+            }
+        }
+    }
+    var onretrieveReslt: Emitter.Listener = Emitter.Listener { args ->
+        runOnUiThread {
+            val data = args[0] as JSONObject
+            try {
+                var correct = data.getBoolean("success")
+                if(correct == true) {
+                    Toast.makeText(this@AddDeviceActivity, "device was created", Toast.LENGTH_LONG).show()
+                }else{
+                    val err = data.getString("message")
+                    Toast.makeText(this, err.toString(), Toast.LENGTH_LONG).show()
+                }
+            } catch (e: JSONException) {
+                Log.d("listDevice", e.toString())
+            }
+        }
+    }
+
 
 }

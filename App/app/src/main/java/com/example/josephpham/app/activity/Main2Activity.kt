@@ -24,6 +24,7 @@ import com.example.josephpham.app.R
 import com.example.josephpham.app.adapter.ListDeviceAdapter
 import com.example.josephpham.app.frament.*
 import com.example.josephpham.app.model.DeviceInRoom
+import com.example.josephpham.smarthome.sqlite.DatabaseHandler
 import io.socket.emitter.Emitter
 import kotlinx.android.synthetic.main.activity_main2.*
 import kotlinx.android.synthetic.main.fablayout.*
@@ -41,9 +42,10 @@ class Main2Activity : AppCompatActivity() {
      * [android.support.v4.app.FragmentStatePagerAdapter].\
      */
     companion object {
-        var listAllDevice: ArrayList<DeviceInRoom>? = null
+        var listDeviceInRoom = ArrayList<DeviceInRoom>()
         var mSocket = LoginActivity.msocket
-        var idUsser = LoginActivity.user.id
+        var listDeviceNotRoom = ArrayList<DeviceInRoom>()
+        var token: String = ""
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,10 +53,26 @@ class Main2Activity : AppCompatActivity() {
         setContentView(R.layout.activity_main2)
         setSupportActionBar(toolbar2)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        control()
         initToolbar()
         addEvent()
         initViews()
     }
+
+    private fun control() {
+        var db = DatabaseHandler(this@Main2Activity)
+        token = db.readData()
+        val bundle = intent.extras
+        val idRoom = bundle.getString("id_room")
+        val idUser = bundle.getString("id_user")
+        val json = JSONObject()
+        json.put("id_room", idRoom)
+        json.put("token", token)
+        mSocket.emit("client_send_room", json)
+        mSocket.on("server_send_room", onretrieveDataDeviceInRoom)
+
+    }
+
     fun addEvent(){
         val mHideButton = AnimationUtils.loadAnimation(this, R.anim.hide_button)
         val mShowButton = AnimationUtils.loadAnimation(this, R.anim.show_button)
@@ -82,8 +100,13 @@ class Main2Activity : AppCompatActivity() {
 
         }
         addmode.setOnClickListener { view ->
-            mSocket.emit("allDevice", idUsser)
-            mSocket.on("allDeviceResult", onretrieveDataAllDevice)
+            val bundle = intent.extras
+            val idUser = bundle.getString("id_user")
+            val token = bundle.getString("token")
+            val intent: Intent = Intent(this@Main2Activity, AddModeActivity::class.java)
+            intent.putExtra("id_user", idUser)
+            intent.putExtra("token", token)
+            startActivity(intent)
         }
     }
     fun openDialog(v: View){
@@ -159,32 +182,27 @@ class Main2Activity : AppCompatActivity() {
 
         return super.onOptionsItemSelected(item)
     }
-    var onretrieveDataAllDevice: Emitter.Listener = Emitter.Listener { args ->
+
+    var onretrieveDataDeviceInRoom: Emitter.Listener = Emitter.Listener { args ->
         runOnUiThread {
             val data1 = args[0] as JSONObject
             try {
                 var correct = data1.getBoolean("error")
                 if(correct != true) {
-                    MainActivity.listDeviceNotRoom = ArrayList<DeviceInRoom>()
                     var roomJson = data1.getJSONArray("Result")
                     for (i in 0.. roomJson.length()-1){
-                        var dataDevice: JSONObject = roomJson.getJSONObject(i)
-                        val allDevice = DeviceInRoom.parseJson(dataDevice)
-                        listAllDevice!!.add(allDevice)
+                        var dataRoom: JSONObject = roomJson.getJSONObject(i)
+                        val deviceinroom = DeviceInRoom.parseJson(dataRoom)
+                        listDeviceInRoom.add(deviceinroom)
                     }
-                    Log.d("listAllDevice", listAllDevice.toString())
-                    val intent: Intent = Intent(this@Main2Activity, AddRoomActivity::class.java)
-                    startActivity(intent)
 
                 }else{
                     val err = data1.getString("Result")
                     Toast.makeText(this, err.toString(), Toast.LENGTH_LONG).show()
                 }
             } catch (e: JSONException) {
-                Log.d("EEEE", e.toString())
+                Log.d("DeviceInRoom", e.toString())
             }
         }
     }
-
 }
-

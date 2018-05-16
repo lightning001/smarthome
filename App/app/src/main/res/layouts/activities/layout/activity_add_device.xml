@@ -93,7 +93,7 @@
                     <ImageView
                         android:layout_width="48dp"
                         android:layout_height="48dp"
-                        android:src="@drawable/ic_border_color_black_24dp"/>
+                        app:srcCompat="@drawable/ic_border_color_black_24dp"/>
                     <EditText
                         android:id="@+id/edt_name_device"
                         android:layout_marginLeft="72dp"
@@ -110,7 +110,26 @@
                     <ImageView
                         android:layout_width="48dp"
                         android:layout_height="48dp"
-                        android:src="@drawable/ic_attach_money_black_24dp"/>
+                        app:srcCompat="@drawable/ic_type"/>
+                    <TextView
+                        android:id="@+id/tv_type_device"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginLeft="72dp"
+                        android:text="type deivce"
+                        android:textColor="@color/colorAccent"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:textSize="15dp"
+                        android:gravity="center_vertical"/>
+                </RelativeLayout>
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp">
+                    <ImageView
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        app:srcCompat="@drawable/ic_attach_money_black_24dp"/>
                     <TextView
                         android:id="@+id/tv_price"
                         android:layout_marginTop="10dp"

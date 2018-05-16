@@ -10,15 +10,12 @@ import android.widget.TextView
 
 import android.content.Intent
 import android.os.AsyncTask
-import android.os.Handler
-import android.support.v7.app.AlertDialog
 import android.util.Log
 import android.widget.Toast
 import com.example.josephpham.app.R
 import com.example.josephpham.app.interfaces.MD5
 import com.example.josephpham.app.connect.Connect
-import com.example.josephpham.app.interfaces.JWTUtils
-import com.example.josephpham.app.model.User
+import com.example.josephpham.smarthome.sqlite.DatabaseHandler
 import io.socket.client.Socket
 import io.socket.emitter.Emitter
 
@@ -28,10 +25,8 @@ import org.json.JSONException
 import org.json.JSONObject
 
 
-class LoginActivity() : AppCompatActivity(), MD5, JWTUtils  {
-    override lateinit var keytoken: String
+class LoginActivity() : AppCompatActivity(), MD5 {
     companion object {
-        var user = User()
         var msocket: Socket = Connect.connect()
     }
 
@@ -41,7 +36,6 @@ class LoginActivity() : AppCompatActivity(), MD5, JWTUtils  {
         addEvent()
         msocket.connect()
         thuchien().execute()
-
     }
     fun addEvent(){
         password.setOnEditorActionListener(TextView.OnEditorActionListener { _, id, _ ->
@@ -56,31 +50,25 @@ class LoginActivity() : AppCompatActivity(), MD5, JWTUtils  {
             startActivity(intent)
         }
         linkforgotpw.setOnClickListener {
-            val intent = Intent(this@LoginActivity, AddDeviceActivity::class.java)
+            val intent = Intent(this@LoginActivity, SettingDeviceActivity::class.java)
             startActivity(intent)
         }
     }
 
-    var onretrieveDateLogin: Emitter.Listener = Emitter.Listener { args ->
+    var onretrievetoken: Emitter.Listener = Emitter.Listener { args ->
         runOnUiThread {
 
-            val token = args[0] as JSONObject
-            Log.d("token", token.toString())
+            val data = args[0] as JSONObject
             try {
-                var correct = token.getBoolean("success")
-                if(correct == true) {
-                    var token = token.get("token")
-
-                    var userjson = decoded(token as String)
-                    user.parseJson(JSONObject(userjson))
-                    Log.d("user", user.name)
-                    Toast.makeText(this@LoginActivity, user.toString(), Toast.LENGTH_LONG).show()
+                var token = data.getString("token")
+                if(token.equals("error")) {
+                    Toast.makeText(this@LoginActivity, "Email or password error! " + "\n" +
+                            "login try again", Toast.LENGTH_SHORT).show()
+                }else{
+                    val db = DatabaseHandler(this@LoginActivity)
+                    db.insertTable(token)
                     var intent = Intent(this@LoginActivity, MainActivity::class.java)
                     startActivity(intent)
-
-                }else{
-                    val err = token.getString("message")
-                    Toast.makeText(this@LoginActivity, err.toString(), Toast.LENGTH_LONG).show()
                 }
             } catch (e: JSONException) {
                 Log.d("EEEE", e.toString())
@@ -147,7 +135,7 @@ class LoginActivity() : AppCompatActivity(), MD5, JWTUtils  {
 
         override fun doInBackground(vararg params: Unit?): String {
             email_sign_in_button.setOnClickListener { attemptLogin() }
-            msocket.on("server_send_login", onretrieveDateLogin)
+            msocket.on("server_send_login", onretrievetoken)
             return ""
         }
 
