@@ -36,7 +36,7 @@ VersionUser.countvsUser = (user_id)=>{
     });
   });
 }
-// truyen vao 1 user
+
 VersionUser.mInsert = async (data) =>{
   let mUser = new VersionUser();
   mUser.user_id = data.user_id;

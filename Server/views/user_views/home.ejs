@@ -1,0 +1,26 @@
+<!DOCTYPE html">
+<html>
+<head>
+<% include ./partials/head %>
+<link rel="stylesheet" href="/css/home.css">
+<title>Home</title>
+</head>
+<body>
+	<% include ./partials/header %>
+	<div class="space-medium">
+		<div class="container-fluid main">
+			<div class="row">
+				<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+					<% if(req.session.authentication != true || req.session.user ==null){%>
+						<!--login-form-->
+						<% include login%>
+					<%}else{%>
+						<% include room%>
+					<%}%>
+				</div>
+			</div>
+		</div>
+	</div>
+	<% include ./partials/footer %>
+</body>
+</html>

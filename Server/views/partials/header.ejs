@@ -1,0 +1,50 @@
+
+<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+	<div class="container">
+		<!-- Brand and toggle get grouped for better mobile display -->
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse"
+				data-target="#my-navbar-collapse">
+				<span> <i class="fa fa-ellipsis-h"></i>
+				</span>
+			</button>
+			<a href="/" class="navbar-brand"> <span class="pull-left">
+					<span class="smart-home-head">Smart Home</span>
+			</span>
+			</a>
+		</div>
+		<div class="collapse navbar-collapse" id="my-navbar-collapse">
+			<% if(req.session !=null && req.session.user != null){ %>
+			<ul class="nav navbar-nav">
+				<li id="mnMode"><a href="/mode">Mode</a></li>
+				<li id="mnDevice"><a href="/device">Device</a></li>
+				<li id="mnCamera"><a href="/camera">Camera</a></li>
+			</ul>
+			<% } %>
+			<ul class="nav navbar-nav navbar-right">
+				<% if(req.session!=null && req.session.user != null){ %>
+				<li>
+					<form class="navbar-form navbar-left input-group" role="search">
+						<div class="form-group has-feedback">
+							<input type="search" class="form-control" placeholder="Search" id="searchnav">
+							<span class="glyphicon glyphicon-search form-control-feedback"></span>
+						</div>
+					</form>
+				</li>
+				<li class="dropdown"><a href="#" class="dropdown-toggle"
+					data-toggle="dropdown"><img alt="profile" class="img-circle image-profile-link"
+						src=<%= req.session.user.img %>><span class="caret"></span></a>
+					<ul class="dropdown-menu">
+						<li><a href="/profile">Profile</a></li>
+						<li><a href="#">New Device</a></li>
+						<li><a href="#">New Mode</a></li>
+						<li class="divider"></li>
+						<li><a href="/logout">Sign out</a></li>
+					</ul></li> <% }else{ %>
+				<li><a href="/login">Sign in</a></li>
+				<li><a href="/register">Sign up</a></li> <% } %>
+			</ul>
+		</div>
+	</div>
+</nav>
+<div class="clearfix"></div>

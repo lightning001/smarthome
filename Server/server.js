@@ -3,6 +3,7 @@ var app = require('express')(),
   server = require('http').createServer(app),
   io = require('socket.io').listen(server),
   port = process.env.PORT || 3000,
+config = require('./util/config'),
   _ = require('underscore');
 
 var mongoose = require('mongoose');

@@ -1,0 +1,251 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+
+<head>
+	<% include ./partials/head %>
+		<% var user = req.session.user ;%>
+			<title>
+				<%=user.name %>
+			</title>
+</head>
+
+<body>
+		<% include ./partials/header %>
+	<div class="space-medium">
+		<div class="container-fluid main">
+			<div class="well">
+				<div class="row">
+					<div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+						<img alt="profile picture" src="<%=user.img%>" class="img img-thumbnail img-responsive" />
+						<span class="badge type-user">&nbsp; <%=user.type%> &nbsp;</span>
+					</div>
+					<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+						<div id="myProfile">
+							<ul class="list-group">
+								<li class="list-group-item">
+									<h2 id="name">
+										<%=user.name%>
+									</h2>
+								</li>
+								<li class="list-group-item"><b>Email: </b><span class="pull-right"><%=user.email%></span></li>
+								<li class="list-group-item"><b>Address: </b><span class="pull-right" id="address"><%= user.street %> - <%=user.district %> - <%=user.city%></span></li>
+								<li class="list-group-item"><b>Phone number: </b><span class="pull-right" id="phonenumber"><%=user.phonenumber%></span></li>
+								<li class="list-group-item"><b>Home phone: </b><span class="pull-right" id="homephone"><%=user.homephone%></span></li>
+								<li class="list-group-item"><b>Date of Birth: </b><span class="pull-right" id="dob"><%=user.dob.split("T")[0]%></span></li>
+							</ul>
+							<div class="clearfix"></div>
+							<div>
+								<a class="btn btn-default" id="btnEditProfile">Edit Profile</a>
+								<a class="btn btn-default" id="btnChangePassword">Change Password</a>
+							</div>
+						</div>
+						<div>
+						<form class="form-horizontal" action="/user/editprofile" method="post" id="editProfileForm">
+							<ul class="list-group">
+								<li class="list-group-item form-group"><label class="control-label col-sm-4">Name <sup style="color : red">*</sup>: </label>
+									<div class="col-sm-8"> <input type="text" class="form-control edit-in-list" id="edtName" name="name" value="<%=user.name%>" required></div>
+								</li>
+								<li class="list-group-item form-group"><label class="control-label col-sm-4">City: </label>
+									<div class="col-sm-8"> <input type="text" class="form-control edit-in-list" name="city" id="edtCity" value="<%=user.city%>"></div>
+								</li>
+								<li class="list-group-item form-group"><label class="control-label col-sm-4">District: </label>
+									<div class="col-sm-8"> <input type="text" class="form-control edit-in-list" name="district" id="edtDistrict" value="<%=user.district%>"></div>
+								</li>
+								<li class="list-group-item form-group"><label class="control-label col-sm-4">Street: </label>
+									<div class="col-sm-8"> <input type="text" class="form-control edit-in-list" name="street" id="edtStreet" value="<%=user.street%>"></div>
+								</li>
+								<li class="list-group-item form-group"><label class="control-label col-sm-4">Phone number<sup style="color : red">*</sup>: </label>
+									<div class="col-sm-8"> <input type="text" id="edtPhone" class="form-control edit-in-list" name="phonenumber" value="<%=user.phonenumber%>" required></div>
+								</li>
+								<li class="list-group-item form-group"><label class="control-label col-sm-4">Home phone: </label>
+									<div class="col-sm-8"> <input type="text" class="form-control edit-in-list" name="homephone" id="edtHomephone" value="<%=user.homephone%>" ></div>
+								</li>
+								<li class="list-group-item form-group"><label class="control-label col-sm-4">Date of birth<sup style="color : red">*</sup>: </label>
+									<div class="col-sm-8"> <input type="date" class="form-control edit-in-list" name="dob" id="edtDob" value="<%=user.dob.split("T")[0]%>" required></div>
+								</li>
+							</ul>
+							<div>
+								<input type="button" value="Save" id="btnSubmitEditProfile" class="btn btn-info" />
+								<input type="reset" value="Cancel" id="btnCancelEditProfile" class="btn btn-default" />
+							</div>
+						</form>
+						</div>
+						<form class="form-horizontal" method="post" action="/user/changepassword" id="changePasswordForm">
+							<ul class="list-group">
+								<li class="list-group-item form-group"><label class="control-label col-sm-4">Current Password: </label>
+									<div class="col-sm-8"> <input type="password" class="form-control" name="currentPassword" required></div>
+								</li>
+								<li class="list-group-item form-group"><label class="control-label col-sm-4">New Password: </label>
+									<div class="col-sm-8"> <input type="password" class="form-control" name="newPassword" required></div>
+								</li>
+								<li class="list-group-item form-group"><label class="control-label col-sm-4">Confirm new Password: </label>
+									<div class="col-sm-8"> <input type="password" class="form-control" name="confirmNewPassword" required></div>
+								</li>
+							</ul>
+							<div>
+								<input type="button" value="Change" id="btnSubmitChangePassword" class="btn btn-warning" />
+								<input type="reset" value="Cancel" id="btnCancelChangePassword" class="btn btn-default" />
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+
+			<div class="history">
+				<div class="panel panel-info">
+					<div class="panel-heading">
+						<h3>HISTORY</h3>
+					</div>
+					<div class="panel-body">
+						<ul class="list-group">
+							<li class="list-group-item"><b>Time</b><span class="pull-right"><b>Content</b></span></li>
+							<li class="list-group-item"><abbr title="ahihi" tabindex="top"><a>2018-4-12</a></abbr><span class="pull-right">Edit profile</span></li>
+							<li class="list-group-item"><abbr title="ahihi" tabindex="top"><a>2018-4-12</a></abbr><span class="pull-right">Edit mode</span></li>
+							<li class="list-group-item"><abbr title="ahihi" tabindex="top"><a>2018-4-12</a></abbr><span class="pull-right">Add mode</span></li>
+							<li class="list-group-item"><abbr title="ahihi" tabindex="top"><a>2018-4-12</a></abbr><span class="pull-right">Edit mode</span></li>
+							<li class="list-group-item"><abbr title="ahihi" tabindex="top"><a>2018-4-12</a></abbr><span class="pull-right">Edit room</span></li>
+							<li class="list-group-item"><abbr title="ahihi" tabindex="top"><a>2018-4-12</a></abbr><span class="pull-right">add room</span></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+			<% include ./partials/footer %>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#editProfileForm").hide();
+			$("#changePasswordForm").hide();
+		});
+		$("#btnEditProfile").click(function() {
+			$("#myProfile").hide();
+			$("#editProfileForm").show();
+		});
+		$("#btnChangePassword").click(function() {
+			$("#myProfile").hide();
+			$("#changePasswordForm").show();
+		});
+		$("#btnCancelEditProfile").click(function() {
+			$("#myProfile").show();
+			$("#editProfileForm").hide();
+		});
+		$("#btnCancelChangePassword").click(function() {
+			$("#myProfile").show();
+			$("#changePasswordForm").hide();
+		});
+		$("#btnSubmitEditProfile").click(function(e) {
+			var form = $("#editProfileForm");
+			$.ajax({
+				type: form.attr("method"),
+				url: form.attr("action"),
+				data: $("#editProfileForm").serialize(),
+				success: function(data) {
+					alert(data);
+					console.log("Edit profile successful.");
+					$("#name").val($("#edtName").val());
+					$("#address").val($("#edtStreet").val() + " - " + $("edtDistrict").val() + " - " + $("edtCity").val());
+					$("#phonenumber").val($("#edtPhone").val());
+					$("#homephone").val($("#edtHomephone").val());
+					$("#dob").val($("#edtDob").val());
+					$("#myProfile").show();
+					$("#editProfileForm").hide();
+				},
+				error: function(err) {
+					alert('Error occured');
+				}
+			});
+		});
+		$("#btnSubmitChangePassword").click(function(e) {
+			var form = $("#changePasswordForm");
+			$.ajax({
+				type: form.attr("method"),
+				url: form.attr("action"),
+				data: $("#changePasswordForm").serialize(),
+				success: function(data) {
+					alert(data.msg);
+					console.log("Edit password successful.");
+					$("#myProfile").show();
+					$("#changePasswordForm").hide();
+
+
+				},
+				error: function(err) {
+					alert(err.msg);
+				}
+			});
+		});
+		$("#editProfileForm").validate({
+			rules: {
+				edtName: {
+					require: true,
+					minlength: 5
+				},
+				edtDob: {
+					require: false,
+					date: true
+				},
+				edtPhone: {
+					require: true,
+					number: true,
+					minlength: 3
+				},
+				edtHomephone: {
+					number: true,
+					minlegth: 3
+				}
+			},
+			messages: {
+				edtName: {
+					require: "Please enter your name",
+					minlength: "Please enter valid name"
+				},
+				edtDob: {
+					date: "Please enter a date"
+				},
+				edtPhone: {
+					require: "Please enter your phone number",
+					number: "Phone number must be a number",
+					minlegth: "Phone number you entered is too short"
+				},
+				edtHomephone: {
+					number: "Home phone number you entered is too short"
+				}
+			}
+		});
+		$("#changePasswordForm").validate({
+			rules: {
+				newPassword: {
+					required: true,
+					minlength: 5
+				},
+				confirmNewPassword: {
+					required: true,
+					minlength: 5,
+					equalTo: "#newPassword"
+				},
+				currentPassword: {
+					required: true,
+					minlength: 5
+				}
+			},
+			messages: {
+				newPassword: {
+					required: "Please enter your new password",
+					minlength: "Password must be 6 - 28 chars and not contains special characters"
+				},
+				confirmNewPassword: {
+					required: "Please confirm your new password",
+					minlength: "Password must be 6 - 28 chars and not contains special characters",
+					equalTo: "Confirm password is wrong"
+				},
+				currentPassword: {
+					required: "Please enter your current password",
+					minlength: "Password must be 6 - 28 chars and not contains special characters"
+				}
+			}
+		});
+
+	</script>
+</body>
+
+</html>

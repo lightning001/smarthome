@@ -1,0 +1,20 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<% include ./partials/head %>
+
+<title>Error</title>
+</head>
+<body>
+	<% include ./partials/header %>
+	<div class="container main">
+	<div class="panel panel-default text-center" style="width: 600px; margin: auto; margin-top: 30px;">
+		<div class="panel-heading text-center">
+			<h2>Error <%=status%></h2>
+		</div>
+		<div class="panel-body"><div class="alert-danger"><%=content%></div></div>
+	</div>
+	</div>
+	<% include ./partials/footer %>
+</body>
+</html>

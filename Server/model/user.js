@@ -14,7 +14,7 @@ var schemaUser = new mongoose.Schema({
   phonenumber : {type : String},
   homephone : {type : String},
   dob : {type : Date},
-  type : {type : String},
+  type : {type : String, default : 'Normal'},
   status : {type : Boolean, default : false},
   startdateregister : {type : Date, default : Date.now()},
   img : {type : String, default : 'https://image.ibb.co/d7xiTn/men.png'},
