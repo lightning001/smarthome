@@ -21,6 +21,14 @@ footer section {
 	min-height: 600px;
 }
 
+a:hover{
+	text-decoration: none;
+}
+
+.panel{
+	margin: 5px;
+}
+
 #image-preview {
 	max-width: 100px;
 	height: 100px;
@@ -42,7 +50,7 @@ footer section {
 
 .navbar {
 	background-color: #fefdfc;
-	position: relative;
+	position: sticky;
 
 }
 
@@ -70,45 +78,21 @@ footer section {
 	margin-top: 4px;
 }
 
-.path-page {
-	margin: auto;
-	background: none;
-	text-align: right;
-	padding-right: 50px;
-	display: inline-block;
-	margin-bottom: 10px;
-}
-
-.path-page li {
-	margin-top: 5px;
-	background-color: #b37800;
-	min-width: 100px;
-	text-align: center;
-	border-radius: 35px 0 35px 0;
-	text-decoration: none;
-	list-style: none;
-	display: inline-block;
-	padding-left: 20px;
-	padding-right: 20px;
-}
-
-.path-page li:hover,
-.path-page li:focus {
-	border-color: red;
-}
-
-.path-page li a {
-	color: white;
-	opacity: 1;
-}
-
 .type-user {
 	margin-top: -30px;
 	margin-left: 5px;
 	padding: 5px;
 	background: #eb3615;
 }
+.well, .jumbotron {
+	background: rgba(221, 203, 190, 0.65);
+	padding: 5px;
+}
 
+.thumbnail{
+	background: rgba(0,0,0,0);
+	border: none;
+}
 .error {
 	font-size: 14px;
 	color: red;
@@ -126,7 +110,7 @@ footer section {
 	display: inline-block;
 	overflow: inherit;
 	width: 200%;
-	
+
 }
 
 .gallery-list-item {
@@ -137,4 +121,90 @@ footer section {
 	background: white;
 	border-radius: 15px;
 	margin: 1px;
+}
+
+.room-img {
+	resize: both;
+	height: 180px;
+	width: 180px;
+	overflow: hidden;
+	padding: 0;
+}
+
+.text-border{
+	color : white;
+	background : rgba(136, 83, 46, 0.71);
+	border-radius : 2px;
+	word-wrap:break-word;
+	width: 75%;
+	text-align: center;
+	vertical-align: middle;
+	margin: auto;
+	height: 50px;
+}
+
+.bottomleft {
+	bottom: 8px;
+	left: 200px;
+	position: absolute;
+	color: white;
+}
+
+.item-off {
+	-webkit-filter: grayscale(1);
+}
+
+.close {
+	color : red;
+	border-radius: 50%;
+	background: white;
+	position: absolute;
+	float: right;
+}
+.close:hover{
+	color : #e30404;
+}
+
+.btn-add{
+	border-radius: 50%;
+	width: 50px;
+	height: 50px;
+	text-align: center;
+	bottom: 100px;
+	right: 40px;
+	position: fixed;
+	margin: auto;
+	padding: 15px;
+	align-items: center;
+	align-content: center;
+	align-self: center;
+	text-align: center;
+	box-shadow: 2px 2px 4px 3px gray;
+	background: #956f1b;
+	color: aliceblue;
+}
+
+.btn-add:hover{
+	color: white;
+	box-shadow: 2px 2px 2px 3px gray;
+}
+
+.error {
+	color: red;
+}
+
+.orange{
+	color: orange;
+}
+
+.badge-warning{
+	background-color: #ec971f;
+}
+
+.bold{
+	font-weight: bold;
+}
+
+.uppercase{
+	text-transform: uppercase;
 }

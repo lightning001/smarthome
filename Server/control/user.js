@@ -1,12 +1,14 @@
-var User = require('../model/user');
-const config = require('../util/config');
-var fs = require('fs');
-const msg = require('../msg').en;
-var jwt = require('jsonwebtoken');
-let base64url = require('base64url');
-let randomstring = require('randomstring');
-var mongoose = require('mongoose');
-let verify = require('./verify');
+require('../model/Mode');
+require('../model/Room');
+var User = require('../model/user'),
+	config = require('../util/config'),
+	mDate = require('../util/dateOperation'),				   
+	randomstring = require('randomstring'),
+	base64url = require('base64url'),
+	mongoose = require('mongoose'),
+	jwt = require('jsonwebtoken'),
+	msg = require('../msg').en,
+	fs = require('fs');
 /**
  * @param {String}
  *            email
@@ -16,35 +18,23 @@ let verify = require('./verify');
 
 User.login = (email, password) => {
 	return new Promise((resolve, reject) => {
-		User.findOne({
-			'email': email
-		}).
+		User.findOne({'email': email}).
 		// .where('password').equals(password)
 		// where('status').equals(true).
-		populate('listMode').
-		populate('listRoom').
 		exec((error, data) => {
 			if (error) {
-				console.log(error);
-				return reject({
-					'token': 'error'
-				});
+				return reject({'token': 'error', message : msg.error.occur});
 			}
 			if (!data || typeof data === undefined) {
 				console.log(msg.not_exist.account);
-				return reject({
-					'token': 'error'
-				});
+				return reject({'token': 'error', message : msg.error.login_incorrect});
 			}
 			if (data && data.length !== 0) {
 				if (data.password !== password) {
 					console.log('Sai mat khau: ' + data.password);
-					return reject({
-						'token': 'error'
-					});
+					return reject({'token': 'error', message : msg.error.login_incorrect});
 				} else {
-					data.password = '';
-					var token = jwt.sign(JSON.stringify(data), config.secret_key, {
+					var token = jwt.sign(JSON.stringify({'_id' : data._id.toString(), 'email' : data.email, status: data.status}), config.secret_key, {
 						algorithm: 'HS256'
 					});
 					return resolve({
@@ -56,10 +46,17 @@ User.login = (email, password) => {
 	})
 }
 
+var checkId = (_id, token_id)=>{
+	if(_id == token_id){
+		return true;
+	}
+	return false;
+}
+
 User.changePassword = (token, _id, oldPassword, newPassword) => {
 	return new Promise((resolve, reject) => {
 		jwt.verify(token, config.secret_key, (error, data) => {
-			if (error) {
+			if (error || !checkId(_id, data._id)) {
 				return reject({
 					'success': false,
 					'message': msg.error.verify
@@ -91,7 +88,7 @@ User.changePassword = (token, _id, oldPassword, newPassword) => {
 User.findBy_ID = (token, _id) => {
 	return new Promise((resolve, reject) => {
 		jwt.verify(token, config.secret_key, (error, data) => {
-			if (error) {
+			if (error || !checkId(_id, data._id)) {
 				reject({
 					'success': false,
 					'message': msg.error.verify
@@ -198,7 +195,7 @@ User.findByEmail = (token, email) => {
 					'message': msg.error.verify
 				});
 			} else {
-				User.find({'email': email}, {password: 0}, (error2, data2) => {
+				User.findOne({'email': email}, {password: 0}, (error2, data2) => {
 					if (error2) {
 						return reject({'success': false,'message': msg.error.occur});
 					} else if (!data2) {
@@ -260,22 +257,18 @@ User.mInsert = (data) => {
 					}
 				}
 				mUser.save((error2) => {
-					console.log('User' + JSON.stringify(mUser));
 					if (error2) {
-						console.log('Error: ' + error2)
 						return reject({
 							'success': false,
 							'message': msg.error.occur
 						});
 					} else {
-						console.log('insert true');
 						return resolve({
 							'success': true
 						});
 					}
 				});
 			} else {
-				console.log('Email exist');
 				return reject({
 					'success': false,
 					'message': msg.error.exist_email
@@ -286,125 +279,65 @@ User.mInsert = (data) => {
 }
 
 User.confirmRegister = (data) => {
-	try {
-		// socket.emit('server_send_confirm_register', {'success': false,
-		// 'message':
-		// msg.error.confirm_register});
-		let EmailManager = require('../util/Email');
-		// ma hoa TOKEN cho an toan
-		let token = jwt.sign({
-			'data': data
-		}, config.secret_key, {
-			algorithm: 'HS256'
-		});
-		let encode = base64url.encode(token.toString(), 'binary');
-		EmailManager.confirmEmail(data.email, encode);
-		return {
-			'success': true,
-			'message': msg.success.confirm_register
-		};
+	return new Promise((resolve, reject)=>{
+		try {
+			// socket.emit('server_send_confirm_register', {'success': false,
+			// 'message':
+			// msg.error.confirm_register});
+			let EmailManager = require('../util/Email');
+			// ma hoa TOKEN cho an toan
+			let token = jwt.sign({'data': data}, config.secret_key, {algorithm: 'HS256'});
+			let encode = base64url.encode(token.toString(), 'binary');
+			EmailManager.confirmRegister(data.email, encode);
+			User.update({'email' : data.email}, {$set:{activeTimeRequest : new Date()}}).exec();
+			return resolve({
+				'success': true,
+				'message': msg.success.confirm_register
+			});
 
-	} catch (e) {
-		console.log(e);
-		return {
-			'success': false,
-			'message': msg.error.occur
-		};
+		} catch (e) {
+			console.log(e);
+			return reject({
+				'success': false,
+				'message': msg.error.occur
+			});
 
-	}
+		}
+	});
 }
 
-User.responseConfirm = (encode, request, response) => {
+User.responseConfirm = (encode, req, response) => {
 	let token = base64url.decode(encode, 'binary');
 	jwt.verify(token, config.secret_key, (error, data) => {
 		if (error) {
-
-			var html = [
-        '<!DOCTYPE html>',
-        '<html>',
-        '<head>',
-        '<meta charset="utf-8" />',
-        '<title>Error Occurred</title>',
-        '</head>',
-        '<body style="margin : auto; padding : 70px;">',
-        '<h1>Ôi không!<hr/></h1> <h3>Hiện chúng tôi chưa thể thực hiện được yêu cầu này bây giờ. Vui lòng thực hiện lại sau ít phút<h3>',
-        // response.write('<link rel="stylesheet"
-		// href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">');
-        // response.write('<script
-		// src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>');
-        // response.write('<script
-		// src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>');
-        '</body>',
-        '</html>',
-      ].join('');
-			response.write(html, 'utf8');
-			response.end();
+			req.flash('error', 'Oh no. We can not do your request now. Please try again later');
+			response.redirect('/error');
 		} else if (data) {
 			let mData = data.data;
 			let email = mData.email;
-			User.find({
-				'email': email
-			}).
+			User.findOne({'email': email}).
 			exec((error2, data2) => {
 				if (error2) {
 					console.log(error2);
-					let html = [
-            '<!DOCTYPE html>',
-            '<html>',
-            '<head>',
-            '<meta charset="utf-8" />',
-            '<title>Error Occurred</title>',
-            '</head>',
-            '<body style="margin : auto; padding : 70px;">',
-            '<h1>Ôi không!<hr/></h1> <h3>Hiện chúng tôi chưa thể thực hiện được yêu cầu này bây giờ. Vui lòng thực hiện lại sau ít phút<h3>',
-            // response.write('<link rel="stylesheet"
-			// href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">');
-            // response.write('<script
-			// src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>');
-            // response.write('<script
-			// src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>');
-            '</body>',
-            '</html>',
-          ].join('');
-					response.write(html, 'utf8');
-					response.end();
+					req.flash('error', 'Oh no. We can not do your request now. Please try again later');
+					response.redirect('/error');
 				} else if (!error && data2) {
-					User.update({
-						'email': data2.email
-					}, {
-						$set: {
-							'status': true
-						}
-					}).
-					exec((err) => {
-						if (err) {
-							console.log(error2);
-							let html = [
-              '<!DOCTYPE html>',
-              '<html>',
-              '<head>',
-              '<meta charset="utf-8" />',
-              '<title>Error Occurred</title>',
-              '</head>',
-              '<body style="margin : auto; padding : 70px;">',
-              '<h1>Ôi không!<hr/></h1> <h3>Hiện chúng tôi chưa thể thực hiện được yêu cầu này bây giờ. Vui lòng thực hiện lại sau ít phút<h3>',
-              // response.write('<link rel="stylesheet"
-				// href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">');
-              // response.write('<script
-				// src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>');
-              // response.write('<script
-				// src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>');
-              '</body>',
-              '</html>',
-            ].join('');
-							response.write(html, 'utf8');
-							response.end();
-						} else {
-							let EmailManager = require('../util/Email');
-							EmailManager.thankConfirmRegister(mData.email);
-							response.render('user_views/registersuccess');
-						}
-					});
+					if(mDate.subtract(new Date(), data2.activeTimeRequest) >=30*60*1000){
+						req.flash('alertmessage', msg.error.timeout);
+						res.redirect('/');
+					}else{
+						User.update({'email': data2.email}, {$set: {'status': 'Active'}, $unset:{activeTimeRequest : 1}}).
+						exec((err) => {
+							if (err) {
+								req.flash('error', 'Oh no. We can not do your request now. Please try again later');
+								response.redirect('/error');
+							} else {
+								let EmailManager = require('../util/Email');
+								EmailManager.thankConfirmRegister(mData.email);
+								response.redirect('/thankyou')
+							}
+						});
+					}
 				}
 			});
 
@@ -412,11 +345,91 @@ User.responseConfirm = (encode, request, response) => {
 	});
 }
 
+
+User.searchResetPassword = (email)=>{
+	return new Promise((resolve, reject)=>{
+		User.findOne({'email': email}).
+		exec((error, data)=>{
+			 if(error)
+				return reject({'success': false, 'message' : msg.error.occur});
+			else if(!error && !data)
+				return reject({'success': false, 'message' : msg.not_exist.account});
+			else if(!error && data)
+				return resolve({'success' :  true});
+				
+			
+		});
+	})
+}
+
+User.requestResetPassword = (email)=>{
+	return new Promise((resolve, reject)=>{
+		var number = randomstring.generate({ length : 6, charset : 'numeric'});
+		console.log('number: '+number);
+		User.update({'email' : email}, {$set : {'forgetcode' : number, 'forgetTimeRequest' : new Date() }}).
+		exec((error)=>{
+			if(error){
+				return reject({'success': false, 'message' : msg.error.occur});
+			}
+			else{
+				let EmailManager = require('../util/Email');
+				let encode = base64url.encode(jwt.sign(JSON.stringify({'email': email}), config.secret_key, {algorithm : 'HS256'}));
+				EmailManager.forgetPassword(email, encode, number);
+				return resolve({'success' :  true, 'encode' : encode});
+			}
+		});
+	});
+}
+
+					   
+User.verifyResetPassword = (email, forgetcode)=>{
+	return new Promise((resolve, reject)=>{
+		
+		User.findOne({$and : [{forgetcode : {$exists : true}}, {forgetcode : {$ne : null}}], 
+					  $and : [{forgetTimeRequest : {$exists : true}}, {forgetTimeRequest : {$ne : null}}],
+					  'email': email}, {password : 0}).
+		exec((error, data)=>{
+			 if(error)
+				return reject({'success': false, type : 'server', 'message' : msg.error.occur});
+			else if(data){
+				if(forgetcode != data.forgetcode)
+					return reject({'success': false, type : 'incorrected', 'message' : msg.error.forgetcode});
+				let currentTime = new Date(),
+					requestTime = data.forgetTimeRequest,
+					deviationTime = mDate.subtract(currentTime, requestTime);
+					console.log('deviationTime: '+deviationTime);
+				if(deviationTime >= 30*60*1000){
+					User.update({'email': email}, {$unset : {forgetcode : 1, forgetTimeRequest : 1}}).exec();
+					return reject({success : false, type : 'timeout', message : msg.error.timeout});
+				}
+				else{
+					return resolve({'success' :  true});
+				}
+			}
+		});
+	});
+}
+
+User.resetPassword = (email, password)=>{
+	return new Promise((resolve, reject) => {
+		User.findOneAndUpdate({$and : [{forgetcode : {$exists : true}}, {forgetcode : {$ne : null}}], 
+					  $and : [{forgetTimeRequest : {$exists : true}}, {forgetTimeRequest : {$ne : null}}],
+					  'email': email}, {$set : {'password' : password}, $unset : {forgetcode : 1, forgetTimeRequest : 1}}).
+		exec((error)=>{
+			if(error){
+				return reject({'success' : false, 'message' : msg.error.occur});
+			}else{
+				return resolve({'success' : true});
+			}
+		})
+	});
+}
+
 User.mUpdate = (token, data) => {
 	return new Promise((resolve, reject) => {
 
 		jwt.verify(token, config.secret_key, (error, decode) => {
-			if (error) {
+			if (error || !checkId(_id, data._id)) {
 				return reject({
 					'success': false,
 					'message': msg.error.verify
@@ -495,7 +508,7 @@ User.mUpdate = (token, data) => {
 User.mDelete = (token, _id) => {
 	return new Promise((resolve, reject) => {
 		jwt.verify(token, config.secret_key, (error, data) => {
-			if (error) {
+			if (error || !checkId(_id, data._id)) {
 				return reject({
 					'success': false,
 					'message': msg.error.verify

@@ -122,19 +122,20 @@ module.exports = exports = function (io) {
 		});
 
 		socket.on('client_send_update_room', (data) => {
+			console.log('client_send_update_room: '+JSON.stringify(data));
 			mRoom.mUpdate(data.token, data.data).then((result) => {
-				socket.emit('client_send_update_room', result);
+				socket.emit('server_send_update_room', result);
 			}, (e) => {
-				socket.emit('client_send_update_room', e);
+				socket.emit('server_send_update_room', e);
 			})
 
 		});
 
 		socket.on('client_send_delete_room', (data) => {
 			mRoom.mDelete(data.token, data._id).then((result) => {
-				socket.emit('client_send_delete_room', result);
+				socket.emit('server_send_delete_room', result);
 			}, (e) => {
-				socket.emit('client_send_delete_room', e);
+				socket.emit('server_send_delete_room', e);
 			});
 		});
 
@@ -143,12 +144,13 @@ module.exports = exports = function (io) {
 		 * ================= DEVICE IN ROOM
 		 * ================================================
 		 */
-		socket.on('client_send_device_room', (data) => {
-			mDeviceInRoom.getDeviceInRoom(data.token, data.room).then((result) => {
-				socket.emit('server_send_device_room', result);
+		socket.on('client_send_device_in_room', (data) => {
+			console.log('client_send_device_in_room: '+JSON.stringify(data));
+			mDeviceInRoom.getDeviceInRoom(data.token, data.id_room).then((result) => {
+				socket.emit('server_send_device_in_room', result);
 			}, (e) => {
 				console.log(e);
-				socket.emit('server_send_device_room', e);
+				socket.emit('server_send_device_in_room', e);
 			});
 		});
 
@@ -174,19 +176,19 @@ module.exports = exports = function (io) {
 			})
 		});
 
-		socket.on('client_send_create_device', (data) => {
+		socket.on('client_send_update_device_in_room', (data) => {
 			mDeviceInRoom.mUpdate(data.token, data.data).then((result) => {
-				socket.emit('server_send_create_device', result);
+				socket.emit('server_send_update_device_in_room', result);
 			}, (e) => {
-				socket.emit('server_send_create_device', e);
+				socket.emit('server_send_update_device_in_room', e);
 			})
 		});
 
-		socket.on('client_send_create_device', (data) => {
-			mDeviceInRoom.mUpdate(data.token, data._id).then((result) => {
-				socket.emit('server_send_create_device', result);
+		socket.on('client_send_delete_device', (data) => {
+			mDeviceInRoom.mDelete(data.token, data._id).then((result) => {
+				socket.emit('server_send_delete_device_in_room', result);
 			}, (e) => {
-				socket.emit('server_send_create_device', e);
+				socket.emit('server_send_delete_device_in_room', e);
 			})
 		});
 

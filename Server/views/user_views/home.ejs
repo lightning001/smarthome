@@ -3,6 +3,13 @@
 <head>
 <% include ./partials/head %>
 <link rel="stylesheet" href="/css/home.css">
+<% if(alertmessage!=null && alertmessage.length>0){%>
+<script>
+$(document).ready(function(){
+	alert('<%=alertmessage%>');
+});
+</script>
+<%}%>
 <title>Home</title>
 </head>
 <body>
@@ -11,12 +18,9 @@
 		<div class="container-fluid main">
 			<div class="row">
 				<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-					<% if(req.session.authentication != true || req.session.user ==null){%>
-						<!--login-form-->
-						<% include login%>
-					<%}else{%>
-						<% include room%>
-					<%}%>
+					<% if((req.session.authentication != true || req.session.user ==null)){%>
+						<% include ./form/login %>
+					<%} %>
 				</div>
 			</div>
 		</div>

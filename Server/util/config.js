@@ -2,9 +2,9 @@
 var mongoose = require('mongoose');
 const uri = 'mongodb://localhost:27017/SmartHome',
 	uri_version = 'mongodb://localhost:27017/VersionSmartHome',
-	//   host = 'http://192.168.1.134:3000/',
+	host = 'http://192.168.1.134:3000/',
 //	host = 'http://192.168.15.135:3000/',
-	 host = 'http://192.168.1.115:3000/',
+//	 host = 'http://192.168.1.115:3000/',
 	//  host = 'http://192.168.43.154:3000/',
 	port = 3000,
 	options = {

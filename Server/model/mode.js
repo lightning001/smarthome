@@ -9,8 +9,9 @@ var schemaMode = new mongoose.Schema({
   circle : {type : []},
   starttime : {type : Number},
   stoptime : {type : Number}
+}, { toJSON : {virtuals: true}});
 
-});
+schemaMode.virtual('listModeDetail', {ref : 'ModeDetail', localField : '_id', foreignField : 'mode', justOne : false});
 
 var Mode = conn.model('Mode', schemaMode, 'MODE');
 

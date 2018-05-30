@@ -1,0 +1,86 @@
+<!DOCTYPE html">
+<html>
+
+<head>
+	<% include ./partials/head %>
+<title><%=mode.mode_name%> - Mode</title>
+<link href="/css/switch.css" rel="stylesheet">
+</head>
+
+<body>
+	<% include ./partials/header %>
+	<div class="container-fluid main">
+		<div class="row">
+			<div>
+				<div class="well panel panel-warning">
+				<% var starttime = mode.starttime/3600 +':'+mode.starttime%3600/60 +':' +mode.starttime%3600%60;
+				var stoptime = mode.stoptime/3600 +':'+mode.stoptime%3600/60 +':' +mode.stoptime%3600%60;
+				%>
+					<div class="panel-body">
+						<div class="col-xs-10">
+					<span style="font-size: 25px;"> <%=mode.mode_name%></span>
+				</div>
+				<div>
+					<label class="switch">
+						<input type="checkbox" <%if(mode.status==true){%>checked<%}%>>
+						<span class="slider round"></span>
+					</label>
+				
+							<button class="btn btn-default pull-right" id="btnEdit" title="Edit room">Edit</button>
+							<button class="btn btn-success pull-right" id="btnSave" title="Done">Done</button>
+						</div>
+						<div><span class="bold uppercase col-xs-4">Start time: </span>
+							<%=starttime %>
+						</div>
+						<div><span class="bold uppercase col-xs-4">Stop time: </span>
+							<%=starttime %>
+						</div>
+						<div class="bold uppercase col-xs-12">Repeat: </div>
+						<ol>
+						<%for(var i=0;i<mode.circle.length; i++){%>
+							<li class="badge badge-warning">
+								<%=mode.circle[i]%>
+							</li>
+						<%}%>
+						</ol>
+						<div>
+						<%if(mode.listModeDetail!=null && mode.listModeDetail.length>0){
+							mode.listModeDetail.forEach(function(device){
+						%>
+							<div class="col-lg-2 col-md-2 col-sm-3 col-xs-4">
+						<div class="thumbnail" onclick="img_click(this)">
+							<i class="fa fa-times-circle fa-2x close" onclick="remove_device(this)"></i>
+							<input type="hidden" value="<%=device.device._id%>">
+							<img src="<%=device.device.device.img%>" style="width:100%" class="img-circle <%if(device.device.status==false){%>item-off<%}%>">
+							<figcaption class="text-border caption"><%=device.device.device_name%></figcaption>
+						</div>
+					</div>
+						<%});}else{%>
+							
+						<%}%>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<% include ./partials/footer %>
+	<script>
+	$(document).ready(function(){
+		$(".close").hide();
+		$("#btnSave").hide();
+	});
+	$('#btnEdit').click(function(){
+		$(".close").show();
+		$("#btnSave").show();
+		$('#btnEdit').hide();
+	});
+	$("#btnSave").click(function(){
+		$(".close").hide();
+		$("#btnSave").hide();
+		$('#btnEdit').show();
+	});
+	</script>
+</body>
+
+</html>

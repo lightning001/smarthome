@@ -4,43 +4,35 @@
 <head>
 	<% include ./partials/head %>
 		<link rel="stylesheet" href="/css/home.css">
-		<title>Home</title>
+		<title>Room</title>
 </head>
 
 <body>
 	<% include ./partials/header %>
-		<div class="space-medium">
-			<div class="container main">
-				<div class="jumbotron">
-					<div class="row">
-						<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-							<% if(req.session.authentication != true || req.session.user ==null){%>
-								<!--login-form-->
-								<% include login%>
-									<%}else{
-						var listRoom = req.session.user.listRoom;
-						listRoom.forEach(function(room){ %>
-
-										<a>
-											<div class="col-lg-4 col-md-4 col-sm-4 cl-xs-12">
-												<div class="panel panel-default">
-													<div class="panel-body"><img src="<%=room.img%>" alt="room" class="img img-responsive"></div>
-													<div class="panel-footer">
-														<%=room.room_name%>
-													</div>
-												</div>
-											</div>
-										</a>
-
-										<% });}%>
-
-
-						</div>
-					</div>
-				</div>
+	<div class="container main">
+		<div class="row">
+		<% 	for(var i =0; i<listRoom.length; i++){
+				var room = listRoom[i];
+				var name = '';
+				if(room.room_name.length < 30){
+					name = room.room_name;
+				}else{
+					name = room.room_name.substring(0, 25)+'...';
+				}
+				%>
+			<div class="col-md-3 col-xs-6 col-sm-4">
+			<div class="thumbnail">
+				<a href="/room/<%=room._id%>">
+					<img src="<%= room.img %>" alt="room" style="width:100%; min-height: 17vw" class="img-room img img-circle">
+					<div class="caption text-center text-border"><font style="font-size: 21px;"><%=name%></font></div>
+				</a>
 			</div>
+			</div>
+		<%}%>
 		</div>
-		<% include ./partials/footer %>
+		<a class="label" href="/room/add"><i class="fa fa-plus fa-4x btn btn-add"></i></a>
+	</div>
+	<% include ./partials/footer %>
 </body>
 
 </html>

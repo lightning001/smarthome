@@ -34,8 +34,11 @@
 									<i class="fa fa-google"></i><a href="#" class="google-btn-text">Google</a>
 								</div>
 							</div>
+							<% if(message){%>
+								<p><%=message%></p>
+							<%}%>
 							<div class="row">
-								<form method="post" action="/user/register" enctype="multipart/form-data" id="formRegister">
+								<form method="post" action="/register" enctype="multipart/form-data" id="formRegister">
 
 									<div class="col-lg-12 col-md-12 col-sm-6 col-xs-12">
 										<div class="form-group">

@@ -1,4 +1,5 @@
 var Mode = require('../model/mode');
+var DeviceInRoom = require('../model/device_in_room');
 const msg = require('../msg').en;
 const config = require('../util/config');
 var jwt = require('jsonwebtoken');
@@ -13,6 +14,7 @@ Mode.findBy_ID = (token, _id) =>{
 				return reject({'success': false, 'message': msg.error.verify});
 			}
       Mode.findById(new mongoose.Types.ObjectId(_id)).
+	  populate('listModeDetail').
       exec((error2, data2) => {
         if(error2){
           console.log(error2);
@@ -23,6 +25,36 @@ Mode.findBy_ID = (token, _id) =>{
         }
       });
   });});
+}
+
+Mode.getFullDetail = (token, _id)=>{
+	return new Promise((resolve, reject)=>{
+		jwt.verify(token, config.secret_key, (error, decode) => {
+			if(error){
+				return reject({'success': false, 'message': msg.error.verify});
+			}
+			Mode.findById(new mongoose.Types.ObjectId(_id)).
+			populate({
+				path: 'listModeDetail',
+				populate:{
+					path: 'device',
+					populate : {
+						path: 'device',
+						select: 'img'
+					}
+				}
+			}).
+			exec((error2, data2) => {
+			if(error2){
+			  console.log(error2);
+			  return reject({'success': false, 'message': msg.error.occur});
+			} else if (!error2 && data2) {
+			  console.log(data2);
+			  return resolve({'success': true,  'result' : data2});
+			}
+		});
+  		});
+	});
 }
 
 Mode.findByUser = (token, id_user) =>{

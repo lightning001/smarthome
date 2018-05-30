@@ -1,0 +1,39 @@
+<!DOCTYPE html">
+<html>
+<head>
+<% include ./partials/head %>
+<link rel="stylesheet" href="/css/home.css">
+<% if(alertmessage!=null && alertmessage.length>0){%>
+<script>
+$(document).ready(function(){
+	alert('<%=alertmessage%>');
+});
+</script>
+<%}%>
+<title>Active account</title>
+</head>
+<body>
+	<% include ./partials/header %>
+	<div class="space-medium">
+		<div class="container-fluid main">
+			<div class="well panel col-xs-8">
+				<div class="panel-heading">
+					<h3>Activate Account</h3>
+				</div>
+				<div class="panel-body">
+					<%if(checkemail && checkemail.length >0){%>
+					<div class="alert alert-success"  role="alert">We have sent you an activation code. Please check your email!</div>
+					<%}%>
+					<p>Hi <%=name%>,</p>
+					<p>Thank you for your trust and use our services. To use our features, you need to activate this account.</p>
+					<p> We will send you an activation code via email that you have registered</p>
+					<form method="post" action="/activeaccount">
+					<input type="submit" class="btn btn-primary btn-sm" value="Activate">
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	<% include ./partials/footer %>
+</body>
+</html>

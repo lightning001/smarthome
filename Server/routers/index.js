@@ -1,6 +1,13 @@
 var express = require('express'),
 	jwt = require('jsonwebtoken'),
+	path = require('path'),
 	url = require('url'),
+	msg = require('../msg');
+	mUser = require('../control/User'),
+	mMode = require('../control/Mode'),
+	mRoom = require('../control/Room'),
+	mModeDetail = require('../control/ModeDetail'),
+	mDeviceInRoom = require('../control/DeviceInRoom'),
 	config = require('../util/config');
 
 
@@ -21,97 +28,20 @@ router.get('/', (req, res) => {
 					}
 				});
 			}
-
 		}
 	}
-	console.log('Session index: '+ JSON.stringify(req.session));
-	res.render('user_views/home', {
-		'req': req,
-		'res': res
-	});
+	if (req.session.user != null) {
+		res.redirect('/room');
+	} else {
+		res.render('user_views/home', {req : req, res : res, messages: req.flash('failureLogin'), alertmessage : req.flash('alertmessage')});
+	}
 });
+
 /**
  * error
  */
 router.get('/error', (req, res) => {
-	if (req.session.authentication == null | false) {
-		res.redirect('/');
-	}
-	let error = req.query;
-	res.render('user_views/error', {
-		error: error.error,
-		status: error.status,
-		content: error.content | error.message,
-		res: res,
-		req: req
-	});
-});
-
-router.get('/profile', (req, res, next) => {
-	if (req.session.authentication == null | false || req.session.user == null) {
-		res.redirect('/');
-	}
-	res.render('user_views/profile', {
-		'req': req,
-		'res': res
-	});
-});
-
-router.get('/login', (req, res) => {
-	res.render('user_views/home', {
-		'req': req,
-		'res': res
-	});
-});
-
-router.get('/logout', (req, res) => {
-	if (req.session.authentication == null | false) {
-		res.redirect('/');
-	}
-	req.session.user = null;
-	req.session.authentication = false;
-	res.redirect('/');
-//	req.session.destroy(function (err) {
-//		console.log('Just Logout');
-//		res.redirect('/');
-//	})
-});
-
-router.get('/register', (req, res, next) => {
-	res.render('user_views/register', {
-		'req': req,
-		'res': res
-	});
-});
-
-router.get('/thankyou', (req, res) => {
-	if (req.session.authentication != null | false) {
-		res.redirect('/');
-	}
-	res.render('user_views/thankyou', {
-		'req': req,
-		'res': res
-	});
-});
-
-router.get('/mode', (req, res) => {
-	if (req.session.authentication == null | false) {
-		res.redirect('/');
-	}
-	res.render('user_views/mode', {
-		'req': req,
-		'res': res
-	});
-});
-
-router.get('/device', (req, res) => {
-	if (req.session.authentication == null | false) {
-		res.redirect('/');
-	}
-	res.render('user_views/device', {
-		'req': req,
-		'res': res
-	});
+	res.render('user_views/error', {req : req, res : res, errormessage : req.flash('error')});
 });
 
 router.get('/camera', (req, res) => {
@@ -122,12 +52,6 @@ router.get('/camera', (req, res) => {
 		'req': req,
 		'res': res
 	});
-});
-
-
-router.get('/' + config.confirm_register_path + '/:encode', (req, res) => {
-	let encode = req.params.data;
-	mUser.responseConfirm(encode, req, res);
 });
 
 module.exports = exports = router;

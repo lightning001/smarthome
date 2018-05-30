@@ -8,12 +8,62 @@
 <body>
 	<% include ./partials/header %>
 	<div class="container main">
-		<div class="row">
-			<div class="col-md-4" style="background: red; min-height: 15px;">
+		<div class="well">
+			<div class="row">
+				<div class="col-xs-12">
+					<button class="btn btn-default pull-right" id="btnEdit" title="Edit room">Edit</button>
+					<button class="btn btn-success pull-right" id="btnSave" title="Done">Done</button>
+				</div>
+				<%listDevice.forEach(function(device){%>
+				<div class="col-lg-2 col-md-2 col-sm-3 col-xs-4">
+					<div class="thumbnail" onclick="img_click(this)">
+						<i class="fa fa-times-circle fa-2x close" onclick="remove_device(this)"></i>
+						<input type="hidden" value="<%=device._id%>">
+						<img src="<%=device.device.img%>" style="width:100%" class="img-circle<%if(device.status==false){%> item-off<%}%>">
+						<figcaption class="text-border caption"><%=device.device_name%></figcaption>
+					</div>
+				</div>
+				<%});%>
 			</div>
-			<div class="col-md-8" style="background: blue; min-height: 15px;"></div>
 		</div>
 	</div>
 	<% include ./partials/footer %>
+	<script>
+	$(document).ready(function(){
+		$(".close").hide();
+		$("#btnSave").hide();
+	});
+	$('#btnEdit').click(function(){
+		$(".close").show();
+		$("#btnSave").show();
+		$('#btnEdit').hide();
+	});
+	$("#btnSave").click(function(){
+		$(".close").hide();
+		$("#btnSave").hide();
+		$('#btnEdit').show();
+	});
+		
+	
+	function remove_device(e){
+		var item = $(e).parent();
+		item.off('click');
+		$.ajax({
+			url: '/device/delete',
+			type: 'DELETE',
+			data: {'id': item.children('input').val()},
+			success: function(data){
+				if(data.success==true){
+					item.remove();
+				}else{
+					alert(data.message);
+				}
+			},
+			error: function(){
+				alert('Error! An error occurred. Please try again later');
+			}
+		});
+	}
+	</script>
 </body>
 </html>

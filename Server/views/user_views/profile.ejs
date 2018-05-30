@@ -40,7 +40,7 @@
 							</div>
 						</div>
 						<div>
-						<form class="form-horizontal" action="/user/editprofile" method="post" id="editProfileForm">
+						<form class="form-horizontal" action="/profile" method="post" id="editProfileForm">
 							<ul class="list-group">
 								<li class="list-group-item form-group"><label class="control-label col-sm-4">Name <sup style="color : red">*</sup>: </label>
 									<div class="col-sm-8"> <input type="text" class="form-control edit-in-list" id="edtName" name="name" value="<%=user.name%>" required></div>
@@ -70,7 +70,7 @@
 							</div>
 						</form>
 						</div>
-						<form class="form-horizontal" method="post" action="/user/changepassword" id="changePasswordForm">
+						<form class="form-horizontal" method="post" action="/changepassword" id="changePasswordForm">
 							<ul class="list-group">
 								<li class="list-group-item form-group"><label class="control-label col-sm-4">Current Password: </label>
 									<div class="col-sm-8"> <input type="password" class="form-control" name="currentPassword" required></div>

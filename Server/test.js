@@ -1,46 +1,46 @@
-'use strict'
-var express = require('express'),
-	session = require('express-session'),
-	app = express(),
-	server = require('http').createServer(app),
-	io = require('socket.io')(server),
-	bodyParser = require('body-parser'),
+require('./model/Mode');
+require('./model/Device');
+require('./model/Room');
+require('./model/mode_detail')
+require('./model/device_in_room')
+var mMode = require('./control/Mode');
+var User = require('./control/user'),
+	jwt = require('jsonwebtoken'),
 	config = require('./util/config'),
-	path = require('path'),
-	port = process.env.PORT || 3000,
-	timeout = 500;
-	
-app.use(express.static(path.join(__dirname, '/public')));
-app.use(session({secret : config.secret_key, cookie : {}}));
-app.use(bodyParser.urlencoded({extended: true}));
-app.use(bodyParser.json());
-app.set('view engine', 'ejs');
-app.set('views', [	path.join(__dirname + '/views'), 
-					path.join(__dirname + '/views/user_views'), 
-					path.join(__dirname + '/views/management'),
-					path.join(__dirname + '/views/partials')]);
-app.use(function(req, res, next) {
-	if(req.headers && req.headers.authorization &&	req.headers.authorization.split(' ')[0] === 'JWT') {
- 		jsonwebtoken.verify(req.headers.authorization.split(' ')[1],
- 		config.secret_key, function(err, decode) {
- 			if (err) req.user = undefined;
- 			req.user = decode;
- 			next();
- 		});
- 	} else {
- 		req.user = undefined;
- 		next();
- 	}
-});
+	mongoose = require('mongoose');
 
+//
+//jwt.verify("eyJhbGciOiJIUzI1NiJ9.NWFiMzMzMzAzOGI5MDQzZTQwOTVmZjg0.EnVjo5H02UHuVQqeJvrEfCxyA1CZnaaloJlEVc8T0kE", config.secret_key, (error, data) => {
+//	if (error) {
+//		console.log(error);
+//	} else {
+//		console.log('token: '+data);
+//		User.findById(new mongoose.Types.ObjectId(data), {
+//			password: 0
+//		}).
+//		populate('listMode').
+//		populate('listRoom').
+//		exec((error2, data2) => {
+//			if (error2) {
+//				console.log(error2);
+//			} else if (!error2 && data2) {
+//				console.log(data2);
+//			}
+//		});
+//
+//	}
+//});
 
-var userRouter = require('./routers/user'),
-	indexRouter = require('./routers/index');
+//var d1 = new Date('2018-05-29 10:10:00.000+07:00');
+//var d2 = new Date('2018-05-29 00:10:00.000+07:00');
+//let a = 
+//console.log(d1.getTime() - d2.getTime());
+//console.log('-----------------------------');
+//User.verifyResetPassword('linhdanit1512@gmail.com', '210027').then(
+//(data)=> console.log(JSON.stringify(data)), (e)=>console.log(JSON.stringify(e))
+//);
+//
+//console.log('type date: '+ new Date() instanceof Date);
 
-app.use('/user', userRouter);
-app.use('/', indexRouter);
-require('./msocket')(io);
-
-server.listen(port, function() {
-	console.log("Waiting statement...");
-});
+mMode.getFullDetail('eyJhbGciOiJIUzI1NiJ9.NWFiMzMzMzAzOGI5MDQzZTQwOTVmZjg0.EnVjo5H02UHuVQqeJvrEfCxyA1CZnaaloJlEVc8T0kE','5ab47f0d52b9ed7bf00ed1c6').then(
+data =>console.log(JSON.stringify(data)), e=>console.log(JSON.stringify(e)));
