@@ -171,20 +171,6 @@ getImageName = (id) => {
 	return id + new Date().getTime() + '.png';
 }
 
-upfile = (img) => {
-	if (img == null)
-		return null;
-	if (typeof img == 'string' && data.img != '')
-		return img;
-	else if (img == '') {
-		return null;
-	} else if (typeof img == Buffer | Byte) {
-		let fileName = getImageName(randomstring.generate(20));
-		fs.writeFile('public/' + config.upload_path + fileName, data.img);
-		return config.host + config.upload_path + fileName;
-	}
-}
-
 Room.mInsert = (token, data) => {
 	return new Promise((resolve, reject) => {
 		jwt.verify(token, config.secret_key, (error, decode) => {
@@ -197,14 +183,13 @@ Room.mInsert = (token, data) => {
 			let mRoom = new Room();
 			mRoom.id_user = new mongoose.Types.ObjectId(data.user);
 			mRoom.room_name = data.room_name;
-			//		if (typeof data.img == 'string' && data.img != '')
-			//			mRoom.img = data.img;
-			//		else if(data.img instanceof Buffer){
-			//			let fileName = getImageName(randomstring.generate(20));
-			//			fs.writeFile('public/'+config.upload_path + fileName, data.img);
-			//			mRoom.img = config.host +config.upload_path+ fileName;
-			//		}
-			mRoom.img = upfile(data.img);
+			if (typeof data.img == 'string' && data.img != '')
+				mRoom.img = config.host +config.upload_path + data.img;
+			else if(data.img instanceof Buffer){
+				let fileName = getImageName(randomstring.generate(20));
+				fs.writeFile('public/'+config.upload_path + fileName, data.img);
+				mRoom.img = config.host +config.upload_path+ fileName;
+			}
 			mRoom.save((error2, docs) => {
 				if (error2) {
 					console.log(error2);
@@ -241,7 +226,13 @@ Room.mUpdate = (token, data) => {
 					'message': msg.error.verify
 				});
 			} else {
-				data.img = upfile(img);
+				if (typeof data.img == 'string' && data.img != '')
+					data.img = config.host +config.upload_path + data.img;
+				else if(data.img instanceof Buffer){
+					let fileName = getImageName(randomstring.generate(20));
+					fs.writeFile('public/'+config.upload_path + fileName, data.img);
+					data.img = config.host +config.upload_path+ fileName;
+				}
 				console.log('Update: '+JSON.stringify(data));
 				Room.update({
 					'_id': new mongoose.Types.ObjectId(data._id),

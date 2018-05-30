@@ -100,5 +100,3 @@ Email.thankConfirmRegister = (email) => {
 }
 
 module.exports = exports = Email;
-// Email.confirmEmail('wintersoul1212@gmail.com', 'http://facebook.com');
-// sendMail('Smart Home', 'wintersoul1212@gmail.com', 'Test Node Mailer', '<div>Ahoho</div>');

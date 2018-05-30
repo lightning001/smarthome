@@ -115,6 +115,7 @@ router.post('/add', (req, res)=>{
 		}).on('end', function() {
 			fields.img = img;
 			fields.user = req.session.user._id;
+			console.log(JSON.stringify(fields));
 			mRoom.mInsert(req.session.usertoken, fields).then((insert) => {
 				console.log('Insert: ' + JSON.stringify(insert));
 				res.redirect('/room');

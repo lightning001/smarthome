@@ -8,7 +8,7 @@ var User = require('./control/user'),
 	jwt = require('jsonwebtoken'),
 	config = require('./util/config'),
 	mongoose = require('mongoose');
-
+console.log(config.database)
 //
 //jwt.verify("eyJhbGciOiJIUzI1NiJ9.NWFiMzMzMzAzOGI5MDQzZTQwOTVmZjg0.EnVjo5H02UHuVQqeJvrEfCxyA1CZnaaloJlEVc8T0kE", config.secret_key, (error, data) => {
 //	if (error) {
@@ -42,5 +42,5 @@ var User = require('./control/user'),
 //
 //console.log('type date: '+ new Date() instanceof Date);
 
-mMode.getFullDetail('eyJhbGciOiJIUzI1NiJ9.NWFiMzMzMzAzOGI5MDQzZTQwOTVmZjg0.EnVjo5H02UHuVQqeJvrEfCxyA1CZnaaloJlEVc8T0kE','5ab47f0d52b9ed7bf00ed1c6').then(
-data =>console.log(JSON.stringify(data)), e=>console.log(JSON.stringify(e)));
+//mMode.getFullDetail('eyJhbGciOiJIUzI1NiJ9.NWFiMzMzMzAzOGI5MDQzZTQwOTVmZjg0.EnVjo5H02UHuVQqeJvrEfCxyA1CZnaaloJlEVc8T0kE','5ab47f0d52b9ed7bf00ed1c6').then(
+//data =>console.log(JSON.stringify(data)), e=>console.log(JSON.stringify(e)));
