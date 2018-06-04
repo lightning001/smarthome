@@ -9,6 +9,8 @@ var schemaRoom = new mongoose.Schema({
   img: {type: String, default: 'https://image.ibb.co/nJfnon/room.png'}
 },{ toJSON : {virtuals: true}});
 
+schemaRoom.virtual('listDevice', {ref : 'DeviceInRoom', localField : '_id', foreignField : 'room', justOne : false});
+
 var Room = conn.model('Room', schemaRoom, 'ROOM');
 
 module.exports = exports = Room;

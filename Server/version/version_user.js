@@ -24,20 +24,7 @@ var schemaVersionUser = new mongoose.Schema({
 
 var VersionUser = conn.model('VersionUser', schemaVersionUser, 'VERSIONUSER');
 
-VersionUser.countvsUser = (user_id)=>{
-  return new Promise((resolve, reject)=>{
-    VersionUser.count({'user_id' : new mongoose.Types.ObjectId(user_id)}, (err, count)=>{
-      if(err) {
-        console.log(err);
-        reject(1);
-      } else {
-        resolve(count);
-      }
-    });
-  });
-}
-
-VersionUser.mInsert = async (data) =>{
+VersionUser.mInsert = (data) =>{
   let mUser = new VersionUser();
   mUser.user_id = data.user_id;
   mUser.email = data.email;
@@ -54,13 +41,7 @@ VersionUser.mInsert = async (data) =>{
   mUser.status = data.status;
   mUser.startdateregister = data.startdateregister;
   mUser.img = data.img;
-  var version = 1;
-  try {
-    version = await VersionUser.countvsUser(data.user_id);
-  }catch(err){
-    console.log(err);
-  }
-  mUser.version = version + 1;
+  mUser.version = data.__v +1;
   mUser.save((err)=>{
     if(err){
       console.log(err);

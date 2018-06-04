@@ -15,7 +15,8 @@ var en = {
 		verify: 'We can not verify. Please try again',
 		incorrect_password: 'Your current password enter is incorrected',
 		forgetcode : 'Verify code is incorrect',
-		timeout : 'This request has expired'
+		timeout : 'This request has expired',
+		login_3: 'You entered more than 3 times incorrectly, please try again in 15 minutes'
 	},
 	success: {
 		confirm_register: 'We have sent to you an activation code.. Please check your email to activate your account'
@@ -46,7 +47,8 @@ var vi = {
 		verify: 'Xác thực không thành công, vui lòng thực hiện lại',
 		incorrect_password: 'Mật khẩu hiện tại không đúng',
 		forgetcode : 'Mã xác thực không chính xác',
-		timeout : 'Yêu cầu thực hiện này bị quá hạn'
+		timeout : 'Yêu cầu thực hiện này bị quá hạn',
+		login_3: 'Bạn đã nhập sai quá 3 lần, vui lòng thực hiện lại sau 15 phút'
 	},
 	success: {
 		confirm_register: 'Quý khách đã gửi yêu cầu xác nhận email thành công. Vui lòng kiểm tra email để kích hoạt tài khoản'

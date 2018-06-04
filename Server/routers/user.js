@@ -1,24 +1,22 @@
+
+/**
+============  USER  ====================================================
+*/
+//module.exports = exports = function userRouter(Passport){
 var mUser = require('../control/user'),
 	config = require('../util/config'),
 	msg = require('../msg').en,
 	express = require('express'),
 	md5 = require('md5'),
+	{authenticated} = require('./authenticated'),
 	base64url = require('base64url'),
-	fs = require('fs'),
-	url = require('url'),
-	path = require('path'),
 	formidable = require('formidable'),
 	randomstring = require("randomstring"),
-	jwt = require('jsonwebtoken');
-userRouter = express.Router();
+	jwt = require('jsonwebtoken'),
+	userRouter = express.Router();
 
-/**
-============  USER  ====================================================
-*/
-
-
-userRouter.get('/profile', (req, res, next) => {
-	if (req.session.authentication == null | false || req.session.user == null) {
+userRouter.get('/profile', authenticated, (req, res) => {
+	if (req.session.authentication == null | false) {
 		res.redirect('/');
 	}else{
 		res.render('user_views/profile', {
@@ -28,16 +26,13 @@ userRouter.get('/profile', (req, res, next) => {
 	}
 });
 
-userRouter.get('/login', (req, res) => {
-	res.redirect('/');
-});
-
-userRouter.get('/logout', (req, res) => {
+userRouter.get('/logout', authenticated, (req, res) => {
 	if (req.session.authentication == null | false) {
 		res.redirect('/');
 	}
 	req.session.user = null;
 	req.session.authentication = false;
+	res.clearCookie("token");
 	res.redirect('/');
 });
 
@@ -50,7 +45,7 @@ userRouter.get('/register', (req, res, next) => {
 });
 
 userRouter.get('/active', (req, res)=>{
-	if ((req.session.authentication != null && req.session.authentication != false) ||(req.session.user_name == null ||req.session.user_name == undefined)) {
+	if (req.session.authentication == true && (req.session.user_name == null ||req.session.user_name == undefined)){
 		res.redirect('/');
 	}else{
 		res.render('user_views/activatedaccount', {
@@ -64,14 +59,7 @@ userRouter.get('/active', (req, res)=>{
 });
 
 userRouter.get('/thankyou', (req, res) => {
-	if (req.session.authentication != null | false) {
-		res.redirect('/');
-	}else{
-		res.render('user_views/thankyou', {
-			'req': req,
-			'res': res
-		});
-	}
+	res.render('user_views/thankyou', {'req': req,'res': res});
 });
 
 userRouter.get('/' + config.confirm_register_path + '/:encode', (req, res) => {
@@ -81,7 +69,7 @@ userRouter.get('/' + config.confirm_register_path + '/:encode', (req, res) => {
 	if(req.session.user_email!=null)
 		req.session.user_email = null;
 	mUser.responseConfirm(encode, req, res);
-	
+
 });
 
 userRouter.post('/register', function (req, res) {
@@ -90,35 +78,35 @@ userRouter.post('/register', function (req, res) {
 	form.encoding = 'utf-8';
 	form.maxFieldSize = 10 * 1024 * 1024; //10MB
 	form.keepExtensions = true;
-	
+
 	let files = {},
 		img ='',
 		fields = {};
 	form.on('field', (field, value)=>{
 		console.log('got field ', field, value);
-        fields[field] = value;
+		fields[field] = value;
 	}).on ('fileBegin', function(name, file){
 		img = randomstring.generate(10) + new Date().getTime() + '_' + file.name;
-        file.path = form.uploadDir +'/'+ img;
-    }).on('file', function(field, file) {
-        console.log('got file ', file);
-        files[field] = file;
-    }).on('progress', function (bytesReceived, bytesExpected) {
-        console.log('progress ', bytesReceived, bytesExpected);
-        if (bytesReceived > form.maxFieldsSize) {
-            console.log('Max size reached');
-            req.connection.destroy();
-        }   
-    }).on('error', function(err) {
-        console.log('error', err);
-    }).parse(req, function(err, fields, files) {
-        console.log('in parse ', fields, files);	
+		file.path = form.uploadDir +'/'+ img;
+	}).on('file', function(field, file) {
+		console.log('got file ', file);
+		files[field] = file;
+		if(file.size==0)img='';
+	}).on('progress', function (bytesReceived, bytesExpected) {
+		console.log('progress ', bytesReceived, bytesExpected);
+		if (bytesReceived > form.maxFieldsSize) {
+			console.log('Max size reached');
+			req.connection.destroy();
+		}   
+	}).on('error', function(err) {
+		console.log('error', err);
+	}).parse(req, function(err, fields, files) {
+		console.log('in parse ', fields, files);	
 	}).on('end', function() {
-        console.log('upload ended', fields, files);
-		
+		console.log('upload ended', fields, files);
 		fields.img = img;
 		fields.password = md5(fields.password);
-       	mUser.mInsert(fields).then((insert) => {
+		mUser.mInsert(fields).then((insert) => {
 			console.log('Insert: ' + JSON.stringify(insert));
 			res.redirect('/');
 		}, (e) => {
@@ -126,56 +114,53 @@ userRouter.post('/register', function (req, res) {
 			req.flash('failureRegister', e.message);
 			res.redirect('/error');
 		});
-    });
+	});
 });
 
 userRouter.post('/login', async function(req, res){
+	if(req.session.loginRequestCount >=3){
+		req.flash('failureLogin', msg.error.login_3);
+		return res.redirect('/');
+	}
 	console.log('Request login: ' + JSON.stringify(req.body));
 	let pass = req.body.password + "";
-	await mUser.login(req.body.email, md5(pass)).then(
-	async (user)=>{
-		console.log('Token: '+user.token);
-		await mUser.byToken(user.token).then(
-		(data) =>{
-			if(data.result.status =='Active'){
-				req.session.authentication = true;
-				req.session.usertoken = user.token;
-				if (req.body.remember == 'on') {
-					console.log('remember me');
-					req.session.cookie.maxAge = 365 * 24 * 60 * 60 * 1000;
-				}
-				req.session.user = data.result;
-				console.log('login successfully');
-				res.redirect('/');
-			}else if(data.result.status =='Block'){
-				req.flash('alertmessage', 'Your account is blocked');
-				res.redirect('/');
-			}else if(data.result.status == 'Pending'){
-				req.session.user_name = data.result.name;
-				req.session.user_email = data.result.email;
-				res.redirect('/active');
+	mUser.login(req.body.email, md5(pass)).then(
+	(user)=>{
+		req.session.usertoken = user.token;
+		req.session.authentication = true;
+		let options = {};
+		if(req.body.remember=='on'){
+			options = {
+				httpOnly : true,
+				maxAge: 1000 * 60 * 60 * 365
 			}
-			
-		}, (e) =>{
-			console.log('Verify: '+JSON.stringify(e));
-			req.flash('failureLogin', e.message);
-			res.redirect('/');
-		});
+		}else{
+			options = {
+				httpOnly : true,
+			}
+		}
+		res.cookie('token', user.token, options);
+		console.log('Success login');
+		res.redirect('/');
 	}).catch((e)=>{
-		console.log(e);
+		console.log('Login error: '+e);
+		if(req.session.loginRequestCount ==null){
+			req.session.loginRequestCount = 0;
+		}
+		req.session.loginRequestCount +=1;
 		req.flash('failureLogin', e.message);
 		res.redirect('/');
 	});
 });
 
 
-/**Forget Password:
-Search Email 		-> Xác nhận email 		-> 	Nhập number code 	-> Nhập pass mới
-	- Server kiểm tra	- Server gửi email + numbercode		- Server kiểm tra 		- Chuyển trang đăng nhập
-*/
+	/**Forget Password:
+	Search Email 		-> Xác nhận email 		-> 	Nhập number code 	-> Nhập pass mới
+		- Server kiểm tra	- Server gửi email + numbercode		- Server kiểm tra 		- Chuyển trang đăng nhập
+	*/
 userRouter.get('/recover/password', function(req, res){
 	console.log('Request forget password');
-	if (req.session.authentication != null && req.session.authentication ==true) {
+	if (req.session.authentication == null | false) {
 		res.redirect('/');
 	}else{
 		res.render('form/searchforgetpassword', {req : req, res : res, message : req.flash('findEmail'), 
@@ -185,7 +170,7 @@ userRouter.get('/recover/password', function(req, res){
 
 userRouter.post('/recover/password', function(req, res){
 	console.log('Search Email' + req.body.email);
-	if (req.session.authentication != null && req.session.authentication ==true) {
+	if (req.session.authentication == null | false) {
 		res.redirect('/');
 	}else{
 		let email = req.body.email;
@@ -205,7 +190,7 @@ userRouter.post('/recover/password', function(req, res){
 
 userRouter.get('/recover/passwordsend', function(req, res){
 	console.log('Confirm find email')
-	if (req.session.authentication != null && req.session.authentication ==true) {
+	if (req.session.authentication == null | false) {
 		res.redirect('/');
 	}else{
 		let email = (req.session.forgetPasswordEmail).substr(0,2)+ '***@******';
@@ -215,7 +200,7 @@ userRouter.get('/recover/passwordsend', function(req, res){
 
 userRouter.post('/recover/passwordsend', function(req, res){
 	console.log('Send email to reset pass');
-	if (req.session.authentication != null && req.session.authentication ==true) {
+	if (req.session.authentication == true) {
 		res.redirect('/');
 	}else{
 		let email = req.session.forgetPasswordEmail;
@@ -235,7 +220,7 @@ userRouter.post('/recover/passwordsend', function(req, res){
 
 userRouter.get('/recover/password/:encode', function(req, res){
 	console.log('enter verify code');
-	if (req.session.authentication != null && req.session.authentication ==true) {
+	if (req.session.authentication == true) {
 		res.redirect('/');
 	}else{
 		let encode = req.params.encode;
@@ -259,7 +244,7 @@ userRouter.get('/recover/password/:encode', function(req, res){
 
 userRouter.post('/recover/passwordverify', function(req, res){
 	console.log('check verify code');
-	if ((req.session.authentication != null && req.session.authentication ==true) || req.session.encodeResetPassword ==null) {
+	if (req.session.authentication == true || req.session.encodeResetPassword ==null) {
 		res.redirect('/');
 	}else{
 		let code = req.body.verifycode;
@@ -283,7 +268,7 @@ userRouter.post('/recover/passwordverify', function(req, res){
 
 userRouter.get('/recover/newpassword', function(req, res){
 	console.log('enter new password');
-	if ((req.session.authentication != null && req.session.authentication ==true) || req.session.forgetPasswordEmail == null || req.session.encodeResetPassword ==null) {
+	if ((req.session.authentication==true) || req.session.forgetPasswordEmail == null || req.session.encodeResetPassword ==null) {
 		res.redirect('/');
 	}else{
 		res.render('form/newpassword', {req: req, res : res});
@@ -292,7 +277,7 @@ userRouter.get('/recover/newpassword', function(req, res){
 
 userRouter.post('/recover/resetpassword', function(req, res){
 	console.log('complete reset password');
-	if ((req.session.authentication != null && req.session.authentication ==true) || req.session.encodeResetPassword ==null) {
+	if (req.session.authentication == null | false || req.session.encodeResetPassword ==null) {
 		res.redirect('/');
 	}else{
 		let email = req.session.forgetPasswordEmail,
@@ -312,9 +297,9 @@ userRouter.post('/recover/resetpassword', function(req, res){
 
 userRouter.post('/activeaccount', function(req, res){
 	console.log('Activated account');
-	
+
 	let email = req.session.user_email;
-	mUser.confirmRegister({email: email}).then(
+	mUser.confirmRegister(req.session.usertoken, {email: email}).then(
 	(data)=>{
 		req.flash('checkemail', data.message);
 		res.redirect('/active');
@@ -322,11 +307,11 @@ userRouter.post('/activeaccount', function(req, res){
 		req.flash('error', e.message);
 		res.redirect('/error');
 	});
-	
+
 });
 
-userRouter.post('/changepassword', function (req, res) {
-	if (!req.session.authentication || req.session.usertoken == null | undefined) {
+userRouter.post('/changepassword', authenticated, function (req, res) {
+	if (req.session.authentication == null | false) {
 		console.log('You cannot change, must be authen before!!!');
 		res.redirect('/');
 	} else {
@@ -346,7 +331,7 @@ userRouter.post('/changepassword', function (req, res) {
 });
 
 var editSessionUser = function (req, res, data) {
-	if (req.session != null && req.session.user != null && req.session.authentication == true) {
+	if (req.session.authentication == null | false) {
 		if (data.name != null && data.name != '') {
 			req.session.user.name = data.name;
 		}
@@ -368,32 +353,31 @@ var editSessionUser = function (req, res, data) {
 	}
 }
 
-userRouter.post('/profile', (req, res) => {
-	if (!req.session.authentication || req.session.usertoken == null | undefined) {
+userRouter.post('/profile', authenticated, (req, res) => {
+	if (req.session.authentication == null | false) {
 		console.log('You cannot change, must be authen before!!!');
 		res.redirect('/');
 	} else {
 		let data = new Object();
 		data._id = req.session.user._id,
-			data.email = req.session.user.email,
-			data.name = req.body.name,
-			data.city = req.body.city,
-			data.district = req.body.district,
-			data.street = req.body.street,
-			data.dob = req.body.dob,
-			data.phonenumber = req.body.phonenumber,
-			data.homephone = req.body.homephone;
+		data.email = req.session.user.email,
+		data.name = req.body.name,
+		data.city = req.body.city,
+		data.district = req.body.district,
+		data.street = req.body.street,
+		data.dob = req.body.dob,
+		data.phonenumber = req.body.phonenumber,
+		data.homephone = req.body.homephone;
 		mUser.mUpdate(req.session.usertoken, data).then(
-			(success) => {
-				console.log('Updating information is successful');
-				editSessionUser(req, res, data);
-				return 'Updating information is successful';
+			async (success) => {
+				await mUser.byToken(req.session.usertoken).then(data => req.session.user = data.result).catch(e =>console.log(e));
+				res.redirect('/profile');
 			}, (err) => {
-				console.error('Updating false, ' + err);
-				return err.message;
+				req.flash('error', msg.error.occur);
+				res.redirect('/error');
 			}
 		)
 	}
 });
-
 module.exports = exports = userRouter;
+//}

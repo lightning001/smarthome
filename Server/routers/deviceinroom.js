@@ -1,11 +1,12 @@
 var mDeviceInRoom = require('../control/deviceinroom'),
 	config = require('../util/config'),
+	{authenticated} = require('./authenticated'),
 	msg = require('../msg').en,
 	express = require('express');
 
 var router = express.Router();
 
-router.get('/', (req, res) => {
+router.get('/', authenticated, (req, res) => {
 	if (req.session.authentication == null | false) {
 		res.redirect('/');
 	} else {
@@ -29,7 +30,7 @@ router.get('/', (req, res) => {
 	}
 });
 
-router.post('/turn-on', (req, res) => {
+router.post('/turn-on', authenticated, (req, res) => {
 	if (req.session.authentication == null | false) {
 		res.redirect('/');
 	} else {
@@ -47,7 +48,7 @@ router.post('/turn-on', (req, res) => {
 	}
 });
 
-router.delete('/removeroom', (req, res) => {
+router.delete('/removeroom', authenticated, (req, res) => {
 	if (req.session.authentication == null | false) {
 		res.redirect('/');
 	} else {
@@ -66,7 +67,7 @@ router.delete('/removeroom', (req, res) => {
 	}
 });
 
-router.put('/update', (req, res) => {
+router.put('/update', authenticated, (req, res) => {
 	if (req.session.authentication == null | false) {
 		res.redirect('/');
 	} else {
@@ -86,7 +87,7 @@ router.put('/update', (req, res) => {
 });
 
 
-router.post('/add', (req, res) => {
+router.post('/add', authenticated, (req, res) => {
 	if (req.session.authentication == null | false) {
 		res.redirect('/');
 	} else {
@@ -106,7 +107,7 @@ router.post('/add', (req, res) => {
 });
 
 
-router.delete('/delete', (req, res) => {
+router.delete('/delete', authenticated, (req, res) => {
 	if (req.session.authentication == null | false) {
 		res.redirect('/');
 	} else {

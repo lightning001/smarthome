@@ -2,23 +2,32 @@
 <html>
 
 <head>
-	<% include ./partials/head %>
-		<% var user = req.session.user ;%>
-			<title>
-				<%=user.name %>
-			</title>
+<% include ./partials/head %>
+<% var user = req.session.user ;%>
+<title><%=user.name %></title>
+<%if(alertMessage!=null && alertMessage.length>0){%>
+<script>
+	$(document).ready(function(){
+		alert("<%=alertMessage%>");
+	});
+</script>
+<%}%>
 </head>
 
 <body>
-		<% include ./partials/header %>
+	<% include ./partials/header %>
 	<div class="space-medium">
 		<div class="container-fluid main">
 			<div class="well">
 				<div class="row">
 					<div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
-						<img alt="profile picture" src="<%=user.img%>" class="img img-thumbnail img-responsive" />
+						<div id="profile_img" class="">
+							<i class="fa fa-camera-retro fa-3x text-center img-popup"></i>
+							<input type='file' accept="image/*" style="display: none" onchange="readURL(this);" name="file" form="editProfileForm"/>
+							<img id="image-preview"  class="img img-thumbnail img-room" src="<%=user.img%>%>" alt="your image" />
+						</div>
 						<span class="badge type-user">&nbsp; <%=user.type%> &nbsp;</span>
-					</div>
+						</div>
 					<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
 						<div id="myProfile">
 							<ul class="list-group">
@@ -65,7 +74,7 @@
 								</li>
 							</ul>
 							<div>
-								<input type="button" value="Save" id="btnSubmitEditProfile" class="btn btn-info" />
+								<input type="submit" value="Save" id="btnSubmitEditProfile" class="btn btn-info" />
 								<input type="reset" value="Cancel" id="btnCancelEditProfile" class="btn btn-default" />
 							</div>
 						</form>
@@ -111,11 +120,14 @@
 			</div>
 		</div>
 	</div>
-			<% include ./partials/footer %>
+	<% include ./partials/footer %>
 	<script type="text/javascript">
 		$(document).ready(function() {
 			$("#editProfileForm").hide();
 			$("#changePasswordForm").hide();
+		});
+		$("#profile_img i").click(function(){
+			$("#profile_img").children("input").click();
 		});
 		$("#btnEditProfile").click(function() {
 			$("#myProfile").hide();
@@ -133,28 +145,6 @@
 			$("#myProfile").show();
 			$("#changePasswordForm").hide();
 		});
-		$("#btnSubmitEditProfile").click(function(e) {
-			var form = $("#editProfileForm");
-			$.ajax({
-				type: form.attr("method"),
-				url: form.attr("action"),
-				data: $("#editProfileForm").serialize(),
-				success: function(data) {
-					alert(data);
-					console.log("Edit profile successful.");
-					$("#name").val($("#edtName").val());
-					$("#address").val($("#edtStreet").val() + " - " + $("edtDistrict").val() + " - " + $("edtCity").val());
-					$("#phonenumber").val($("#edtPhone").val());
-					$("#homephone").val($("#edtHomephone").val());
-					$("#dob").val($("#edtDob").val());
-					$("#myProfile").show();
-					$("#editProfileForm").hide();
-				},
-				error: function(err) {
-					alert('Error occured');
-				}
-			});
-		});
 		$("#btnSubmitChangePassword").click(function(e) {
 			var form = $("#changePasswordForm");
 			$.ajax({
@@ -163,10 +153,8 @@
 				data: $("#changePasswordForm").serialize(),
 				success: function(data) {
 					alert(data.msg);
-					console.log("Edit password successful.");
 					$("#myProfile").show();
 					$("#changePasswordForm").hide();
-
 
 				},
 				error: function(err) {

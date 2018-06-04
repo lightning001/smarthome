@@ -1,16 +1,25 @@
 var nodemailer = require('nodemailer');
 let http = require('http');
 const config = require('../util/config');
-var transporter = nodemailer.createTransport({
-	host: 'smtp.gmail.com',
-	port: 465,
-	secure: true, // secure:true for port 465, secure:false for port 587
-	service: 'gmail',
-	auth: {
-		user: config.emailFrom,
-		pass: config.emailPassword
-	}
-});
+//var transporter = nodemailer.createTransport({
+//	service: 'gmail',
+//	pool: true,
+//	host: 'smtp.gmail.com',
+//	port: 587,
+//	secure: false, // secure:true use TLS for port 465, secure:false use STARTTLS for port 587
+//	proxy: process.env.http_proxy,
+//	auth: {
+//		user: config.emailFrom,
+//		pass: config.emailPassword
+//	},
+//	tls: {
+//        rejectUnauthorized: false
+//    }
+//},{
+//	from: 'SmartHome system <smarthomeproject2018@gmail.com>'
+//});
+
+var transporter = nodemailer.createTransport('smtps://smarthomeproject2018:100100.m@smtp.gmail.com');
 
 var Email = new Object();
 
@@ -20,6 +29,23 @@ sendMail = (eFrom, eTo, eSubject, eHtml) => {
 		to: eTo,
 		subject: eSubject,
 		html: eHtml
+	};
+	transporter.sendMail(options, function (error, info) {
+		if (error) {
+			console.log(error);
+		} else {
+			console.log('Email sent: ' + info.response.toString());
+		}
+	});
+}
+
+sendMail = (eFrom, eTo, eSubject, eHtml, eAttachments) => {
+	options = {
+		from: eFrom,
+		to: eTo,
+		subject: eSubject,
+		html: eHtml,
+		attachments : eAttachments
 	};
 	transporter.sendMail(options, function (error, info) {
 		if (error) {

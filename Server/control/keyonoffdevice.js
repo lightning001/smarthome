@@ -14,11 +14,11 @@ Key.mInsert = (token, data)=>{
 			k.device = data.device;
 			k.on = data.on;
 			k.off = data.off;
-			k.save((err)=>{
+			k.save((err, result)=>{
 				if(err){
 					return reject({'success' : false, 'message' : msg.error.occur});
 				}else{
-					return resolve({'success' : true});
+					return resolve({'success' : true, 'id' : decode._id, 'result' : result});
 				}
 			})
 		});
@@ -32,11 +32,11 @@ Key.mUpdate = (token, data)=>{
 				return reject({'success': false, 'message': msg.error.verify});
 			}
 			Key.update({'_id' : new mongoose.Types.ObjectId(data._id)}, {$set : {data}}).
-			exec((err)=>{
+			exec((err, result)=>{
 				if(err){
 					return reject({'success' : false, 'message' : msg.error.occur});
 				}else{
-					return resolve({'success' : true});
+					return resolve({'success' : true, 'id' : decode._id, 'result' : result});
 				}
 			});
 		});
@@ -52,11 +52,9 @@ Key.mDelete = (token, _id)=>{
 			Key.remove({'_id': new mongoose.Types.ObjectId(_id)}).
 		      exec((error2) => {
 		        if(error2){
-		          console.log(error2);
 		          return reject({'success': false, 'message': msg.error.occur});
 		        } else {
-		          console.log(true);
-		          return resolve({'success': true});
+		          return resolve({'success': true, 'id' : decode._id, 'result' : _id});
 		        }
 		      });
 		});

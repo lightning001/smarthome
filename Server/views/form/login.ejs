@@ -10,8 +10,8 @@
 			<i class="fa fa-google"></i><a href="#" class="google-btn-text">Google</a>
 		</div>
 	</div>
-	<%if(messages!=null){%>
-	<p class="error"><%=messages%></p>
+	<%if(messages!=null && messages.length>0){%>
+	<div class="alert alert-danger"><%=messages%></div>
 	<%}%>
 	<div class="row">
 		<form method="POST" action="/login" id="formLogin">
@@ -32,7 +32,7 @@
 				<div class="checkbox">
 					<label><input type="checkbox" name="remember">Remember login</label>
 				</div>
-				<input type="submit" class="btn btn-primary btn-block" value="Sign in" />
+				<input type="submit" class="btn btn-primary btn-block" value="Sign in" id="btnSignin"/>
 			</div>
 		</form>
 	</div>

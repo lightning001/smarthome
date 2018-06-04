@@ -1,0 +1,83 @@
+<!DOCTYPE html">
+<html>
+
+<head>
+<% include ./partials/head %>
+<script src="/sockets/room.js"></script>
+<title>Room</title>
+</head>
+
+<body>
+	<% include ./partials/header %>
+	<div class="container main">
+		<div class="row">
+			<div class="col-xs-12"><h1><b>ROOM</b></h1><hr></div>
+		<% 	for(var i =0; i<listRoom.length; i++){
+				var room = listRoom[i];
+				var name = '';
+				if(room.room_name.length < 30){
+					name = room.room_name;
+				}else{
+					name = room.room_name.substring(0, 25)+'...';
+				}
+				if(i%4==0&&i>0){%>
+			<div class="clearfix"></div>		
+				<%}	%>
+			<div class="col-md-3 col-xs-6 col-sm-4">
+				<div class="thumbnail">
+					<a href="/room/<%=room._id%>">
+						<input type="hidden" value="<%=room._id%>">
+						<img src="<%= room.img %>" alt="room" style="width:100%; min-height: 17vw" class="img-room img">
+						<div class="caption row">
+							<font style="font-size: 21px;" class="col-xs-10"><%=name%></font>
+							<div class="col-xs-2">
+								<div class="dropdown">
+									<a class="dropdown-toggle" data-toggle="dropdown" href="#">
+									<i class="fa fa-ellipsis-v fa-2x text-center col-xs-1" ></i>
+									</a>
+									<ul class="dropdown-menu">
+										<li><a href="/room/<%=room._id%>"> Update room </a></li>
+										<li><a onclick="deleteRoom(this, 0)">
+											Delete room
+											<input type="hidden" value="<%=room._id%>" name="id">
+											</a>
+										</li>
+										<li><a onclick="deleteRoom(this, 1)">
+											Delete room and device
+											<input type="hidden" value="<%=room._id%>">
+											</a>
+										</li>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</a>
+				</div>
+			</div>
+		<%}%>
+		</div>
+		<a class="label" href="/room/add"><i class="fa fa-plus fa-4x btn btn-add"></i></a>
+	</div>
+	<% include ./partials/footer %>
+	<script>
+		function deleteRoom(e, method){
+			let id = $(e).children('input').val();
+			$.ajax({
+				url: '/room/delete/'+id+'/'+method,
+				type : 'DELETE',
+				success: function(data){
+					if(data.success==true){
+						$(e).closest('div.col-xs-6').remove();
+					}else{
+						alert(data.message);
+					}
+				},
+				error : function(){
+					alert('Error! An error occurred. Please try again later');
+				}
+			});
+		}
+	</script>
+</body>
+
+</html>

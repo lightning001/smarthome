@@ -20,8 +20,7 @@ var schemaUser = new mongoose.Schema({
 	img : {type : String, default : 'https://image.ibb.co/d7xiTn/men.png'},
 	forgetcode : {type: String},
 	forgetTimeRequest : {type : Date},
-	activeTimeRequest : {type : Date},
-	socketUsers : {type : []}
+	activeTimeRequest : {type : Date}
 }, { toJSON : {virtuals: true}});
 
 schemaUser.virtual(  'listMode', {ref : 'Mode', localField : '_id', foreignField : 'id_user', justOne : false});

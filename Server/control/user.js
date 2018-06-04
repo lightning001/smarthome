@@ -1,8 +1,9 @@
-require('../model/Mode');
-require('../model/Room');
+require('../model/mode');
+require('../model/room');
 var User = require('../model/user'),
 	config = require('../util/config'),
 	mDate = require('../util/dateOperation'),				   
+	EmailManage = require('../util/Email'),
 	randomstring = require('randomstring'),
 	base64url = require('base64url'),
 	mongoose = require('mongoose'),
@@ -19,59 +20,41 @@ var User = require('../model/user'),
 User.login = (email, password) => {
 	return new Promise((resolve, reject) => {
 		User.findOne({'email': email}).
-		// .where('password').equals(password)
-		// where('status').equals(true).
 		exec((error, data) => {
 			if (error) {
 				return reject({'token': 'error', message : msg.error.occur});
 			}
 			if (!data || typeof data === undefined) {
-				console.log(msg.not_exist.account);
 				return reject({'token': 'error', message : msg.error.login_incorrect});
 			}
 			if (data && data.length !== 0) {
 				if (data.password !== password) {
-					console.log('Sai mat khau: ' + data.password);
 					return reject({'token': 'error', message : msg.error.login_incorrect});
 				} else {
-					var token = jwt.sign(JSON.stringify({'_id' : data._id.toString(), 'email' : data.email, status: data.status}), config.secret_key, {
-						algorithm: 'HS256'
-					});
-					return resolve({
-						'token': token
-					});
+					var token = jwt.sign(JSON.stringify({'_id' : data._id.toString(), 'email' : data.email, status: data.status}), config.secret_key, {algorithm: 'HS256'});
+					return resolve({'token': token, 'id' : data._id});
 				}
 			}
 		});
-	})
-}
-
-var checkId = (_id, token_id)=>{
-	if(_id == token_id){
-		return true;
-	}
-	return false;
+	});
 }
 
 User.changePassword = (token, _id, oldPassword, newPassword) => {
 	return new Promise((resolve, reject) => {
 		jwt.verify(token, config.secret_key, (error, data) => {
-			if (error || !checkId(_id, data._id)) {
-				return reject({
-					'success': false,
-					'message': msg.error.verify
-				});
+			if (error) {
+				return reject({'success': false,'message': msg.error.verify});
 			} else {
-				User.findOne({'_id': new mongoose.Types.ObjectId(_id),'password': oldPassword}, {password: 0}, (error2, data2) => {
+				User.findOne({'_id': new mongoose.Types.ObjectId(data._id),'password': oldPassword}, {password: 0},(error2, data2) => {
 					if (error2) {
 						return reject({'success': false,'message': msg.error.incorrect_password});
 					} else if (!error2 && data2) {
-						User.update({'_id': new mongoose.Types.ObjectId(data2._id)}, {$set: {'password': newPassword}}).
+						User.update({'_id': new mongoose.Types.ObjectId(data._id)}, {$set: {'password': newPassword}}).
 						exec((err)=> {
 							if (err) {
 								return reject({'success': false,'message': msg.error.incorrect_password});
 							} else {
-								return resolve({'success': true});
+								return resolve({'success': true, 'id' : data._id});
 							}
 						});
 					}
@@ -88,25 +71,14 @@ User.changePassword = (token, _id, oldPassword, newPassword) => {
 User.findBy_ID = (token, _id) => {
 	return new Promise((resolve, reject) => {
 		jwt.verify(token, config.secret_key, (error, data) => {
-			if (error || !checkId(_id, data._id)) {
-				reject({
-					'success': false,
-					'message': msg.error.verify
-				});
+			if (error) {
+				return reject({'success': false,'message': msg.error.verify});
 			} else {
-				User.findById(new mongoose.Types.ObjectId(_id), {
-					password: 0
-				}, (error2, data2) => {
+				User.findById(new mongoose.Types.ObjectId(_id), {password: 0}, (error2, data2) => {
 					if (error2) {
-						return reject({
-							'success': false,
-							'message': msg.empty.cant_find
-						});
+						return reject({'success': false,'message': msg.empty.cant_find});
 					} else if (!error2 && data2) {
-						return resolve({
-							'success': true,
-							'result': data2
-						});
+						return resolve({'success': true,'result': data2});
 					}
 				});
 
@@ -119,27 +91,15 @@ User.byToken = (token) => {
 	return new Promise((resolve, reject) => {
 		jwt.verify(token, config.secret_key, (error, data) => {
 			if (error) {
-				reject({
-					'success': false,
-					'message': msg.error.verify
-				});
+				reject({'success': false,'message': msg.error.verify_token});
 			} else {
-				User.findById(new mongoose.Types.ObjectId(data._id), {
-					password: 0
-				}).
-				populate('listMode').
-				populate('listRoom').
+				User.findById(new mongoose.Types.ObjectId(data._id), {password: 0}).
+				populate('listMode').populate('listRoom').
 				exec((error2, data2) => {
 					if (error2) {
-						return reject({
-							'success': false,
-							'message': msg.empty.cant_find
-						});
+						return reject({'success': false,'message': msg.empty.cant_find});
 					} else if (!error2 && data2) {
-						return resolve({
-							'success': true,
-							'result': data2
-						});
+						return resolve({'success': true,'result': data2});
 					}
 				});
 
@@ -152,33 +112,15 @@ User.findByName = (token, name) => {
 	return new Promise((resolve, reject) => {
 		jwt.verify(token, config.secret_key, (error, data) => {
 			if (error) {
-				return reject({
-					'success': false,
-					'message': msg.error.verify
-				});
+				return reject({'success': false,'message': msg.error.verify});
 			} else {
-				User.find({
-					'name': {
-						$regex: name
-					}
-				}, {
-					password: 0
-				}, (error2, data2) => {
+				User.find({'name': {$regex: name}}, {password: 0}, (error2, data2) => {
 					if (error2) {
-						return reject({
-							'success': false,
-							'message': msg.error.occur
-						});
+						return reject({'success': false,'message': msg.error.occur});
 					} else if (!data2) {
-						return reject({
-							'success': false,
-							'message': msg.empty.cant_find
-						});
+						return reject({'success': false,'message': msg.empty.cant_find});
 					} else if (!error2 && data2) {
-						return resolve({
-							'success': true,
-							'result': data2
-						});
+						return resolve({'success': true,'result': data2});
 					}
 				});
 			}
@@ -190,10 +132,7 @@ User.findByEmail = (token, email) => {
 	return new Promise((resolve, reject) => {
 		jwt.verify(token, config.secret_key, (error, data) => {
 			if (error) {
-				return reject({
-					'success': false,
-					'message': msg.error.verify
-				});
+				return reject({'success': false,'message': msg.error.verify});
 			} else {
 				User.findOne({'email': email}, {password: 0}, (error2, data2) => {
 					if (error2) {
@@ -201,7 +140,6 @@ User.findByEmail = (token, email) => {
 					} else if (!data2) {
 						return reject({'success': false,'message': msg.empty.cant_find});
 					} else if (!error2 && data2) {
-						console.log(data2);
 						return resolve({'success': true,'result': data2});
 					}
 				});
@@ -220,14 +158,9 @@ getImageName = (id) => {
  */
 User.mInsert = (data) => {
 	return new Promise((resolve, reject) => {
-		User.count({
-			'email': data.email
-		}, (error, findresult) => {
+		User.count({'email': data.email}, (error, findresult) => {
 			if (error) {
-				return reject({
-					'success': false,
-					'message': msg.error.occur
-				});
+				return reject({'success': false,'message': msg.error.occur});
 			} else if (!error && findresult === 0) {
 				let mUser = new User();
 				mUser.email = data.email;
@@ -248,61 +181,44 @@ User.mInsert = (data) => {
 				if (data.type !== null && data.type !== undefined)
 					mUser.type = data.type;
 				if (data.img !== null && data.img !== undefined) {
-					if (typeof data.img == 'string')
+					if (typeof data.img == 'string' && data.img != '')
 						mUser.img = config.host + config.upload_path + data.img;
-					else {
+					else if(data.img instanceof Buffer){
 						let fileName = getImageName(randomstring.generate(20));
-						fs.writeFile(config.upload_path + fileName, data.img);
-						mUser.img = config.host + fileName;
+						fs.writeFile('public/'+config.upload_path + fileName, data.img);
+						mUser.img = config.host + config.upload_path + fileName;
+					}else if(data.img==''){
+						delete data[img];
 					}
 				}
 				mUser.save((error2) => {
 					if (error2) {
-						return reject({
-							'success': false,
-							'message': msg.error.occur
-						});
+						return reject({'success': false,'message': msg.error.occur});
 					} else {
-						return resolve({
-							'success': true
-						});
+						return resolve({'success': true});
 					}
 				});
 			} else {
-				return reject({
-					'success': false,
-					'message': msg.error.exist_email
-				});
+				return reject({'success': false,'message': msg.error.exist_email});
 			}
 		})
 	});
 }
 
-User.confirmRegister = (data) => {
+User.confirmRegister = (token, data) => {
 	return new Promise((resolve, reject)=>{
-		try {
-			// socket.emit('server_send_confirm_register', {'success': false,
-			// 'message':
-			// msg.error.confirm_register});
-			let EmailManager = require('../util/Email');
-			// ma hoa TOKEN cho an toan
-			let token = jwt.sign({'data': data}, config.secret_key, {algorithm: 'HS256'});
-			let encode = base64url.encode(token.toString(), 'binary');
-			EmailManager.confirmRegister(data.email, encode);
-			User.update({'email' : data.email}, {$set:{activeTimeRequest : new Date()}}).exec();
-			return resolve({
-				'success': true,
-				'message': msg.success.confirm_register
-			});
-
-		} catch (e) {
-			console.log(e);
-			return reject({
-				'success': false,
-				'message': msg.error.occur
-			});
-
-		}
+		jwt.verify(token, config.secret_key, (error, data) => {
+			try {
+				// ma hoa TOKEN cho an toan
+				let token = jwt.sign({'data': data}, config.secret_key, {algorithm: 'HS256'});
+				let encode = base64url.encode(token.toString(), 'binary');
+				EmailManage.confirmRegister(data.email, encode);
+				User.update({'email' : data.email}, {$set:{activeTimeRequest : new Date()}}).exec();
+				return resolve({'success': true,'message': msg.success.confirm_register});
+			} catch (e) {
+				return reject({'success': false,'message': msg.error.occur});
+			}
+		});
 	});
 }
 
@@ -318,7 +234,6 @@ User.responseConfirm = (encode, req, response) => {
 			User.findOne({'email': email}).
 			exec((error2, data2) => {
 				if (error2) {
-					console.log(error2);
 					req.flash('error', 'Oh no. We can not do your request now. Please try again later');
 					response.redirect('/error');
 				} else if (!error && data2) {
@@ -332,8 +247,7 @@ User.responseConfirm = (encode, req, response) => {
 								req.flash('error', 'Oh no. We can not do your request now. Please try again later');
 								response.redirect('/error');
 							} else {
-								let EmailManager = require('../util/Email');
-								EmailManager.thankConfirmRegister(mData.email);
+								EmailManage.thankConfirmRegister(mData.email);
 								response.redirect('/thankyou')
 							}
 						});
@@ -355,9 +269,7 @@ User.searchResetPassword = (email)=>{
 			else if(!error && !data)
 				return reject({'success': false, 'message' : msg.not_exist.account});
 			else if(!error && data)
-				return resolve({'success' :  true});
-				
-			
+				return resolve({'success' :  true});			
 		});
 	})
 }
@@ -365,16 +277,14 @@ User.searchResetPassword = (email)=>{
 User.requestResetPassword = (email)=>{
 	return new Promise((resolve, reject)=>{
 		var number = randomstring.generate({ length : 6, charset : 'numeric'});
-		console.log('number: '+number);
 		User.update({'email' : email}, {$set : {'forgetcode' : number, 'forgetTimeRequest' : new Date() }}).
 		exec((error)=>{
 			if(error){
 				return reject({'success': false, 'message' : msg.error.occur});
 			}
 			else{
-				let EmailManager = require('../util/Email');
 				let encode = base64url.encode(jwt.sign(JSON.stringify({'email': email}), config.secret_key, {algorithm : 'HS256'}));
-				EmailManager.forgetPassword(email, encode, number);
+				EmailManage.forgetPassword(email, encode, number);
 				return resolve({'success' :  true, 'encode' : encode});
 			}
 		});
@@ -384,10 +294,7 @@ User.requestResetPassword = (email)=>{
 					   
 User.verifyResetPassword = (email, forgetcode)=>{
 	return new Promise((resolve, reject)=>{
-		
-		User.findOne({$and : [{forgetcode : {$exists : true}}, {forgetcode : {$ne : null}}], 
-					  $and : [{forgetTimeRequest : {$exists : true}}, {forgetTimeRequest : {$ne : null}}],
-					  'email': email}, {password : 0}).
+		User.findOne({forgetcode : {$exists : true}, forgetcode : {$ne : null}, forgetTimeRequest : {$exists : true}, forgetTimeRequest : {$ne : null}, 'email': email}, {password : 0}).
 		exec((error, data)=>{
 			 if(error)
 				return reject({'success': false, type : 'server', 'message' : msg.error.occur});
@@ -397,7 +304,6 @@ User.verifyResetPassword = (email, forgetcode)=>{
 				let currentTime = new Date(),
 					requestTime = data.forgetTimeRequest,
 					deviationTime = mDate.subtract(currentTime, requestTime);
-					console.log('deviationTime: '+deviationTime);
 				if(deviationTime >= 30*60*1000){
 					User.update({'email': email}, {$unset : {forgetcode : 1, forgetTimeRequest : 1}}).exec();
 					return reject({success : false, type : 'timeout', message : msg.error.timeout});
@@ -415,82 +321,46 @@ User.resetPassword = (email, password)=>{
 		User.findOneAndUpdate({$and : [{forgetcode : {$exists : true}}, {forgetcode : {$ne : null}}], 
 					  $and : [{forgetTimeRequest : {$exists : true}}, {forgetTimeRequest : {$ne : null}}],
 					  'email': email}, {$set : {'password' : password}, $unset : {forgetcode : 1, forgetTimeRequest : 1}}).
-		exec((error)=>{
-			if(error){
-				return reject({'success' : false, 'message' : msg.error.occur});
-			}else{
-				return resolve({'success' : true});
-			}
+		exec((error, data)=>{
+			if(error){return reject({'success' : false, 'message' : msg.error.occur});}
+			else{return resolve({'success' : true, 'id' : data._id});}
 		})
 	});
 }
 
 User.mUpdate = (token, data) => {
 	return new Promise((resolve, reject) => {
-
 		jwt.verify(token, config.secret_key, (error, decode) => {
-			if (error || !checkId(_id, data._id)) {
-				return reject({
-					'success': false,
-					'message': msg.error.verify
-				});
+			if (error) {
+				return reject({'success': false,'message': msg.error.verify});
 			}
+			
 			// kiem tra email da co hay chua
-			User.findOne({
-				'email': data.email
-			}, (error2, findresult) => {
+			User.findOne({'email': data.email, '_id' : decode._id}, (error2, findresult) => {
 				if (error2) {
-					return reject({
-						'success': false,
-						'message': msg.error.occur
-					});
+					return reject({'success': false,'message': msg.error.occur});
 				} else if (!error2 && findresult) {
 					// neu email nay da co thi kiem tra xem co trung _id ko
 					// neu trung thi cho phep chinh sua, do email do la cua nguoi
-					// dang
-					// yeu cau
-					console.log('user _id: '+data._id + ' '+typeof data._id + ' is equals to '+ findresult._id+ ' '+typeof findresult._id);
-					if (data._id == findresult._id.toString()) {
-						console.log('la email cua nguoi request');
-					} else {
-						// khong trung thi email da ton tai, user co data._id ko dc
-						// phep
-						// dung email nay
-						console.log('Email da ton tai');
-						return reject({
-							'success': false,
-							'message': msg.error.exist_email
-						});
+					// dang yeu cau
+					if (data._id != findresult._id.toString()) {
+						return reject({'success': false,'message': msg.error.exist_email});
 					}
-				} else if (!error2 && (typeof findresult === undefined)) {
-					// ko tim thay ket qua, tuc la email nay chua co trong database,
-					// dc
-					// phep su dung
 				}
 				if(data.img !=null){
-					if(typeof data.img !== 'string'){
-					let fileName = getImageName(randomstring.generate(20));
-					fs.writeFile(fileName, data.img);
-					data.img = config.host + fileName;
-					}
+					if (typeof data.img == 'string' && data.img != '')data.img = config.host + config.upload_path + data.img;
+					else if(typeof data.img !== 'string'){
+						let fileName = getImageName(randomstring.generate(20));
+						fs.writeFile('public/'+config.upload_path + fileName, data.img);
+						data.img = config.host + config.upload_path + fileName;
+					}else if(data.img==''){delete data[img];}
 				}
-				User.update({
-					'_id': new mongoose.Types.ObjectId(data._id)
-				}, {
-					$set: data
-				}).
-				exec((error2) => {
+				User.update({'_id': new mongoose.Types.ObjectId(data._id)}, {$set: data}).
+				exec((error2, result) => {
 					if (error2) {
-						console.log(error2);
-						return reject({
-							'success': false,
-							'message': msg.error.occur
-						});
+						return reject({'success': false,'message': msg.error.occur});
 					} else {
-						console.log('update' + true);
-						return resolve({
-							'success': true
-						});
+						return resolve({'success': true, 'id' : data._id, 'result' : result});
 					}
 				});
 			});
@@ -508,27 +378,15 @@ User.mUpdate = (token, data) => {
 User.mDelete = (token, _id) => {
 	return new Promise((resolve, reject) => {
 		jwt.verify(token, config.secret_key, (error, data) => {
-			if (error || !checkId(_id, data._id)) {
-				return reject({
-					'success': false,
-					'message': msg.error.verify
-				});
+			if (error) {
+				return reject({'success': false,'message': msg.error.verify});
 			}
-			User.remove({
-				'_id': new mongoose.Type.ObjectId(_id)
-			}).
+			User.remove({'_id': new mongoose.Type.ObjectId(_id)}).
 			exec((error2) => {
 				if (error2) {
-					console.log(error2);
-					return reject({
-						'success': false,
-						'message': msg.error.occur
-					});
+					return reject({'success': false,'message': msg.error.occur});
 				} else {
-					console.log(true);
-					return resolve({
-						'success': true
-					});
+					return resolve({'success': true, 'id' : data._id, 'result' : _id});
 				}
 			});
 		});
@@ -542,26 +400,13 @@ User.getAllUser = (token) => {
 	return new Promise((resolve, reject) => {
 		jwt.verify(token, config.secret_key, (error, data) => {
 			if (error) {
-				return reject({
-					'success': false,
-					'message': msg.error.verify
-				});
+				return reject({'success': false,'message': msg.error.verify});
 			}
-			User.find({}, {
-				password: 0
-			}, (error2, data2) => {
+			User.find({}, {password: 0}, (error2, data2) => {
 				if (error2) {
-					console.log(error2);
-					return reject({
-						'success': false,
-						'message': msg.error.occur
-					});
+					return reject({'success': false,'message': msg.error.occur});
 				} else {
-					console.log(data2);
-					return resolve({
-						'success': true,
-						'result': data2
-					});
+					return resolve({'success': true,'result': data2});
 				}
 			});
 
@@ -575,35 +420,17 @@ User.getByPage = (token, data) => {
 	return new Promise((resolve, reject) => {
 		jwt.verify(token, config.secret_key, (error, data) => {
 			if (error) {
-				return reject({
-					'success': false,
-					'message': msg.error.verify
-				});
+				return reject({'success': false,'message': msg.error.verify_token});
 			}
-			User.find({}, {
-				password: 0
-			}).
+			User.find({}, {password: 0}).
 			skip((data.page - 1) * data.quantity).
 			limit(data.quantity).
-			sort({
-				name: 1,
-				type: 1,
-				price: -1
-			}).
+			sort({name: 1,type: 1,price: -1}).
 			exec((error2, data2) => {
 				if (error2) {
-					console.log(error2);
-					return reject({
-						'success': false,
-						'message': msg.error.occur
-					});
+					return reject({'success': false,'message': msg.error.occur});
 				} else {
-					console.log(data2);
-
-					return resolve({
-						'success': true,
-						'result': data2
-					});
+					return resolve({'success': true,'result': data2});
 				}
 			});
 		});

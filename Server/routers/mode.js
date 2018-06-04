@@ -1,7 +1,8 @@
 var express = require('express'),
-	msg = require('../msg');
-	mMode = require('../control/Mode'),
-	mModeDetail = require('../control/ModeDetail'),
+	msg = require('../msg'),
+	{authenticated} = require('./authenticated'),
+	mMode = require('../control/mode'),
+	mModeDetail = require('../control/modedetail'),
 	config = require('../util/config'),
 	router = express.Router();
 
@@ -64,7 +65,7 @@ var convertCircle = (circle)=>{
 	return newCircle;
 }
 
-router.get('/', (req, res) => {
+router.get('/', authenticated, (req, res) => {
 	if (req.session.authentication == null | false) {
 		res.redirect('/');
 	}else{
@@ -89,7 +90,7 @@ router.get('/', (req, res) => {
 	}
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id', authenticated, (req, res) => {
 	if (req.session.authentication == null | false) {
 		res.redirect('/');
 	}else{
