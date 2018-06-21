@@ -2,27 +2,27 @@
 var express = require('express'),
 	session = require('express-session'),
 	cookieParser = require('cookie-parser'),
+	bodyParser = require('body-parser'),
+	flash = require('connect-flash'),
+	jwt = require('jsonwebtoken'),
+	path = require('path'),
 	app = express(),
 	server = require('http').createServer(app),
 	io = require('socket.io')(server),
-	bodyParser = require('body-parser'),
-	config = require('./util/config'),
-	path = require('path'),
-	jwt = require('jsonwebtoken'),
-	flash = require('connect-flash'),
 	port = process.env.PORT || 3000,
+	config = require('./util/config'),
 	mUser = require('./control/user'),
+	{initStorage} = require('./util/storage'),
 	timeout = 500;
-	
+
 app.use(express.static(path.join(__dirname, '/public')));
-app.use(session({secret: config.secret_key, resave: true, saveUninitialized: true, cookie: {'token' : 'abc'}}));
+app.use(session({secret: config.secret_key, resave: true, saveUninitialized: true, cookie: {maxAge : 1000*60*30}}));
+app.use(cookieParser(config.cookie_secret_key));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
-app.use(cookieParser());
 app.use(flash());
 app.set('view engine', 'ejs');
 app.set('views', [	path.join(__dirname + '/views')]);
-
 var userRouter = require('./routers/user'),
 	deviceinroomRouter = require('./routers/deviceinroom'),
 	roomRouter = require('./routers/room'),
@@ -34,7 +34,6 @@ app.use('/', indexRouter);
 app.use('/room', roomRouter);
 app.use('/mode', modeRouter);
 app.use('/device', deviceinroomRouter);
-
 require('./msocket')(io);
 
 server.listen(port, function() {

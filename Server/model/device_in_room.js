@@ -12,7 +12,6 @@ var schemaDeviceInRoom = new mongoose.Schema({
 }, { toJSON : {virtuals: true}});
 
 schemaDeviceInRoom.virtual('keyonoffdevice', {ref : 'KeyOnOffDevice', localField : '_id', foreignField : 'device', justOne : false});
-schemaDeviceInRoom.virtual('listDevice', {ref : 'Device', localField : 'device', foreignField : '_id', justOne : false});
 
 var DeviceInRoom = conn.model('DeviceInRoom', schemaDeviceInRoom, 'DEVICEINROOM');
 module.exports = exports = DeviceInRoom;

@@ -10,27 +10,23 @@ var router = express.Router();
 /**
  * home
  */
-router.get('/', (req, res) => {
-	if(req.session.user ==null){
-		console.log('user = null');
-		if (req.session.usertoken != null) {
-			console.log('verify token');
-			mUser.byToken(req.session.usertoken).then(
-			(decode)=>{
-				req.session.user = decode.result;
-				console.log('Session user: '+ JSON.stringify(req.session.user._id));
-				req.session.authentication = true;
-				res.redirect('/room');
-			}, 	(e)=>{
-				console.log(JSON.stringify(e));
-			});
-		}else{
-			res.render('user_views/home', {req : req, res : res, messages: req.flash('failureLogin'), alertmessage : req.flash('alertmessage')});
-		}
-	}
-	else if(req.session.user !=null) {
+router.get('/', authenticated, (req, res) => {
+	if(req.session.user == null){
+		res.render('user_views/home', {req : req, res : res, messages: req.flash('failureLogin'), alertmessage : req.flash('alertmessage')});
+	} else if(req.session.user !=null) {
 		res.redirect('/room');
 	}
+});
+
+router.get('/test',authenticated, (req, res) => {
+	let mRoom = require('../control/room');
+	mRoom.getFullDetailUser(req.session.user._id).then(
+	(data) => {
+		res.render('user_views/test', {'req': req, 'res': res, 'listRoom': data.result});
+	}, (e) => {
+		req.flash('error', e.message);
+		res.redirect('/error');
+	});
 });
 
 /**
@@ -44,10 +40,7 @@ router.get('/camera', authenticated, (req, res) => {
 	if (req.session.authentication == null | false) {
 		res.redirect('/');
 	}
-	res.render('user_views/camera', {
-		'req': req,
-		'res': res
-	});
+	res.render('user_views/camera', {'req': req,'res': res});
 });
 
 module.exports = exports = router;

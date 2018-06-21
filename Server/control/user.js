@@ -1,14 +1,16 @@
-require('../model/mode');
-require('../model/room');
+
 var User = require('../model/user'),
 	config = require('../util/config'),
-	mDate = require('../util/dateOperation'),				   
+	Mode = require('../model/mode'),
+	Room = require('../model/room'),
+	mDate = require('../util/dateOperation'),
 	EmailManage = require('../util/Email'),
 	randomstring = require('randomstring'),
 	base64url = require('base64url'),
 	mongoose = require('mongoose'),
 	jwt = require('jsonwebtoken'),
 	msg = require('../msg').en,
+	path = require('path'),
 	fs = require('fs');
 /**
  * @param {String}
@@ -39,26 +41,44 @@ User.login = (email, password) => {
 	});
 }
 
-User.changePassword = (token, _id, oldPassword, newPassword) => {
+User.byToken = (token)=>{
 	return new Promise((resolve, reject) => {
-		jwt.verify(token, config.secret_key, (error, data) => {
-			if (error) {
-				return reject({'success': false,'message': msg.error.verify});
-			} else {
-				User.findOne({'_id': new mongoose.Types.ObjectId(data._id),'password': oldPassword}, {password: 0},(error2, data2) => {
+		jwt.verify(token, config.secret_key, (err, data)=>{
+			if(err){
+				return reject({'success': false,'message': msg.error.verify_token});
+			}else{
+				User.findOne({_id : new mongoose.Types.ObjectId(data._id), email : data.email}, {password: 0}).
+				populate('listMode').populate('listRoom').
+				exec((error2, data2) => {
 					if (error2) {
-						return reject({'success': false,'message': msg.error.incorrect_password});
+						return reject({'success': false,'message': msg.error.occur});
 					} else if (!error2 && data2) {
-						User.update({'_id': new mongoose.Types.ObjectId(data._id)}, {$set: {'password': newPassword}}).
-						exec((err)=> {
-							if (err) {
-								return reject({'success': false,'message': msg.error.incorrect_password});
-							} else {
-								return resolve({'success': true, 'id' : data._id});
-							}
-						});
+						return resolve({'success': true,'result': data2});
+					}else{
+						return reject({'success': false,'message': msg.empty.cant_find});
 					}
 				});
+			}
+		});
+	});
+}
+
+User.changePassword = (_id, oldPassword, newPassword) => {
+	return new Promise((resolve, reject) => {
+		User.findOne({'_id': new mongoose.Types.ObjectId(_id),'password': oldPassword}, {password: 0},(error2, data2) => {
+			if (error2) {
+				return reject({'success': false,'message': msg.error.incorrect_password});
+			} else if (!error2 && data2) {
+				User.update({'_id': new mongoose.Types.ObjectId(_id)}, {$set: {'password': newPassword}}).
+				exec((err)=> {
+					if (err) {
+						return reject({'success': false,'message': msg.error.incorrect_password});
+					} else {
+						return resolve({'success': true, 'id' : _id});
+					}
+				});
+			}else{
+				return reject({'success': false,'message': msg.error.incorrect_password});
 			}
 		});
 	});
@@ -68,81 +88,55 @@ User.changePassword = (token, _id, oldPassword, newPassword) => {
  * @param {String}
  *            _id
  */
-User.findBy_ID = (token, _id) => {
+User.findBy_ID = (_id) => {
 	return new Promise((resolve, reject) => {
-		jwt.verify(token, config.secret_key, (error, data) => {
-			if (error) {
-				return reject({'success': false,'message': msg.error.verify});
-			} else {
-				User.findById(new mongoose.Types.ObjectId(_id), {password: 0}, (error2, data2) => {
-					if (error2) {
-						return reject({'success': false,'message': msg.empty.cant_find});
-					} else if (!error2 && data2) {
-						return resolve({'success': true,'result': data2});
-					}
-				});
-
+		User.findById(new mongoose.Types.ObjectId(_id), {password: 0}, (error2, data2) => {
+			if (error2) {
+				return reject({'success': false,'message': msg.empty.cant_find});
+			} else if (!error2 && data2) {
+				return resolve({'success': true,'result': data2});
 			}
 		});
 	});
 }
 
-User.byToken = (token) => {
+User.getDataUser = (user) => {
 	return new Promise((resolve, reject) => {
-		jwt.verify(token, config.secret_key, (error, data) => {
-			if (error) {
-				reject({'success': false,'message': msg.error.verify_token});
-			} else {
-				User.findById(new mongoose.Types.ObjectId(data._id), {password: 0}).
-				populate('listMode').populate('listRoom').
-				exec((error2, data2) => {
-					if (error2) {
-						return reject({'success': false,'message': msg.empty.cant_find});
-					} else if (!error2 && data2) {
-						return resolve({'success': true,'result': data2});
-					}
-				});
-
+		User.findById(new mongoose.Types.ObjectId(user), {password: 0}).
+		populate('listMode').populate('listRoom').
+		exec((error2, data2) => {
+			if (error2) {
+				return reject({'success': false,'message': msg.empty.cant_find});
+			} else if (!error2 && data2) {
+				return resolve({'success': true,'result': data2});
 			}
 		});
 	});
 }
 
-User.findByName = (token, name) => {
+User.findByName = (name) => {
 	return new Promise((resolve, reject) => {
-		jwt.verify(token, config.secret_key, (error, data) => {
-			if (error) {
-				return reject({'success': false,'message': msg.error.verify});
-			} else {
-				User.find({'name': {$regex: name}}, {password: 0}, (error2, data2) => {
-					if (error2) {
-						return reject({'success': false,'message': msg.error.occur});
-					} else if (!data2) {
-						return reject({'success': false,'message': msg.empty.cant_find});
-					} else if (!error2 && data2) {
-						return resolve({'success': true,'result': data2});
-					}
-				});
+		User.find({'name': {$regex: name}}, {password: 0}, (error2, data2) => {
+			if (error2) {
+				return reject({'success': false,'message': msg.error.occur});
+			} else if (!data2) {
+				return reject({'success': false,'message': msg.empty.cant_find});
+			} else if (!error2 && data2) {
+				return resolve({'success': true,'result': data2});
 			}
 		});
 	});
 }
 
-User.findByEmail = (token, email) => {
+User.findByEmail = (email) => {
 	return new Promise((resolve, reject) => {
-		jwt.verify(token, config.secret_key, (error, data) => {
-			if (error) {
-				return reject({'success': false,'message': msg.error.verify});
-			} else {
-				User.findOne({'email': email}, {password: 0}, (error2, data2) => {
-					if (error2) {
-						return reject({'success': false,'message': msg.error.occur});
-					} else if (!data2) {
-						return reject({'success': false,'message': msg.empty.cant_find});
-					} else if (!error2 && data2) {
-						return resolve({'success': true,'result': data2});
-					}
-				});
+		User.findOne({'email': email}, {password: 0}, (error2, data2) => {
+			if (error2) {
+				return reject({'success': false,'message': msg.error.occur});
+			} else if (!data2) {
+				return reject({'success': false,'message': msg.empty.cant_find});
+			} else if (!error2 && data2) {
+				return resolve({'success': true,'result': data2});
 			}
 		});
 	});
@@ -182,19 +176,23 @@ User.mInsert = (data) => {
 					mUser.type = data.type;
 				if (data.img !== null && data.img !== undefined) {
 					if (typeof data.img == 'string' && data.img != '')
-						mUser.img = config.host + config.upload_path + data.img;
+						mUser.img = config.host + config.upload_path +'profile/'+ data.img;
 					else if(data.img instanceof Buffer){
 						let fileName = getImageName(randomstring.generate(20));
-						fs.writeFile('public/'+config.upload_path + fileName, data.img);
-						mUser.img = config.host + config.upload_path + fileName;
+						fs.writeFile('public/'+config.upload_path +'profile/' + fileName, data.img);
+						mUser.img = config.host + config.upload_path +'profile/' + fileName;
 					}else if(data.img==''){
 						delete data[img];
 					}
 				}
-				mUser.save((error2) => {
+				mUser.save((error2, result) => {
 					if (error2) {
 						return reject({'success': false,'message': msg.error.occur});
 					} else {
+						let tmp = result.img +"";
+						let mpath = 'profile/'+ path.posix.basename(result.img);
+						let ImageResize = require('../resize');
+						ImageResize.resize(mpath, 400, 400, mpath);
 						return resolve({'success': true});
 					}
 				});
@@ -205,112 +203,14 @@ User.mInsert = (data) => {
 	});
 }
 
-User.confirmRegister = (token, data) => {
+User.activeAccount = (email) => {
 	return new Promise((resolve, reject)=>{
-		jwt.verify(token, config.secret_key, (error, data) => {
-			try {
-				// ma hoa TOKEN cho an toan
-				let token = jwt.sign({'data': data}, config.secret_key, {algorithm: 'HS256'});
-				let encode = base64url.encode(token.toString(), 'binary');
-				EmailManage.confirmRegister(data.email, encode);
-				User.update({'email' : data.email}, {$set:{activeTimeRequest : new Date()}}).exec();
-				return resolve({'success': true,'message': msg.success.confirm_register});
-			} catch (e) {
-				return reject({'success': false,'message': msg.error.occur});
-			}
-		});
-	});
-}
-
-User.responseConfirm = (encode, req, response) => {
-	let token = base64url.decode(encode, 'binary');
-	jwt.verify(token, config.secret_key, (error, data) => {
-		if (error) {
-			req.flash('error', 'Oh no. We can not do your request now. Please try again later');
-			response.redirect('/error');
-		} else if (data) {
-			let mData = data.data;
-			let email = mData.email;
-			User.findOne({'email': email}).
-			exec((error2, data2) => {
-				if (error2) {
-					req.flash('error', 'Oh no. We can not do your request now. Please try again later');
-					response.redirect('/error');
-				} else if (!error && data2) {
-					if(mDate.subtract(new Date(), data2.activeTimeRequest) >=30*60*1000){
-						req.flash('alertmessage', msg.error.timeout);
-						res.redirect('/');
-					}else{
-						User.update({'email': data2.email}, {$set: {'status': 'Active'}, $unset:{activeTimeRequest : 1}}).
-						exec((err) => {
-							if (err) {
-								req.flash('error', 'Oh no. We can not do your request now. Please try again later');
-								response.redirect('/error');
-							} else {
-								EmailManage.thankConfirmRegister(mData.email);
-								response.redirect('/thankyou')
-							}
-						});
-					}
-				}
-			});
-
-		}
-	});
-}
-
-
-User.searchResetPassword = (email)=>{
-	return new Promise((resolve, reject)=>{
-		User.findOne({'email': email}).
-		exec((error, data)=>{
-			 if(error)
-				return reject({'success': false, 'message' : msg.error.occur});
-			else if(!error && !data)
-				return reject({'success': false, 'message' : msg.not_exist.account});
-			else if(!error && data)
-				return resolve({'success' :  true});			
-		});
-	})
-}
-
-User.requestResetPassword = (email)=>{
-	return new Promise((resolve, reject)=>{
-		var number = randomstring.generate({ length : 6, charset : 'numeric'});
-		User.update({'email' : email}, {$set : {'forgetcode' : number, 'forgetTimeRequest' : new Date() }}).
-		exec((error)=>{
-			if(error){
-				return reject({'success': false, 'message' : msg.error.occur});
-			}
-			else{
-				let encode = base64url.encode(jwt.sign(JSON.stringify({'email': email}), config.secret_key, {algorithm : 'HS256'}));
-				EmailManage.forgetPassword(email, encode, number);
-				return resolve({'success' :  true, 'encode' : encode});
-			}
-		});
-	});
-}
-
-					   
-User.verifyResetPassword = (email, forgetcode)=>{
-	return new Promise((resolve, reject)=>{
-		User.findOne({forgetcode : {$exists : true}, forgetcode : {$ne : null}, forgetTimeRequest : {$exists : true}, forgetTimeRequest : {$ne : null}, 'email': email}, {password : 0}).
-		exec((error, data)=>{
-			 if(error)
-				return reject({'success': false, type : 'server', 'message' : msg.error.occur});
-			else if(data){
-				if(forgetcode != data.forgetcode)
-					return reject({'success': false, type : 'incorrected', 'message' : msg.error.forgetcode});
-				let currentTime = new Date(),
-					requestTime = data.forgetTimeRequest,
-					deviationTime = mDate.subtract(currentTime, requestTime);
-				if(deviationTime >= 30*60*1000){
-					User.update({'email': email}, {$unset : {forgetcode : 1, forgetTimeRequest : 1}}).exec();
-					return reject({success : false, type : 'timeout', message : msg.error.timeout});
-				}
-				else{
-					return resolve({'success' :  true});
-				}
+		User.findOneAndupdate({'email': email}, {$set: {'status': 'Active'}, $unset:{activeTimeRequest : 1}}).
+		exec((err, data) => {
+			if (err) {
+				reject({success: false, message : msg.error.occur});
+			} else if(data){
+				resolve({success: true, result: data});
 			}
 		});
 	});
@@ -318,56 +218,51 @@ User.verifyResetPassword = (email, forgetcode)=>{
 
 User.resetPassword = (email, password)=>{
 	return new Promise((resolve, reject) => {
-		User.findOneAndUpdate({$and : [{forgetcode : {$exists : true}}, {forgetcode : {$ne : null}}], 
-					  $and : [{forgetTimeRequest : {$exists : true}}, {forgetTimeRequest : {$ne : null}}],
-					  'email': email}, {$set : {'password' : password}, $unset : {forgetcode : 1, forgetTimeRequest : 1}}).
+		User.findOneAndUpdate({'email': email}, {$set : {'password' : password}}).
 		exec((error, data)=>{
 			if(error){return reject({'success' : false, 'message' : msg.error.occur});}
 			else{return resolve({'success' : true, 'id' : data._id});}
-		})
+		});
 	});
 }
 
-User.mUpdate = (token, data) => {
+User.mUpdate = (user, data) => {
 	return new Promise((resolve, reject) => {
-		jwt.verify(token, config.secret_key, (error, decode) => {
-			if (error) {
-				return reject({'success': false,'message': msg.error.verify});
+		// kiem tra email da co hay chua
+		User.findOne({'email': data.email, '_id' : user}, (error2, findresult) => {
+			if (error2) {
+				return reject({'success': false,'message': msg.error.occur});
+			} else if (!error2 && findresult) {
+				// neu email nay da co thi kiem tra xem co trung _id ko
+				// neu trung thi cho phep chinh sua, do email do la cua nguoi
+				// dang yeu cau
+				if (data._id != findresult._id.toString()) {
+					return reject({'success': false,'message': msg.error.exist_email});
+				}
 			}
-			
-			// kiem tra email da co hay chua
-			User.findOne({'email': data.email, '_id' : decode._id}, (error2, findresult) => {
+			if(data.img !=null){
+				if (typeof data.img == 'string' && data.img != '')data.img = config.host + config.upload_path+'profile/' + data.img;
+				else if(typeof data.img !== 'string'){
+					let fileName = getImageName(randomstring.generate(20));
+					fs.writeFile('public/'+config.upload_path +'profile/' + fileName, data.img);
+					data.img = config.host + config.upload_path +'profile/' +  fileName;
+				}else if(data.img==''){delete data[img];}
+			}
+			User.update({'_id': new mongoose.Types.ObjectId(data._id)}, {$set: data}).
+			exec((error2) => {
 				if (error2) {
 					return reject({'success': false,'message': msg.error.occur});
-				} else if (!error2 && findresult) {
-					// neu email nay da co thi kiem tra xem co trung _id ko
-					// neu trung thi cho phep chinh sua, do email do la cua nguoi
-					// dang yeu cau
-					if (data._id != findresult._id.toString()) {
-						return reject({'success': false,'message': msg.error.exist_email});
+				} else {
+					if(data.img!=null){
+						let ImageResize = require('../resize');
+						let mpath = 'profile/'+ path.posix.basename(data.img);
+						ImageResize.resize(mpath, 400, 400, mpath);
 					}
+					return resolve({'success': true, 'id' : user});
 				}
-				if(data.img !=null){
-					if (typeof data.img == 'string' && data.img != '')data.img = config.host + config.upload_path + data.img;
-					else if(typeof data.img !== 'string'){
-						let fileName = getImageName(randomstring.generate(20));
-						fs.writeFile('public/'+config.upload_path + fileName, data.img);
-						data.img = config.host + config.upload_path + fileName;
-					}else if(data.img==''){delete data[img];}
-				}
-				User.update({'_id': new mongoose.Types.ObjectId(data._id)}, {$set: data}).
-				exec((error2, result) => {
-					if (error2) {
-						return reject({'success': false,'message': msg.error.occur});
-					} else {
-						return resolve({'success': true, 'id' : data._id, 'result' : result});
-					}
-				});
 			});
-
 		});
 	});
-
 }
 
 /**
@@ -375,20 +270,21 @@ User.mUpdate = (token, data) => {
  *            mã _id của thiết bị (kiểu ObjectId)
  * @objective : thực hiện xóa 1 user
  */
-User.mDelete = (token, _id) => {
+User.mDelete = (_id) => {
 	return new Promise((resolve, reject) => {
-		jwt.verify(token, config.secret_key, (error, data) => {
-			if (error) {
-				return reject({'success': false,'message': msg.error.verify});
+		User.remove({'_id': new mongoose.Type.ObjectId(_id)}).
+		exec((error2) => {
+			if (error2) {
+				return reject({'success': false,'message': msg.error.occur});
+			} else {
+				let Mode = require('./mode');
+				Mode.mDelete(new mongoose.Type.ObjectId(_id)).then().catch();
+				let Room = require('./room');
+				Room.mDeleteByUser(_id);
+				let DeviceInRoom = require('../model/device_in_room');
+				DeviceInRoom.deleteMany({'user' : new mongoose.Type.ObjectId(_id)});
+				return resolve({'success': true, 'id' : _id, 'result' : _id});
 			}
-			User.remove({'_id': new mongoose.Type.ObjectId(_id)}).
-			exec((error2) => {
-				if (error2) {
-					return reject({'success': false,'message': msg.error.occur});
-				} else {
-					return resolve({'success': true, 'id' : data._id, 'result' : _id});
-				}
-			});
 		});
 	});
 }
@@ -396,43 +292,32 @@ User.mDelete = (token, _id) => {
 /**
  * Lấy về tất cả các User
  */
-User.getAllUser = (token) => {
+User.getAllUser = () => {
 	return new Promise((resolve, reject) => {
-		jwt.verify(token, config.secret_key, (error, data) => {
-			if (error) {
-				return reject({'success': false,'message': msg.error.verify});
+		User.find({}, {password: 0}, (error2, data2) => {
+			if (error2) {
+				return reject({'success': false,'message': msg.error.occur});
+			} else {
+				return resolve({'success': true,'result': data2});
 			}
-			User.find({}, {password: 0}, (error2, data2) => {
-				if (error2) {
-					return reject({'success': false,'message': msg.error.occur});
-				} else {
-					return resolve({'success': true,'result': data2});
-				}
-			});
-
 		});
 	});
 }
 /**
  * Lấy danh sách thiết bị theo số lượng và trang (dùng cho phân trang)
  */
-User.getByPage = (token, data) => {
+User.getByPage = (data) => {
 	return new Promise((resolve, reject) => {
-		jwt.verify(token, config.secret_key, (error, data) => {
-			if (error) {
-				return reject({'success': false,'message': msg.error.verify_token});
+		User.find({}, {password: 0}).
+		skip((data.page - 1) * data.quantity).
+		limit(data.quantity).
+		sort({name: 1,type: 1,price: -1}).
+		exec((error2, data2) => {
+			if (error2) {
+				return reject({'success': false,'message': msg.error.occur});
+			} else {
+				return resolve({'success': true,'result': data2});
 			}
-			User.find({}, {password: 0}).
-			skip((data.page - 1) * data.quantity).
-			limit(data.quantity).
-			sort({name: 1,type: 1,price: -1}).
-			exec((error2, data2) => {
-				if (error2) {
-					return reject({'success': false,'message': msg.error.occur});
-				} else {
-					return resolve({'success': true,'result': data2});
-				}
-			});
 		});
 	});
 }

@@ -1,8 +1,11 @@
-<!DOCTYPE html">
 <html>
 <head>
-<% include ./partials/head %> 
-
+<% include ./partials/head %>
+<script>
+	var token = localStorage.getItem('token');
+	var socket = io({query : {'token': token}});
+	socket.emit('join-room', token);
+</script>
 <title>Device</title>
 </head>
 <body>
@@ -11,58 +14,63 @@
 		<div class="well">
 			<div class="row">
 				<div class="col-xs-12">
-					<button class="btn btn-default pull-right" id="btnEdit" title="Edit room">Edit</button>
-					<button class="btn btn-success pull-right" id="btnSave" title="Done">Done</button>
+					<a class="btn btn-default pull-right" id="btnAdd" href="#">Add</a>
+					<button class="btn btn-default pull-right" id="btnDelete" title="Delete your device">Delete</button>
 				</div>
-				<%listDevice.forEach(function(device){%>
-				<div class="col-lg-2 col-md-2 col-sm-3 col-xs-4">
-					<div class="thumbnail" onclick="img_click(this)">
-						<i class="fa fa-times-circle fa-2x close" onclick="remove_device(this)"></i>
-						<input type="hidden" value="<%=device._id%>">
-						<img src="<%=device.device.img%>" style="width:100%" class="img-circle<%if(device.status==false){%> item-off<%}%>">
-						<figcaption class="text-border caption"><%=device.device_name%></figcaption>
+				<div class="col-xs-12"><%listRoom.forEach(function(room){%>
+					<div class="col-sm-6 col-xs-12 well">
+						<legend><h4 class="white"><%=room.room_name%></h4></legend><% if(room.listDevice.length==0){%>
+							<div>No device is used</div><%}else{ room.listDevice.forEach((device)=>{%>
+							<div style="width:85px; display:inline-grid;" id="device_<%=device._id%>">
+								<div class="thumbnail opacity-background" style="width:100%;">
+									<i class="fa fa-times-circle fa-2x close" onclick="delete_device(this)"></i>
+									<input type="hidden" value="<%=device._id%>">
+									<img src="<%=device.device.img%>" style="width:100%" onclick="control_device(this)" class="img img-circle <%if(device.status==false){%> item-off<%}%>">
+									<figcaption class="caption text-center" onclick="editDevice(this)"><%=device.device_name%></figcaption>
+									<input type="text" id="edt_device" style="font-size: 12px; display:none; width:100%" onchange="submitEditDevice(this)" value="<%=device.device_name%>">
+								</div>
+							</div>
+						<%});}%>
+					</div><%}); %>
+					<div class="clearfix"></div>
+					<div class="col-xs-12 well" id="listNoRoom">
+						<h4 class="white">Other device</h4><%listDevice.forEach((device)=>{%>
+						<div style="width:85px; display:inline-grid;" id="device_<%=device._id%>">
+							<div class="thumbnail opacity-background" style="width:100%;">
+								<i class="fa fa-times-circle fa-2x close" onclick="delete_device(this)"></i>
+								<input type="hidden" value="<%=device._id%>">
+								<img src="<%=device.device.img%>" style="width:100%" onclick="control_device(this)" class="img img-circle <%if(device.status==false){%> item-off<%}%>">
+								<figcaption class="caption text-center" onclick="editDevice(this)"><%=device.device_name%></figcaption>
+								<input type="text" id="edt_device" style="font-size: 12px; display:none; width:100%" onchange="submitEditDevice(this)" value="<%=device.device_name%>">
+							</div>
+						</div><%});%>
 					</div>
 				</div>
-				<%});%>
 			</div>
 		</div>
 	</div>
 	<% include ./partials/footer %>
+	<script src="/sockets/device.js"></script>
 	<script>
 	$(document).ready(function(){
 		$(".close").hide();
-		$("#btnSave").hide();
 	});
-	$('#btnEdit').click(function(){
+	$('#btnDelete').click(function(){
 		$(".close").show();
-		$("#btnSave").show();
-		$('#btnEdit').hide();
 	});
-	$("#btnSave").click(function(){
-		$(".close").hide();
-		$("#btnSave").hide();
-		$('#btnEdit').show();
-	});
-		
 	
-	function remove_device(e){
-		var item = $(e).parent();
-		item.off('click');
-		$.ajax({
-			url: '/device/delete',
-			type: 'DELETE',
-			data: {'id': item.children('input').val()},
-			success: function(data){
-				if(data.success==true){
-					item.remove();
-				}else{
-					alert(data.message);
-				}
-			},
-			error: function(){
-				alert('Error! An error occurred. Please try again later');
-			}
-		});
+	function editDevice(e){
+		$(e).parent().children('input:text').show();
+		$(e).hide();
+	}
+	function submitEditDevice(e){
+		console.log('forcus_out');
+		let id = $(e).parent().children('input:hidden').val();
+		let name = $(e).val();
+		let data = {'_id' : id, 'device_name' : name};
+		socket.emit('client_send_update_device_in_room', {'data' : data});
+		$(e).hide();
+		$(e).parent().children('figcaption').show();
 	}
 	</script>
 </body>

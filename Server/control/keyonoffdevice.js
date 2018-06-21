@@ -4,77 +4,57 @@ var Key = require('../model/key_control_device'),
  jwt = require('jsonwebtoken');
 var mongoose = require('mongoose');
 
-Key.mInsert = (token, data)=>{
+Key.mInsert = (user, data)=>{
 	return new Promise((resolve, reject)=>{
-		jwt.verify(token, config.secret_key, (error, decode) => {
-			if(error){
-				return reject({'success': false, 'message': msg.error.verify});
+		let k = new Key();
+		k.device = data.device;
+		k.on = data.on;
+		k.off = data.off;
+		k.save((err, result)=>{
+			if(err){
+				return reject({'success' : false, 'message' : msg.error.occur});
+			}else{
+				return resolve({'success' : true, 'id' : user, 'result' : result});
 			}
-			let k = new Key();
-			k.device = data.device;
-			k.on = data.on;
-			k.off = data.off;
-			k.save((err, result)=>{
-				if(err){
-					return reject({'success' : false, 'message' : msg.error.occur});
-				}else{
-					return resolve({'success' : true, 'id' : decode._id, 'result' : result});
-				}
-			})
+		})
+	});
+}
+
+Key.mUpdate = (user, data)=>{
+	return new Promise((resolve, reject)=>{
+		Key.update({'_id' : new mongoose.Types.ObjectId(data._id)}, {$set : {data}}).
+		exec((err, result)=>{
+			if(err){
+				return reject({'success' : false, 'message' : msg.error.occur});
+			}else{
+				return resolve({'success' : true, 'id' : user, 'result' : result});
+			}
 		});
 	});
 }
 
-Key.mUpdate = (token, data)=>{
+Key.mDelete = (user, _id)=>{
 	return new Promise((resolve, reject)=>{
-		jwt.verify(token, config.secret_key, (error, decode) => {
-			if(error){
-				return reject({'success': false, 'message': msg.error.verify});
+		Key.remove({'_id': new mongoose.Types.ObjectId(_id)}).
+		exec((error2) => {
+			if(error2){
+			  return reject({'success': false, 'message': msg.error.occur});
+			} else {
+			  return resolve({'success': true, 'id' : user, 'result' : _id});
 			}
-			Key.update({'_id' : new mongoose.Types.ObjectId(data._id)}, {$set : {data}}).
-			exec((err, result)=>{
-				if(err){
-					return reject({'success' : false, 'message' : msg.error.occur});
-				}else{
-					return resolve({'success' : true, 'id' : decode._id, 'result' : result});
-				}
-			});
 		});
 	});
 }
 
-Key.mDelete = (token, _id)=>{
+Key.getByDevice = (device)=>{
 	return new Promise((resolve, reject)=>{
-		jwt.verify(token, config.secret_key, (error, decode) => {
-			if(error){
-				return reject({'success': false, 'message': msg.error.verify});
+		Key.find({'device' : new mongoose.Types.ObjectId(device)}).
+		exec((err, data)=>{
+			if(err){
+				return reject({'success': false, 'message': msg.error.occur});
+			}else{
+				return resolve({'success': true, 'result' : data});
 			}
-			Key.remove({'_id': new mongoose.Types.ObjectId(_id)}).
-		      exec((error2) => {
-		        if(error2){
-		          return reject({'success': false, 'message': msg.error.occur});
-		        } else {
-		          return resolve({'success': true, 'id' : decode._id, 'result' : _id});
-		        }
-		      });
-		});
-	});
-}
-
-Key.getByDevice = (token, device)=>{
-	return new Promise((resolve, reject)=>{
-		jwt.verify(token, config.secret_key, (error, decode) => {
-			if(error){
-				return reject({'success': false, 'message': msg.error.verify});
-			}
-			Key.find({'device' : new mongoose.Types.ObjectId(device)}).
-			exec((err, data)=>{
-				if(err){
-					return reject({'success': false, 'message': msg.error.occur});
-				}else{
-					return resolve({'success': true, 'result' : data});
-				}
-			});
 		});
 	});
 }

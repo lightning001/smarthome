@@ -1,5 +1,6 @@
 
 <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+			
 	<div class="container">
 		<!-- Brand and toggle get grouped for better mobile display -->
 		<div class="navbar-header">
@@ -9,16 +10,17 @@
 				</span>
 			</button>
 			<a href="/" class="navbar-brand"> <span class="pull-left">
-					<span class="font-lobster">Smart Home</span>
+				<button class="btn btn-success text-center navbar-btn"><i class="fa fa-arrow-left"></i></button>
+				<span class="font-lobster">Smart Home</span>
 			</span>
 			</a>
 		</div>
 		<div class="collapse navbar-collapse" id="my-navbar-collapse">
 			<% if(req.session !=null && req.session.user != null){ %>
 			<ul class="nav navbar-nav">
-				<li id="mnMode"><a href="/mode">Mode</a></li>
-				<li id="mnDevice"><a href="/device">Device</a></li>
-				<li id="mnCamera"><a href="/camera">Camera</a></li>
+				<li id="mnMode"><a href="/mode" class="font18">Mode</a></li>
+				<li id="mnDevice"><a href="/device" class="font18">Device</a></li>
+				<li id="mnCamera"><a href="/camera" class="font18">Camera</a></li>
 			</ul>
 			<% } %>
 			<ul class="nav navbar-nav navbar-right">
@@ -41,7 +43,7 @@
 						<li class="divider"></li>
 						<li><a href="#">Help</a></li>
 						<li class="divider"></li>
-						<li><a href="/logout">Sign out</a></li>
+						<li><a href="#" onclick="logout()">Sign out</a></li>
 					</ul></li> 
 				<% }else{ %>
 				<li><a href="/login">Sign in</a></li>
@@ -51,4 +53,3 @@
 		</div>
 	</div>
 </nav>
-<div class="clearfix"></div>

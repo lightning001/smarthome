@@ -3,21 +3,12 @@
 
 <head>
 	<% include ./partials/head %>
-		<link rel="stylesheet" href="/css/home.css">
 		<title>Sign up</title>
+		<link rel="stylesheet" href="/css/home.css">
 </head>
 
 <body>
 	<% include ./partials/header %>
-		<div class="clearfix"></div>
-	<div class="content-wrapper">
-		<section class="content-header">
-		<ol class="path-page pull-right">
-			<li><a href="#"><i class="fa fa-home"></i> Home</a></li>
-			<li><a href="#">Sign up</a></li>
-		</ol>
-		</section>
-	</div>
 		<div class="space-medium">
 			<div class="container">
 				<div class="row" style="margin: auto">
@@ -34,110 +25,139 @@
 									<i class="fa fa-google"></i><a href="#" class="google-btn-text">Google</a>
 								</div>
 							</div>
-							<% if(message){%>
-								<p><%=message%></p>
-							<%}%>
-							<div class="row">
-								<form method="post" action="/register" enctype="multipart/form-data" id="formRegister">
+							<% if(message!=null && message.length>0){%>
+								<div class="alert alert-danger">
+									<%=message%>
+								</div>
+								<%}%>
+									<div class="row">
+										<form method="post" class="form-horizontal" action="/register" enctype="multipart/form-data" id="formRegister">
 
-									<div class="col-lg-12 col-md-12 col-sm-6 col-xs-12">
-										<div class="form-group">
-											<label class="control-label required" for="name"> Name<sup
-											style="color: red">*</sup></label> <input type="text" name="name" id="name" tabindex="1" class="form-control" placeholder="Enter Your Name" required>
-										</div>
-									</div>
+											<div class="col-lg-12 col-md-12 col-sm-6 col-xs-12">
+												<div class="form-group">
+													<label class="control-label col-sm-3 required" for="name"> Name<sup
+											style="color: red">*</sup></label>
+													<div class="col-sm-9">
+														<input type="text" name="name" id="name" tabindex="1" class="form-control" placeholder="Enter Your Name" required>
+													</div>
+												</div>
+											</div>
 
-									<div class="col-lg-12 col-md-12 col-sm-6 col-xs-12">
-										<div class="form-group">
-											<label class="control-label required" for="email">
+											<div class="col-lg-12 col-md-12 col-sm-6 col-xs-12">
+												<div class="form-group">
+													<label class="control-label col-sm-3 required" for="email">
 											Email<sup style="color: red">*</sup>
-										</label> <input type="email" name="email" id="email" tabindex="2" class="form-control" placeholder="Enter Your Email" required>
-										</div>
-									</div>
-									<div class="col-lg-12 col-md-12 col-sm-6 col-xs-12">
-										<div class="form-group">
-											<label class="control-label required" for="password">
+										</label>
+													<div class="col-sm-9"><input type="email" name="email" id="email" tabindex="2" class="form-control" placeholder="Enter Your Email" required>
+													</div>
+												</div>
+											</div>
+											<div class="col-lg-12 col-md-12 col-sm-6 col-xs-12">
+												<div class="form-group">
+													<label class="control-label required col-sm-3" for="password">
 											Password<sup style="color: red">*</sup>
-										</label> <input type="password" name="password" id="password" tabindex="3" class="form-control" placeholder="Password (*)" required>
-										</div>
-									</div>
-									<div class="col-lg-12 col-md-12 col-sm-6 col-xs-12">
-										<div class="form-group">
-											<label class="control-label required" for="cfpassword">
+										</label>
+													<div class="col-sm-9"><input type="password" name="password" id="password" tabindex="3" class="form-control" placeholder="Password (*)" required>
+													</div>
+												</div>
+											</div>
+											<div class="col-lg-12 col-md-12 col-sm-6 col-xs-12">
+												<div class="form-group">
+													<label class="control-label required col-sm-3" for="cfpassword">
 											Confirm Password<sup style="color: red">*</sup>
-										</label> <input type="password" name="confirmPassword" id="confirmPassword" tabindex="4" class="form-control" placeholder="Confirm Password" required>
-										</div>
-									</div>
-									<div class="col-lg-12 col-md-12 col-sm-6 col-xs-12">
-										<div class="form-group">
-											<label class="control-label required" for="phone">
+										</label>
+													<div class="col-sm-9"><input type="password" name="confirmPassword" id="confirmPassword" tabindex="4" class="form-control" placeholder="Confirm Password" required>
+													</div>
+												</div>
+											</div>
+											<div class="col-lg-12 col-md-12 col-sm-6 col-xs-12">
+												<div class="form-group">
+													<label class="control-label required col-sm-3" for="phone">
 											Phone number<sup style="color: red">*</sup>
-										</label> <input type="text" name="phonenumber" id="phonenumber" tabindex="5" class="form-control" placeholder="Phone number (*)" required>
-										</div>
-									</div>
-									<div class="col-lg-12 col-md-12 col-sm-6 col-xs-12">
-										<div class="form-group">
-											<label class="control-label" for="homephone"> Home
-											phone number</label> <input type="text" name="homephone" id="homphone" tabindex="6" class="form-control" placeholder="Home phone number">
-										</div>
+										</label>
+													<div class="col-sm-9"><input type="text" name="phonenumber" id="phonenumber" tabindex="5" class="form-control" placeholder="Phone number (*)" required>
+													</div>
+												</div>
+											</div>
+											<div class="col-lg-12 col-md-12 col-sm-6 col-xs-12">
+												<div class="form-group">
+													<label class="control-label col-sm-3" for="homephone"> Home
+											phone number</label>
+													<div class="col-sm-9"><input type="text" name="homephone" id="homphone" tabindex="6" class="form-control" placeholder="Home phone number">
+													</div>
+												</div>
 
-									</div>
-									<div class="col-lg-12 col-md-12 col-sm-6 col-xs-12">
-										<div class="form-group">
-											<label class="control-label" for="city"> City</label> <input type="text" name="city" id="city" tabindex="7" class="form-control" placeholder="City/Province">
-										</div>
-									</div>
-									<div class="col-lg-12 col-md-12 col-sm-6 col-xs-12">
-										<div class="form-group">
-											<label class="control-label" for="district"> District</label>
-											<input type="text" name="district" id="district" tabindex="8" class="form-control" placeholder="District/County">
-										</div>
-									</div>
-									<div class="col-lg-12 col-md-12 col-sm-6 col-xs-12">
-										<div class="form-group">
-											<label class="control-label" for="city"> Ward</label> <input type="text" name="ward" id="ward" tabindex="9" class="form-control" placeholder="Commune/Ward">
-										</div>
-									</div>
-									<div class="col-lg-12 col-md-12 col-sm-6 col-xs-12">
-										<div class="form-group">
-											<label class="control-label" for="street"> Street</label> <input type="text" name="street" id="street" tabindex="10" class="form-control" placeholder="Street">
-										</div>
-									</div>
-									<div class="col-lg-12 col-md-12 col-sm-6 col-xs-12">
-										<div class="form-group">
-											<label class="control-label required" for="dob"> Day
+											</div>
+											<div class="col-lg-12 col-md-12 col-sm-6 col-xs-12">
+												<div class="form-group">
+													<label class="control-label col-sm-3" for="city"> City</label>
+													<div class="col-sm-9"><input type="text" name="city" id="city" tabindex="7" class="form-control" placeholder="City/Province">
+													</div>
+												</div>
+											</div>
+											<div class="col-lg-12 col-md-12 col-sm-6 col-xs-12">
+												<div class="form-group">
+													<label class="control-label col-sm-3" for="district"> District</label>
+													<div class="col-sm-9"><input type="text" name="district" id="district" tabindex="8" class="form-control" placeholder="District/County">
+													</div>
+												</div>
+											</div>
+											<div class="col-lg-12 col-md-12 col-sm-6 col-xs-12">
+												<div class="form-group">
+													<label class="control-label col-sm-3" for="city"> Ward</label>
+													<div class="col-sm-9"><input type="text" name="ward" id="ward" tabindex="9" class="form-control" placeholder="Commune/Ward">
+													</div>
+												</div>
+											</div>
+											<div class="col-lg-12 col-md-12 col-sm-6 col-xs-12">
+												<div class="form-group">
+													<label class="control-label col-sm-3" for="street"> Street</label>
+													<div class="col-sm-9"><input type="text" name="street" id="street" tabindex="10" class="form-control" placeholder="Street">
+													</div>
+												</div>
+											</div>
+											<div class="col-lg-12 col-md-12 col-sm-6 col-xs-12">
+												<div class="form-group">
+													<label class="control-label required col-sm-3" for="dob"> Day
 											of birth<sup style="color: red">*</sup>
-										</label> <input type="date" name="dob" id="dob" tabindex="11" class="form-control" placeholder="Birthday" required>
-										</div>
-									</div>
-									<div class="col-lg-12 col-md-12 col-sm-6 col-xs-12">
-										<div class="form-group">
-											<label class="control-label required" for="postcde">
+										</label>
+													<div class="col-sm-9"><input type="date" name="dob" id="dob" tabindex="11" class="form-control" placeholder="Birthday" required>
+													</div>
+												</div>
+											</div>
+											<div class="col-lg-12 col-md-12 col-sm-6 col-xs-12">
+												<div class="form-group">
+													<label class="control-label required col-sm-3" for="postcde">
 											Postal/Zipcode<sup style="color: red">*</sup>
-										</label> <input type="text" name="postcode" id="postcode" tabindex="12" class="form-control required" role="number" placeholder="Postal code" required>
+										</label>
+													<div class="col-sm-9"><input type="text" name="postcode" id="postcode" tabindex="12" class="form-control required" role="number" placeholder="Postal code" required>
+													</div>
+													<div>
+													</div>
+													<div class="col-lg-12 col-md-12 col-sm-6 col-xs-12">
+														<div class="form-group">
+															<label class="control-label col-sm-3" for="profile"> Profile
+											picture </label>
+															<div class="col-sm-9"><input type='file' accept="image/*" onchange="readURL(this);" class="form-control" title="Choose your profile picture" name="file" />
+																<div class="input-group" data-toggle="tooltip" data-placement="top" title="Choose your profile picture"></div>
+															</div>
+														</div>
+													</div>
+													<div class="col-sm-3">
+														<img id="image-preview" src="/image/no-images.png" alt="your image" style="width : 100%; height : auto" />
+													</div>
+													<div>
+														<input type="submit" class="btn btn-success" value="Sign up" id="btn-submit-register"> <input type="reset" class="btn btn-warning" value="Clear"> <input type="button" class="btn btn-default" value="Cancel">
+													</div>
+										</form>
+										</div>
 										</div>
 									</div>
-									<div class="col-lg-12 col-md-12 col-sm-6 col-xs-12">
-										<div class="form-group">
-											<label class="control-label" for="profile"> Profile
-											picture </label> <input type='file' accept="image/*" onchange="readURL(this);" class="form-control" title="Choose your profile picture" name="file" />
-											<div class="input-group" data-toggle="tooltip" data-placement="top" title="Choose your profile picture"></div>
-										</div>
-									</div>
-									<img id="image-preview" src="/image/no-images.png" alt="your image" class="img-100"/>
-									<div>
-										<input type="submit" class="btn btn-success" value="Sign up" id="btn-submit-register"> <input type="reset" class="btn btn-warning" value="Clear"> <input type="button" class="btn btn-default" value="Cancel">
-									</div>
-								</form>
-							</div>
 						</div>
-
 					</div>
 				</div>
-			</div>
-		</div>
-	<% include ./partials/footer %>
-	<script src="/js/formuser.js"></script>
+				<% include ./partials/footer %>
+					<script src="/js/formuser.js"></script>
 </body>
 
 </html>

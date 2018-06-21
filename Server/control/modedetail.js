@@ -4,152 +4,147 @@ var mongoose = require('mongoose');
 const msg = require('../msg').en;
 var jwt = require('jsonwebtoken');
 
-ModeDetail.getDetailMode = (token, mode) =>{
+ModeDetail.getDetailMode = (mode) =>{
 	return new Promise((resolve, reject)=>{
-		jwt.verify(token, config.secret_key, (error, decode) => {
-			if(error){
-				return reject({'success': false, 'message': msg.error.verify});
+		ModeDetail.find({'mode' : new mongoose.Types.ObjectId(mode)}, {'group': 'mode'}).
+		populate('mode').
+		populate('device').
+		exec((error2, data2) => {
+			if(error2){
+				return reject({'success': false, 'message': msg.empty.cant_find});
+			} else if (!error && data2) {
+				return resolve({'success': true,  'result' : data2});
 			}
-			ModeDetail.find({'mode' : new mongoose.Types.ObjectId(mode)}, {'group': 'mode'}).
-			populate('mode').
-			populate('device').
-			exec((error2, data2) => {
-				if(error2){
-					return reject({'success': false, 'message': msg.empty.cant_find});
-				} else if (!error && data2) {
-					return resolve({'success': true,  'result' : data2});
-				}
-			});
 		});
 	});
 }
 
-ModeDetail.unused = (token, data) =>{
+ModeDetail.unused = (user, data) =>{
 	return new Promise((resolve, reject)=>{
-		jwt.verify(token, config.secret_key, (error, decode) => {
-			if(error){
-				return reject({'success': false, 'message': msg.error.verify});
+		ModeDetail.find().
+		populate({path : 'mode',match : {'_id' : {$nin : [new mongoose.Types.ObjectId(data.mode)]},'id_user' : new mongoose.Types.ObjectId(user)}}).
+		populate('device').
+		exec((error2, data2) => {
+			if(error2){
+				return reject({'success': false, 'message': msg.error.occur});
+			} else if (!error2 && data2) {
+				return resolve({'success': true,  'result' : data2});
 			}
-			ModeDetail.find().
-			populate({path : 'mode',match : {'_id' : {$nin : [new mongoose.Types.ObjectId(data.mode)]},'id_user' : new mongoose.Types.ObjectId(data.id_user)}}).
-			populate('device').
-			exec((error2, data2) => {
-				if(error2){
-					return reject({'success': false, 'message': msg.error.occur});
-				} else if (!error2 && data2) {
-					return resolve({'success': true,  'result' : data2});
-				}
-			});
 		});
 	});
 }
 
-ModeDetail.findByMode = (token, mode) =>{
+ModeDetail.findByMode = (mode) =>{
 	return new Promise((resolve, reject)=>{
-		jwt.verify(token, config.secret_key, (error, decode) => {
-			if(error){
-				return reject({'success': false, 'message': msg.error.verify});
+		ModeDetail.find({'mode' : new mongoose.Types.ObjectId(mode)}).
+		exec((error2, data2) => {
+			if(error2){
+				return reject({'success': false, 'message': msg.error.occur});
+			} else if (!error2 && data2) {
+				return resolve({'success': true,  'result' : data2});
 			}
-			ModeDetail.find({'mode' : new mongoose.Types.ObjectId(mode)}).
-			exec((error2, data2) => {
-				if(error2){
-					return reject({'success': false, 'message': msg.error.occur});
-				} else if (!error2 && data2) {
-					return resolve({'success': true,  'result' : data2});
-				}
-			});
 		});
 	});
 }
 
-ModeDetail.findByDevice = (token, device) =>{
+ModeDetail.findByDevice = (device) =>{
 	return new Promise((resolve, reject)=>{
-		jwt.verify(token, config.secret_key, (error, decode) => {
-			if(error){
-				return reject({'success': false, 'message': msg.error.verify});
+		ModeDetail.find({'device' : new mongoose.Types.ObjectId(device)}).
+		exec((error2, data2) => {
+			if(error2){
+				return reject({'success': false, 'message': msg.error.occur});
+			} else if (!error2 && data2) {
+				return resolve({'success': true,  'result' : data2});
 			}
-			ModeDetail.find({'device' : new mongoose.Types.ObjectId(device)}).
-			exec((error2, data2) => {
-				if(error2){
-					return reject({'success': false, 'message': msg.error.occur});
-				} else if (!error2 && data2) {
-					return resolve({'success': true,  'result' : data2});
-				}
-			});
 		});
 	});
 }
 
-ModeDetail.findBy_id = (token, _id) =>{
+ModeDetail.findBy_id = (_id) =>{
 	return new Promise((resolve, reject)=>{
-		jwt.verify(token, config.secret_key, (error, decode) => {
-			if(error){
-				return reject({'success': false, 'message': msg.error.verify});
+		ModeDetail.findById(new mongoose.Types.ObjectId(_id)).
+		exec((error2, data2) => {
+			if(error2){
+				return reject({'success': false, 'message': msg.empty.cant_find});
+			} else if (!error2 && data2) {
+				return resolve({'success': true,  'result' : data2});
 			}
-			ModeDetail.findById(new mongoose.Types.ObjectId(_id)).
-			exec((error2, data2) => {
-				if(error2){
-					return reject({'success': false, 'message': msg.empty.cant_find});
-				} else if (!error2 && data2) {
-					return resolve({'success': true,  'result' : data2});
-				}
-			});
 		});
 	});
 }
 
-ModeDetail.mInsert = (token, data) =>{
+
+
+ModeDetail.mInsert = (user, data) =>{
 	return new Promise((resolve, reject)=>{
-		jwt.verify(token, config.secret_key, (error, decode) => {
-			if(error){
-				return reject({'success': false, 'message': msg.error.verify});
+		let mModeDetail = new ModeDetail();
+		mModeDetail.mode = new mongoose.Types.ObjectId(data.mode);
+		mModeDetail.device = new mongoose.Types.ObjectId(data.device);
+		mModeDetail.save((err, result) =>{
+			if(err) {
+				return reject({'success' : false, 'message' : msg.error.occur});
+			}else{
+				return resolve({'success': true, 'id' : user, 'result' : result});
 			}
+		});
+	});
+}
+
+ModeDetail.insertArray = (user, data, mode)=>{
+	return new Promise((resolve, reject)=>{
+		try{
+			data.forEach(modedetail=>{
+				let mModeDetail = new ModeDetail(modedetail);
+				mModeDetail.mode = mode;
+				mModeDetail.save();
+			});
+			resolve(true);
+		}catch(e){
+			reject(false);
+		}
+	});
+}
+
+ModeDetail.mUpdate = (user, data) => {
+	return new Promise((resolve, reject)=>{
+		ModeDetail.update({'_id' : new mongoose.Types.ObjectId(data._id)}, {$set : data}).
+		exec((error2, result) => {
+			if(error2){
+				return reject({'success': false, 'message': msg.error.occur});
+			} else {
+				return resolve({'success': true, 'id' : user, 'result' : result});
+			}
+		});
+	});
+}
+
+ModeDetail.updateArray = (user, arrdata, mode)=>{
+	return new Promise((resolve, reject)=>{
+		arrdata.forEach(modedetail=>{
+			modedetail.mode = mode;
 			let mModeDetail = new ModeDetail();
-			mModeDetail.mode = new mongoose.Types.ObjectId(data.mode);
-			mModeDetail.device = new mongoose.Types.ObjectId(data.device);
-			mModeDetail.save((err, result) =>{
-				if(err) {
-					return reject({'success' : false, 'message' : msg.error.occur});
-				}else{
-					return resolve({'success': true, 'id' : decode._id, 'result' : result});
+			mModeDetail._id = new mongoose.Types.ObjectId(modedetail._id);
+			mModeDetail.mode = new mongoose.Types.ObjectId(mode);
+			mModeDetail.device = new mongoose.Types.ObjectId(modedetail.device);
+			mModeDetail.save().exec((err)=>{
+				if(err){
+					return reject({'success': false, 'message': msg.error.occur});
 				}
 			});
+			resolve({'success': true, 'id' : user, 'result' : arrdata});
 		});
 	});
 }
 
-ModeDetail.mUpdate = (token, data) => {
+ModeDetail.mDelete = (user, _id) =>{
 	return new Promise((resolve, reject)=>{
-		jwt.verify(token, config.secret_key, (error, decode) => {
-			if(error){
-				return reject({'success': false, 'message': msg.error.verify});
+		ModeDetail.remove({'_id' : new mongoose.Types.ObjectId(_id)}).
+		exec((error2) => {
+			if(error2){
+				return reject({'success': false, 'message': msg.error.occur});
+			} else {
+				return resolve({'success': true, 'id' : user, 'result' : _id});
 			}
-			ModeDetail.update({'_id' : new mongoose.Types.ObjectId(data._id)}, {$set : data}).
-			exec((error2, result) => {
-				if(error2){
-					return reject({'success': false, 'message': msg.error.occur});
-				} else {
-					return resolve({'success': true, 'id' : decode._id, 'result' : result});
-				}
-			});
-		});
-	});
-}
-
-ModeDetail.mDelete = (token, _id) =>{
-	return new Promise((resolve, reject)=>{
-		jwt.verify(token, config.secret_key, (error, decode) => {
-			if(error){
-				return reject({'success': false, 'message': msg.error.verify});
-			}
-			ModeDetail.remove({'_id' : new ObjectId(_id)}).
-			exec((error2) => {
-				if(error2){
-					return reject({'success': false, 'message': msg.error.occur});
-				} else {
-					return resolve({'success': true, 'id' : decode._id, 'result' : _id});
-				}
-			});
 		});
 	});
 };
@@ -159,43 +154,32 @@ ModeDetail.mDelete = (token, _id) =>{
 
 ModeDetail.getAllModeDetail = (token) => {
 	return new Promise((resolve, reject)=>{
-		jwt.verify(token, config.secret_key, (error, decode) => {
-			if(error){
-				return reject({'success': false, 'message': msg.error.verify});
+		ModeDetail.find().
+		exec((error2, data2) => {
+			if(error2){
+				return reject({'success': false, 'message': msg.error.occur});
+			} else if (!error2 && data2) {
+				return resolve({'success': true, 'result' : data2});
 			}
-			ModeDetail.find().
-			exec((error2, data2) => {
-				if(error2){
-					return reject({'success': false, 'message': msg.error.occur});
-				} else if (!error2 && data2) {
-					return resolve({'success': true, 'result' : data2});
-				}
-			});
 		});
 	});
 }
-// ModeDetail.getAllModeDetail().then(data =>console.log(JSON.stringify(data)),
-// err =>console.log(err));
+
 /**
  * Lấy danh sách thiết bị theo số lượng và trang (dùng cho phân trang)
  */
 ModeDetail.getByPage = (token, data) =>{
 	return new Promise((resolve, reject)=>{
-		jwt.verify(token, config.secret_key, (error, decode) => {
-			if(error){
-				return reject({'success': false, 'message': msg.error.verify});
+		ModeDetail.find().
+		skip((data.page-1) * data.quantity).
+		limit(data.quantity).
+		sort({id : 1, name : 1, type : 1, price : -1}).
+		exec((error2, data2) => {
+			if(error2){
+				return reject({'success': false, 'message': msg.error.occur});
+			} else if (!error2 && data2) {
+				return resolve({'success': true,  'result' : data2});
 			}
-			ModeDetail.find().
-			skip((data.page-1) * data.quantity).
-			limit(data.quantity).
-			sort({id : 1, name : 1, type : 1, price : -1}).
-			exec((error2, data2) => {
-				if(error2){
-					return reject({'success': false, 'message': msg.error.occur});
-				} else if (!error2 && data2) {
-					return resolve({'success': true,  'result' : data2});
-				}
-			});
 		});
 	});
 }

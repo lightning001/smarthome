@@ -1,63 +1,88 @@
-<!DOCTYPE html">
 <html>
-
 <head>
-	<% include ./partials/head %>
-<title><%=mode.mode_name%> - Mode</title>
+<% include ./partials/head %>
+<title>
+	<%=mode.mode_name%> - Mode</title>
 <link href="/css/switch.css" rel="stylesheet">
-</head>
-
+<script>
+	var token = localStorage.getItem('token');
+	var socket = io({query: {'token': token}});
+	socket.emit('join-room', token);
+</script>
+<script src="/js/ejs.min.js"></script>
+</head><%function changeTime(time){return new Date(parseInt(time *1000)).toISOString().split('T')[1].split('.')[0]}%>
 <body>
 	<% include ./partials/header %>
 	<div class="container-fluid main">
 		<div class="row">
 			<div>
 				<div class="well panel panel-warning">
-				<% var starttime = mode.starttime/3600 +':'+mode.starttime%3600/60 +':' +mode.starttime%3600%60;
-				var stoptime = mode.stoptime/3600 +':'+mode.stoptime%3600/60 +':' +mode.stoptime%3600%60;
-				%>
 					<div class="panel-body">
-						<div class="col-xs-10">
-					<span style="font-size: 25px;"> <%=mode.mode_name%></span>
-				</div>
-				<div>
-					<label class="switch">
-						<input type="checkbox" <%if(mode.status==true){%>checked<%}%>>
-						<span class="slider round"></span>
-					</label>
-				
-							<button class="btn btn-default pull-right" id="btnEdit" title="Edit room">Edit</button>
-							<button class="btn btn-success pull-right" id="btnSave" title="Done">Done</button>
-						</div>
-						<div><span class="bold uppercase col-xs-4">Start time: </span>
-							<%=starttime %>
-						</div>
-						<div><span class="bold uppercase col-xs-4">Stop time: </span>
-							<%=starttime %>
-						</div>
-						<div class="bold uppercase col-xs-12">Repeat: </div>
-						<ol>
-						<%for(var i=0;i<mode.circle.length; i++){%>
-							<li class="badge badge-warning">
-								<%=mode.circle[i]%>
-							</li>
-						<%}%>
-						</ol>
+						<legend>
 						<div>
-						<%if(mode.listModeDetail!=null && mode.listModeDetail.length>0){
-							mode.listModeDetail.forEach(function(device){
-						%>
-							<div class="col-lg-2 col-md-2 col-sm-3 col-xs-4">
-						<div class="thumbnail" onclick="img_click(this)">
-							<i class="fa fa-times-circle fa-2x close" onclick="remove_device(this)"></i>
-							<input type="hidden" value="<%=device.device._id%>">
-							<img src="<%=device.device.device.img%>" style="width:100%" class="img-circle <%if(device.device.status==false){%>item-off<%}%>">
-							<figcaption class="text-border caption"><%=device.device.device_name%></figcaption>
-						</div>
-					</div>
-						<%});}else{%>
-							
+							<div class="col-xs-10">
+								<span style="font-size: 25px;"><%=mode.mode_name%></span>
+							</div>
+							<div>
+								<label class="switch">
+									<input type="checkbox" <%if(mode.status==true){%>checked<%}%>>
+									<span class="slider round"></span>
+								</label>
+
+								<button class="btn btn-default pull-right" id="btnEdit" title="Edit room">Edit</button>
+								<button class="btn btn-success pull-right" id="btnSave" title="Done">Done</button>
+							</div>
+						</div></legend>
+						<%	if(mode.type==0){
+							var start = new Date(parseInt(mode.starttime *1000)).toISOString().split('T')[1].split('.')[0];
+			  				var stop = new Date(parseInt(mode.stoptime *1000)).toISOString().split('T')[1].split('.')[0];%>
+						<div><span class="bold uppercase col-xs-4">Start time: </span><%=start %></div>
+						<div><span class="bold uppercase col-xs-4">Stop time: </span><%=stop %></div>
+						<div class="bold uppercase col-xs-12">Repeat: </div>
+						<ol><%for(var i=0;i<mode.circle.length; i++){%>
+							<li class="badge badge-warning"><%=mode.circle[i]%></li><%}%>
+						</ol>
+						<%}else{%>
+						<div class="bold uppercase col-xs-12">Time Period: </div>
+						<div><b class="bold uppercase col-xs-4">Start date: </b><%= mode.day.startdate.toISOString().split('T')[0]%></div>
+						<div><b class="bold uppercase col-xs-4">Stop date: </b><%= mode.day.stopdate.toISOString().split('T')[0]%></div>
 						<%}%>
+						<hr>
+						<div class="row">
+							<%if(mode.listModeDetail!=null && mode.listModeDetail.length>0){
+							mode.listModeDetail.forEach(function(modedetail){
+							let device = modedetail.device;
+							let	perOn = 100.0 * modedetail.schedule.ontime / (mode.stoptime - mode.starttime) ;
+							let	perOff = 100.0 * modedetail.schedule.offtime / (mode.stoptime - mode.starttime);
+							let	schedule = modedetail.schedule.scheduledetail;
+								if(device!=null){
+					%>
+							<div class="media well"><a class="pull-left" href="#">
+								<img class="media-object<%if(device.status==false){%> item-off<%}%>" style="width : 85px;" src="<%=device.device.img%>" alt="<%=device.device_name%>"></a>
+								<div class="media-body">
+									<h4 class="media-heading"><%=device.device_name%></h4>
+									<div class="row">
+										<div class="col-xs-12"><% let on = changeTime(modedetail.schedule.ontime);let off = changeTime(modedetail.schedule.offtime);%>
+											<div class="col-xs-2"><b>On Time: </b><%=on%></div>
+											<div class="col-xs-2"><b>Off Time: </b><%=off%></div>
+										</div><%if(mode.type==0){%>
+										<div class="col-sm-1 hidden-xs pull-left"><%=start%></div>
+										<div class="col-sm-1 hidden-xs pull-right"><%=stop%></div><%}%>
+										<div class="col-xs-10">
+											<div class="progress" style="border-radius : 0px;">
+												<%if(modedetail.schedule.offtime==0 && modedetail.schedule.ontime>0){%>
+												<div class="progress-bar progress-bar-success" style="width: 100%"></div>
+												<%}else if(modedetail.schedule.offtime==0 && modedetail.schedule.ontime==0){%>
+												<div class="progress-bar progress-bar-success" style="width: 0%"></div>
+												<%}else{schedule.forEach((detail)=>{%>
+												<div class="progress-bar progress-bar-success" style="width: <%=perOn%>%"  data-placement="top" data-toggle="popover" data-trigger="hover" data-content="<%='On: '+changeTime(detail.ontime) + ' to '+ changeTime(detail.offtime)%>"></div>
+												<div class="progress-bar" style="background-color : #d3d3d3; width: <%=perOff%>%"></div><%});}%>
+											</div>
+										</div>	
+									</div>
+								</div>
+							</div><%}});}else{%>
+							<div> No device</div><%}%>
 						</div>
 					</div>
 				</div>
@@ -66,21 +91,24 @@
 	</div>
 	<% include ./partials/footer %>
 	<script>
-	$(document).ready(function(){
-		$(".close").hide();
-		$("#btnSave").hide();
-	});
-	$('#btnEdit').click(function(){
-		$(".close").show();
-		$("#btnSave").show();
-		$('#btnEdit').hide();
-	});
-	$("#btnSave").click(function(){
-		$(".close").hide();
-		$("#btnSave").hide();
-		$('#btnEdit').show();
-	});
+		$(document).ready(function() {
+			$(".close").hide();
+			$("#btnSave").hide();
+			$('[data-toggle="popover"]').popover();   
+		});
+		$('#btnEdit').click(function() {
+			$(".close").show();
+			$("#btnSave").show();
+			$('#btnEdit').hide();
+		});
+		$("#btnSave").click(function() {
+			$(".close").hide();
+			$("#btnSave").hide();
+			$('#btnEdit').show();
+		});
+
 	</script>
+	<script src="/sockets/device.js"></script>
 </body>
 
 </html>

@@ -10,7 +10,7 @@ var schemaDevice = new mongoose.Schema({
   description : {type : String},
   price : {type : mongoose.Schema.Types.Double, default : 0},
   type : {type : Number}
-});
+}, { toJSON : {virtuals: true}});
 
 var Device = conn.model('Device', schemaDevice, 'DEVICE');
 

@@ -1,61 +1,79 @@
-<!DOCTYPE html">
 <html>
-
 <head>
 <% include ./partials/head %>
-<script src="/sockets/room.js"></script>
+<script>
+	var token = localStorage.getItem('token');
+	if (token == null || token == undefined) {
+		token = "<%=req.session.usertoken%>";
+		localStorage.setItem('token', token);
+	}
+	var socket = io({query : {'token': token}});
+	socket.emit('join-room', token);
+</script>
+<script src="/js/ejs.min.js"></script>
 <title>Room</title>
 </head>
-
 <body>
-	<% include ./partials/header %>
+	<%- include('./partials/header'); %>
+<main>
 	<div class="container main">
-		<div class="row" id="pane_Room">
-			<div class="col-xs-12"><h1><b>ROOM</b></h1><hr></div>
-		<% 	for(var i =0; i<listRoom.length; i++){
-				var room = listRoom[i];
-				var name = '';
-				if(room.room_name.length < 30){
-					name = room.room_name;
-				}else{
-					name = room.room_name.substring(0, 25)+'...';
-				}
-				if(i%4==0&&i>0){%>
-			<div class="clearfix"></div>		
-				<%}	%>
-			<div class="col-md-3 col-xs-6 col-sm-6" id="<%=room._id%>">
-				<div class="thumbnail">
-					<a href="/room/<%=room._id%>">
-						<input type="hidden" value="<%=room._id%>">
-						<img src="<%= room.img %>" alt="room"  style="min-height:17vw" class="img-room img">
-						<div class="caption row">
-							<font class="col-xs-10" style="font-size:17px;"><%=name%></font>
-							<div class="col-xs-1">
-								<div class="dropdown">
-									<a class="dropdown-toggle" data-toggle="dropdown" href="#">
-									<i class="fa fa-ellipsis-v text-center col-xs-1" ></i>
-									</a>
-									<ul class="dropdown-menu">
-										<li><a> Update room </a></li>
-										<li><a onclick="deleteRoom(this, 0)">Delete room</a>
-											<input type="hidden" value="<%=room._id%>" name="id">
-										</li>
-										<li><a onclick="deleteRoom(this, 1)">Delete room and device</a>
-											<input type="hidden" value="<%=room._id%>">
-										</li>
-									</ul>
-								</div>
+		<div class="row">
+			<div class="well"><%if(listRoom.length ==0){%>
+				<div id="noroom">No room</div><%}else{%>
+				<div id="haveroom">
+					<div class="col-xs-12">
+						<div class="row">
+							<div id="carousel" class="row"><%listRoom.forEach((room)=>{%>
+								<%- include('./partials/item_room', {'room' : room}) %><%});%>
 							</div>
 						</div>
-					</a>
+						<i class="fa fa-angle-left fa-2x controler-left"></i>
+						<i class="fa fa-angle-right fa-2x controler-right"></i>
+						<input type="hidden" value="<%=listRoom.length%>" id="length">
+						<input type="hidden" value="0" id="currentIndex">
+					</div>
+					<div class="clearfix"></div>
+					<!-- Content room -->
+					<div class="tab-content"><% for(var i=0; i<listRoom.length; i++){%>
+						<div class="tab-pane well opacity-background fade<%if(i==0){%> in active<%}%>" id="room_<%=listRoom[i]._id%>">
+							<div class="btn-group">
+								<button type="button" class="btn btn-default btn-group-lg dropdown-toggle" data-toggle="dropdown">
+								<%=listRoom[i].room_name%>
+								<i class="fa fa-ellipsis-v" style="padding-right:0px;"></i>
+								</button>
+								<ul class="dropdown-menu">
+									<li><a href="/room/<%=listRoom[i]._id%>"> Update room </a></li>
+									<li><a onclick="deleteRoom(this, 0)">Delete room
+										<input type="hidden" value="<%=listRoom[i]._id%>" name="id">
+										</a>
+									</li>
+									<li><a onclick="deleteRoom(this, 1)">Delete room and device
+										<input type="hidden" value="<%=listRoom[i]._id%>">
+										</a>
+									</li>
+								</ul>
+							</div><%if(listRoom[i].listDevice == undefined || listRoom[i].listDevice == null || listRoom[i].listDevice.length == undefined || listRoom[i].listDevice.length==0){%>
+							<div class="row opacity-background">
+								<div class="col-xs-12" id="nodeviceuse"> No device is used</div>
+							</div><%}else{%>
+							<div class="row opacity-background">
+								<div id="havedevice"><%listRoom[i].listDevice.forEach(function(device){%>
+								<%- include('./partials/item_device', {'device' : device});%><%})%>
+								</div>
+							</div><%}%>
+						</div><%}%>
+					</div>
 				</div>
-			</div>
-		<%}%>
-		<div class="clearfix"></div>
-		</div>
-		<a class="label" href="/room/add"><i class="fa fa-plus fa-4x btn btn-add"></i></a>
-	</div>
-	<% include ./partials/footer %>
+				<input type="hidden" value="<%=listRoom.length%>" id="lengthRoom"><%}%>
+			</div><!-- end well-->
+			<a class="label" href="/room/add"><i class="fa fa-plus fa-3x btn btn-add"></i></a>
+		</div><!-- end row-->
+	</div><!-- end container-->
+	<script src="/js/carousel.js"></script>
+	<script src="/sockets/room.js"></script>
+	<script src="/sockets/device.js"></script>
+</main>
+<%- include('./partials/footer'); %>
 </body>
 
 </html>

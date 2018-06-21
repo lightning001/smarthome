@@ -66,46 +66,32 @@ var convertCircle = (circle)=>{
 }
 
 router.get('/', authenticated, (req, res) => {
-	if (req.session.authentication == null | false) {
-		res.redirect('/');
-	}else{
-		mMode.findByUser(req.session.usertoken, req.session.user._id).then(
-		(data) => {
-			let listMode = [];
-			if (data.result != undefined && data.result.length > 0) {
-				listMode = data.result;
-			}
-			for(var i = 0; i<listMode.length; i++){
-				listMode[i].circle = changeCircle(listMode[i].circle);
-			}
-			res.render('user_views/mode', {
-				'req': req,
-				'res': res,
-				'listMode': listMode
-			});
-		}, (e) => {
-			req.flash('error', 'We can\'t get your Mode. Please try later');
-			res.redirect('/error');
-		});
-	}
+	mMode.findByUser(req.session.user._id).then(
+	(data) => {
+		let listMode = [];
+		if (data.result != undefined && data.result.length > 0) {
+			listMode = data.result;
+		}
+		for(var i = 0; i<listMode.length; i++){
+			listMode[i].circle = changeCircle(listMode[i].circle);
+		}
+		res.render('user_views/mode', {'req': req,'res': res,'listMode': listMode});
+	}, (e) => {
+		req.flash('error', 'We can\'t get your Mode. Please try later');
+		res.redirect('/error');
+	});
 });
 
 router.get('/:id', authenticated, (req, res) => {
-	if (req.session.authentication == null | false) {
-		res.redirect('/');
-	}else{
-		let id = req.params.id;
-		mMode.findBy_ID(req.session.usertoken, id)
-		mMode.getFullDetail(req.session.usertoken, id).then(
-			(data) => {
-				console.log('Mode detail: '+JSON.stringify(data));
-				data.result.circle = changeCircle(data.result.circle);
-				res.render('user_views/modedetail', {req: req, res: res, 'mode': data.result});
-			}).catch((err) => {
-				req.flash('error', 'We can\'t get this mode. Please try later');
-				res.redirect('/error');
-		});
-	}
+	let id = req.params.id;
+	mMode.getScheduleMode(req.session.user._id, id).then(
+		(data) => {
+			data.result.mode.circle = changeCircle(data.result.mode.circle);
+			res.render('user_views/modedetail', {req: req, res: res, 'mode': data.result.mode});
+		}).catch((err) => {
+			req.flash('error', 'We can\'t get this mode. Please try later');
+			res.redirect('/error');
+	});
 });
 
 module.exports = exports = router;

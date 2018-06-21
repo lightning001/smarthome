@@ -1,0 +1,101 @@
+<html>
+
+<head>
+<% include ./partials/head %>
+<script src="/sockets/room.js"></script>
+<script>
+	$(document).ready(function(){
+		$('.close').hide()
+	});
+	$('#mDevice').hover(function(){
+		$(this).children('i').show();
+	}, function(){
+		$(this).children('i').hide();
+	});
+
+</script>
+<style>
+	.nav-tabs{
+		display : table-row;
+		overflow-y: scroll;
+		overflow-x:hidden;
+	}
+</style>
+<title>Room</title>
+</head>
+<body>
+	<% include ./partials/header %>
+	<div class="container main">
+		<div class="well">
+			<div id="myCarousel" class="carousel slide" data-ride="carousel">
+				<ul class="nav nav-tabs"><%for(var i=0;i<listRoom.length;i++){%>
+					<li <%if(i==0){%>class="active"<%}%>><a data-toggle="tab" href="#room-<%=listRoom[i]._id%>">
+						<div class="dropdown"><%=listRoom[i].room_name%>
+							<a class="dropdown-toggle" data-toggle="dropdown" href="#">
+							<i class="fa fa-ellipsis-v white text-center col-xs-1" ></i>
+							</a>
+							<ul class="dropdown-menu">
+								<li><a href="/room/<%=listRoom[i]._id%>"> Update room </a></li>
+								<li><a onclick="deleteRoom(this, 0)">
+									Delete room
+									<input type="hidden" value="<%=listRoom[i]._id%>" name="id">
+									</a>
+								</li>
+								<li><a onclick="deleteRoom(this, 1)">
+									Delete room and device
+									<input type="hidden" value="<%=listRoom[i]._id%>">
+									</a>
+								</li>
+							</ul>
+						</div>
+						<img class="img" src="<%=listRoom[i].img%>" style="max-width:100px;">
+					</a></li><%}%>
+				</ul>
+				<div class="tab-content">
+					<% for(var i=0; i<listRoom.length; i++){%>
+					<div class="tab-pane well opacity-background fade<%if(i==0){%> in active<%}%>" id="room-<%=listRoom[i]._id%>">
+						<div class="row">
+							<div class="col-lg-2 col-md-2 col-xs-3 inline">
+								<button type="button" onclick="goBack()" class="btn btn-success" title="Back"><i class="fa fa-arrow-left"></i></button>
+								<div class="dropdown">
+									<a class="dropdown-toggle" data-toggle="dropdown" href="#">
+									<i class="fa fa-ellipsis-v white fa-2x text-center col-xs-1" ></i>
+									</a>
+									<ul class="dropdown-menu">
+										<li><a href="/room/<%=listRoom[i]._id%>"> Update room </a></li>
+										<li><a onclick="deleteRoom(this, 0)">
+											Delete room
+											<input type="hidden" value="<%=listRoom[i]._id%>" name="id">
+											</a>
+										</li>
+										<li><a onclick="deleteRoom(this, 1)">
+											Delete room and device
+											<input type="hidden" value="<%=listRoom[i]._id%>">
+											</a>
+										</li>
+									</ul>
+								</div>
+							</div>
+							<h4 class="col-sm-6 col-xs-8"><%=listRoom[i].room_name%></h4>
+						</div><%if(listRoom[i].listDevice == undefined || listRoom[i].listDevice == null || listRoom[i].listDevice.length == undefined || listRoom[i].listDevice.length==0){%>
+						<div class="row opacity-background"><div id="nodeviceuse" class="col-xs-12"> No device is used</div></div><%}else{%>
+						<div class="row opacity-background"><%listRoom[i].listDevice.forEach(function(device){%>
+							<div class="col-lg-2 col-md-2 col-sm-3 col-xs-3">
+								<div class="thumbnail opacity-background" id="mDevice" style="width:100%;" onclick="img_click(this)">
+									<i class="fa fa-times-circle fa-2x close"></i>
+									<input type="hidden" value="<%=device._id%>">
+									<img src="<%=device.device.img%>" style="width:100%" class="img img-circle <%if(device.status==false){%> item-off<%}%>">
+									<figcaption class="caption text-center"><%=device.device_name%></figcaption>
+								</div>
+							</div><%})%>
+						</div><%}%>
+					</div><%}%>
+				</div>
+			</div>
+		</div>
+		<a class="label" href="/room/add"><i class="fa fa-plus fa-4x btn btn-add"></i></a>
+	</div>
+	<% include ./partials/footer %>
+</body>
+
+</html>

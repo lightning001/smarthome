@@ -1,17 +1,8 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-
 <head>
 <% include ./partials/head %>
 <% var user = req.session.user ;%>
 <title><%=user.name %></title>
-<%if(alertMessage!=null && alertMessage.length>0){%>
-<script>
-	$(document).ready(function(){
-		alert("<%=alertMessage%>");
-	});
-</script>
-<%}%>
 </head>
 
 <body>
@@ -49,7 +40,7 @@
 							</div>
 						</div>
 						<div>
-						<form class="form-horizontal" action="/profile" method="post" id="editProfileForm">
+						<form class="form-horizontal" enctype="multipart/form-data" action="/profile" method="post" id="editProfileForm">
 							<ul class="list-group">
 								<li class="list-group-item form-group"><label class="control-label col-sm-4">Name <sup style="color : red">*</sup>: </label>
 									<div class="col-sm-8"> <input type="text" class="form-control edit-in-list" id="edtName" name="name" value="<%=user.name%>" required></div>

@@ -3,133 +3,109 @@ var DeviceInRoom = require('../model/device_in_room'),
 	config = require('../util/config'),
 	jwt = require('jsonwebtoken'),
 	mongoose = require('mongoose');
+require('../model/device');
+require('../model/room');
 /**
  * Tìm kiếm dựa vào _id của deviceInRoom (kiểu ObjectId)
  */
-DeviceInRoom.findBy_ID = (token, _id) => {
+DeviceInRoom.findBy_ID = (_id) => {
 	return new Promise((resolve, reject) => {
-		jwt.verify(token, config.secret_key, (error, decode) => {
-			if (error) {
-				return reject({'success': false,'message': msg.error.verify});
+		DeviceInRoom.findById(new mongoose.Types.ObjectId(_id)).
+		exec((error2, data2) => {
+			if (error2) {
+				return reject({'success': false,'message': msg.error.occur});
+			} else if (!error2 && data2) {
+				return resolve({'success': true,'result': data2});
 			}
-			DeviceInRoom.findById(new mongoose.Types.ObjectId(_id)).
-			exec((error2, data2) => {
-				if (error2) {
-					return reject({'success': false,'message': msg.error.occur});
-				} else if (!error2 && data2) {
-					return resolve({'success': true,'result': data2});
-				}
-			});
 		});
 	});
 };
 
-DeviceInRoom.getDeviceInRoom = (token, room) => {
+DeviceInRoom.getDeviceInRoom = (room) => {
 	return new Promise((resolve, reject) => {
-		jwt.verify(token, config.secret_key, (error, decode) => {
-			if (error) {
-				return reject({'success': false,'message': msg.error.verify});
+		DeviceInRoom.find({'room': new mongoose.Types.ObjectId(room)}).
+		populate('device').
+		exec((error2, data2) => {
+			if (error2) {
+				return reject({'success': false,'message': msg.error.occur});
+			} else if (!error2 && data2) {
+				return resolve({'success': true,'result': data2});
 			}
-			DeviceInRoom.find({'room': new mongoose.Types.ObjectId(room)}).
-			populate('device').
-			exec((error2, data2) => {
-				if (error2) {
-					return reject({'success': false,'message': msg.error.occur});
-				} else if (!error2 && data2) {
-					return resolve({'success': true,'result': data2});
-				}
-			});
 		});
 	});
 }
 
-DeviceInRoom.unused = (token) => {
+DeviceInRoom.unused = (user) => {
 	return new Promise((resolve, reject) => {
-		jwt.verify(token, config.secret_key, (error, decode) => {
-			if (error) {
-				return reject({'success': false,'message': msg.error.verify});
-			}
-			DeviceInRoom.find({'user': new mongoose.Types.ObjectId(decode._id)}).
-			or([{'room': null}, {'room': {$exists: false}}]).
-			populate('device').
-			exec((error2, data2) => {
-				if (error2) {
-					return reject({'success': false,'message': msg.error.occur});
-				} else if (!error2 && data2) {
-					return resolve({'success': true,'result': data2});
+		DeviceInRoom.find({'user': new mongoose.Types.ObjectId(user)}).
+		or([{'room': null}, {'room': {$exists: false}}]).
+		populate('device').
+		exec((error2, data2) => {
+			if (error2) {
+				return reject({'success': false,'message': msg.error.occur});
+			} else {
+				if(!data2){
+					data2 = [];
 				}
-			});
+				return resolve({'success': true,'result': data2});
+			}
 		});
 	});
 }
 /**
 _id : objectid: _id cua deviceinroom
 */
-DeviceInRoom.onoff = (token, _id)=>{
+DeviceInRoom.onoff = (_id)=>{
 	return new Promise((resolve, reject) => {
-		jwt.verify(token, config.secret_key, (error, decode) => {
-			if (error) {
-				return reject({'success': false,'message': msg.error.verify});
+		DeviceInRoom.findById(new mongoose.Types.ObjectId(_id)).
+		exec((error2, findresult)=>{
+			if (error2) {
+				return reject({'success': false,'message': msg.error.occur});
+			}else{
+				DeviceInRoom.update({'_id': mongoose.Types.ObjectId(_id)}, {$set: {'status': !findresult.status}}).
+				exec((error3) => {
+					if (error3) {
+						return reject({'success': false,'message': msg.error.occur});
+					} else {
+						return resolve({'success': true, status: !findresult.status});
+					}
+				});
 			}
-			DeviceInRoom.findById(new mongoose.Types.ObjectId(_id)).
-			exec((error2, findresult)=>{
-				if (error2) {
-					return reject({'success': false,'message': msg.error.occur});
-				}else{
-					DeviceInRoom.update({'_id': mongoose.Types.ObjectId(_id)}, {$set: {status: !findresult.status}}).
-					exec((error3) => {
-						if (error3) {
-							return reject({'success': false,'message': msg.error.occur});
-						} else {
-							return resolve({'success': true, status: !findresult.status});
-						}
-					});
-					
-				}
-			});
 		});
 	});
 }
 
-DeviceInRoom.findByUser = (token, user) => {
+DeviceInRoom.findByUser = (user) => {
 	return new Promise((resolve, reject) => {
-		jwt.verify(token, config.secret_key, (error, decode) => {
-			if (error) {
-				return reject({'success': false,'message': msg.error.verify});
+		DeviceInRoom.find({'user': new mongoose.Types.ObjectId(user)}).
+		populate({path: 'room', select : {room_name : 1, id : -1}}).
+		populate({path : 'device', match : {'type' :1}}).sort({'room' : 1, 'device' : 1}).
+		exec((error2, data2) => {
+			if (error2) {
+				return reject({'success': false,'message': msg.error.occur});
+			} else if (!error2 && data2) {
+				return resolve({'success': true,'result': data2});
+			}else if(!error2 && !data2){
+				return resolve({'success': true,'result': []});
 			}
-			DeviceInRoom.find({'user': new mongoose.Types.ObjectId(user)}).
-			populate('device').sort('room').
-			exec((error2, data2) => {
-				if (error2) {
-					return reject({'success': false,'message': msg.error.occur});
-				} else if (!error2 && data2) {
-					return resolve({'success': true,'result': data2});
-				}
-			});
 		});
 	});
 }
 
-DeviceInRoom.mInsert = (token, data) => {
+DeviceInRoom.mInsert = (user, data) => {
 	return new Promise((resolve, reject) => {
-		jwt.verify(token, config.secret_key, (error, decode) => {
-			if (error) {
-				return reject({'success': false,'message': msg.error.verify});
+		let mDeviceInRoom = new DeviceInRoom();
+		mDeviceInRoom.device = new mongoose.Types.ObjectId(data.device);
+		if (data.room != null)mDeviceInRoom.room = new mongoose.Types.ObjectId(data.room);
+		mDeviceInRoom.user = new mongoose.Types.ObjectId(user);
+		mDeviceInRoom.device_name = data.device_name;
+		if (data.status != null) mDeviceInRoom.status = data.status;
+		mDeviceInRoom.save((err, result) => {
+			if (err) {
+				return reject({'success': false,'message': msg.error.occur});
+			} else {
+				return resolve({'success': true, 'id' : user, 'result' : result});
 			}
-			let mDeviceInRoom = new DeviceInRoom();
-			mDeviceInRoom.device = new mongoose.Types.ObjectId(data.device);
-			if (data.room != null)mDeviceInRoom.room = new mongoose.Types.ObjectId(data.room);
-			mDeviceInRoom.user = new mongoose.Types.ObjectId(data.user);
-			mDeviceInRoom.device_name = data.device_name;
-			if (data.status != null) mDeviceInRoom.status = data.status;
-			mDeviceInRoom.save((err, result) => {
-				if (err) {
-					return reject({'success': false,'message': msg.error.occur});
-				} else {
-					return resolve({'success': true, 'id' : decode._id, 'result' : result});
-				}
-			});
-
 		});
 	});
 };
@@ -137,33 +113,54 @@ DeviceInRoom.mInsert = (token, data) => {
 /**
  * @param mDeviceInRoom:
  */
-DeviceInRoom.mUpdate = (token, data) => {
+DeviceInRoom.mUpdate = (user, data) => {
 	return new Promise((resolve, reject) => {
-		jwt.verify(token, config.secret_key, (error, decode) => {
-			if (error) {
-				return reject({'success': false,'message': msg.error.verify});
-			}
-			DeviceInRoom.update({'_id': new mongoose.Types.ObjectId(data._id)}, {$set: data}, {multi: true}).
-			exec((error2, result) => {
-				if (error2) {
-					return reject({'success': false,'message': msg.error.occur});
-				} else {
-					return resolve({'success': true, 'id' : decode._id, 'result' : result});
+		DeviceInRoom.update({'_id': new mongoose.Types.ObjectId(data._id)}, {$set: data}).
+		exec((error2, result) => {
+			if (error2) {
+				return reject({'success': false,'message': msg.error.occur});
+			} else {
+				if(data.device){
+					DeviceInRoom.findOne({'_id' : new mongoose.Types.ObjectId(data._id)}).
+					populate('device').
+					exec((e, find)=>{
+						if(e) throw e;
+						else{
+							data.device.img = find.device.img;
+							return resolve({'success': true, 'id' : user, 'result' : data});
+						}
+					});
+				}else{
+					return resolve({'success': true, 'id' : user, 'result' : data});
 				}
-			});
+			}
 		});
 	});
 };
 
-DeviceInRoom.setRoom = (token, arrdata, roomId) => {
-	jwt.verify(token, config.secret_key, (error, decode) => {
-		if (error) {
-			return;
-		}
-		arrdata.forEach((device) => {
-			DeviceInRoom.update({'_id': new mongoose.Types.ObjectId(device)}, {$set: {'room': roomId}}).exec();
-		});
+DeviceInRoom.setRoom = (arrdata, roomId) => {
+	arrdata.forEach((device) => {
+		DeviceInRoom.update({'_id': new mongoose.Types.ObjectId(device)}, {$set: {'room': roomId}}).exec();
 	});
+}
+
+
+DeviceInRoom.unsetRoom = async (roomId) => {
+	await DeviceInRoom.update({'room': new mongoose.Types.ObjectId(roomId)}, {$unset: {'room': 1}}, {multi : true}).exec();
+}
+
+DeviceInRoom.unsetRoomDevice = (_id) => {
+	return new Promise((resolve, reject)=>{
+		DeviceInRoom.update({'_id' : new mongoose.Types.ObjectId(_id)}, {$unset: {'room': 1}}).
+		exec((error)=>{
+			if(error){
+				return reject({'success': false,'message': msg.error.occur});
+			}else{
+				return resolve({'success': true, 'result' : {'_id' : _id}});
+			}
+		});
+
+	})
 }
 
 /**
@@ -171,38 +168,32 @@ DeviceInRoom.setRoom = (token, arrdata, roomId) => {
  *            mã _id của thiết bị
  * @objective : thực hiện xóa 1 DeviceInRoom
  */
-DeviceInRoom.mDelete = (token, _id) => {
+DeviceInRoom.mDelete = (_id) => {
 	return new Promise((resolve, reject) => {
-		jwt.verify(token, config.secret_key, (error, decode) => {
-			if (error) {
-				return reject({'success': false,'message': msg.error.verify});
+		DeviceInRoom.remove({'_id': new mongoose.Types.ObjectId(_id)}).
+		exec((error2) => {
+			if (error2) {
+				return reject({'success': false,'message': msg.error.occur});
+			} else {
+				let ModeDetail = require('../model/mode_detail');
+				ModeDetail.deleteMany({'device' :  new mongoose.Types.ObjectId(_id)});
+				return resolve({'success': true, 'result' : _id});
 			}
-			DeviceInRoom.remove({'_id': new mongoose.Types.ObjectId(_id)}).
-			exec((error2) => {
-				if (error2) {
-					return reject({'success': false,'message': msg.error.occur});
-				} else {
-					return resolve({'success': true, 'id' : decode._id, 'result' : _id});
-				}
-			});
 		});
 	});
 }
 
-DeviceInRoom.mDeleteByRoom = (token, room_id) => {
+DeviceInRoom.mDeleteByRoom = (user, room_id) => {
 	return new Promise((resolve, reject) => {
-		jwt.verify(token, config.secret_key, (error, decode) => {
-			if (error) {
-				return reject({'success': false,'message': msg.error.verify});
+		DeviceInRoom.deleteMany({'room': new mongoose.Types.ObjectId(room_id)}).
+		exec((error2) => {
+			if (error2) {
+				return reject({'success': false,'message': msg.error.occur});
+			} else {
+				let ModeDetail = require('../model/mode_detail');
+				ModeDetail.deleteMany({'device' :  new mongoose.Types.ObjectId(_id)});
+				return resolve({'success': true, 'id' : user, 'result' : room_id});
 			}
-			DeviceInRoom.deleteMany({'room': new mongoose.Types.ObjectId(room_id)}).
-			exec((error2) => {
-				if (error2) {
-					return reject({'success': false,'message': msg.error.occur});
-				} else {
-					return resolve({'success': true});
-				}
-			});
 		});
 	});
 }
@@ -212,45 +203,35 @@ DeviceInRoom.mDeleteByRoom = (token, room_id) => {
  * Lấy về tất cả các DeviceInRoom
  */
 
-DeviceInRoom.getAllDeviceInRoom = (token) => {
+DeviceInRoom.getAllDeviceInRoom = () => {
 	return new Promise((resolve, reject) => {
-		jwt.verify(token, config.secret_key, (error, decode) => {
-			if (error) {
-				return reject({'success': false,'message': msg.error.verify});
+		DeviceInRoom.find().
+		populate('device').
+		exec((error2, data2) => {
+			if (error2) {
+				return reject({'success': false,'message': msg.error.occur});
+			} else if (!error2 && data2) {
+				return resolve({'success': true,'result': data2});
 			}
-			DeviceInRoom.find().
-			populate('device').
-			exec((error2, data2) => {
-				if (error2) {
-					return reject({'success': false,'message': msg.error.occur});
-				} else if (!error2 && data2) {
-					return resolve({'success': true,'result': data2});
-				}
-			});
 		});
 	});
 }
 /**
  * Lấy danh sách thiết bị theo số lượng và trang (dùng cho phân trang)
  */
-DeviceInRoom.getByPage = (token, data) => {
+DeviceInRoom.getByPage = (data) => {
 	return new Promise((resolve, reject) => {
-		jwt.verify(token, config.secret_key, (error, decode) => {
-			if (error) {
-				return reject({'success': false,'message': msg.error.verify});
+		DeviceInRoom.find().
+		populate('device').
+		skip((data.page - 1) * data.quantity).
+		limit(data.quantity).
+		sort({name: 1,type: 1,price: -1}).
+		exec((error2, data2) => {
+			if (error2) {
+				return reject({'success': false,'message': msg.error.occur});
+			} else if (!error2 && data2) {
+				return resolve({'success': true,'result': data2});
 			}
-			DeviceInRoom.find().
-			populate('device').
-			skip((data.page - 1) * data.quantity).
-			limit(data.quantity).
-			sort({name: 1,type: 1,price: -1}).
-			exec((error2, data2) => {
-				if (error2) {
-					return reject({'success': false,'message': msg.error.occur});
-				} else if (!error2 && data2) {
-					return resolve({'success': true,'result': data2});
-				}
-			});
 		});
 	});
 }

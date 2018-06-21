@@ -1,35 +1,83 @@
-var socket = io();
-socket.emit('join-room', $.cookie('token'));
-
 socket.on('server_send_delete_room', function(data){
+	console.log('receive Delete room');
 	if(data.success==true){
-		$('#'+data.result).remove();
+		let item = document.getElementById('room_'+data.result);
+		let index = Array.from(document.getElementById('room_'+data.result).parentNode.children).indexOf(item);
+		item.remove();
+		document.getElementById('item_room_'+data.result).remove();
+		$('#carousel').children('div:nth-child('+index+')').show();
+		$('.tab-content').children('div:nth-child('+index+')').addClass('in active');
+	}else{
+		alert(data.message);
+	}
+});
+socket.on('server_send_create_room', function (data){
+	console.log('Receive new room');
+	if(data.success == true){
+		let noroom = $('#noroom');
+		if(noroom!=null && noroom!=undefined){
+			location.reload(true);
+		}else{
+			let newRoom = ejs.renderFile('./partials/item_room', {'room' : data.result});
+			console.log('New room: '+ JSON.stringify(newRoom));
+			$('#carousel').append(newRoom);
+		}
 	}else{
 		alert(data.message);
 	}
 });
 
-socket.on('server_send_create_room', function(data){
+socket.on('server_send_update_room', (data) => {
 	if(data.success == true){
-		$('#pane_Room').append('<div class="col-md-3 col-xs-6 col-sm-6" id='+data.result._id+'><div class="thumbnail"><a href="/room/"'+data.result._id+'><input type="hidden" value='+data.result._id+'><img src='+data.result.img+' alt="room"  style="min-height:17vw" class="img-room img"><div class="caption row"><font class="col-xs-10" style="font-size:17px;">'+data.result.room_name+'</font><div class="col-xs-1"><div class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-ellipsis-v text-center col-xs-1" ></i></a><ul class="dropdown-menu"><li><a> Update room </a></li><li><a onclick="deleteRoom(this, 0)">Delete room</a><input type="hidden" value='+data.result._id+' name="id"></li><li><a onclick="deleteRoom(this, 1)">Delete room and device<a><input type="hidden" value="'+data.result._id+'"></li></ul></div></div></div></a></div></div>');
-	}else{
-		alert(data.message);
-	}
-});
-
-socket.on('server_send_update_room', function(data){
-	if(data.success == true){
-		$(data.result._id).append('<div class="col-md-3 col-xs-6 col-sm-6" id='+data.result._id+'><div class="thumbnail"><a href="/room/"'+data.result._id+'><input type="hidden" value='+data.result._id+'><img src='+data.result.img+' alt="room"  style="min-height:17vw" class="img-room img"><div class="caption row"><font class="col-xs-10" style="font-size:17px;">'+data.result.room_name+'</font><div class="col-xs-1"><div class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-ellipsis-v text-center col-xs-1" ></i></a><ul class="dropdown-menu"><li><a> Update room </a></li><li><a onclick="deleteRoom(this, 0)">Delete room</a><input type="hidden" value='+data.result._id+' name="id"></li><li><a onclick="deleteRoom(this, 1)">Delete room and device<input type="hidden" value="'+data.result._id+'"></a></li></ul></div></div></div></a></div></div>');
+		let room = data.result;
+		let innerHtml = document.getElementById('item_room_'+room._id);
+		if(room.img){
+			innerHtml.child('img').attr('src', room.img);
+		}
+		if(room.room_name){
+			innerHtml.children('figcaption').val(room.room_name);
+		}
 	}else{
 		alert(data.message);
 	}
 });
 
 function deleteRoom(e, method){
-	var token = $.cookie('token');
-	console.log('token: '+token);
-	var value = $(e).parent().children('input').val();
+	var value = $(e).children('input').val();
 	console.log('input: '+value);
-	console.log('document cookie'+document.cookie);
-	socket.emit('client_send_delete_room', {'token': token, 'data' : {'id' : value, 'isDeleteDevice' : method}});
+	socket.emit('client_send_delete_room', {'data' : {'_id' : value, 'isDeleteDevice' : method}});
+}
+
+
+var myFile;
+function changeImg(input) {
+	if (input.files && input.files[0]) {
+		var reader = new FileReader();
+		reader.onload = function(evt) {
+			$('#image-preview').attr('src', evt.target.result);
+			myFile = evt.target.result;
+		};
+		reader.readAsDataURL(input.files[0]);
+	}
+}
+
+function createRoom(){
+	let name = $('#room_name').val();
+	let device = $("#formRoom input:checkbox:checked").map(function(){
+        return $(this).val();
+    }).toArray();
+	let img = $('#file');
+	let data = {};
+	if (myFile !=null && myFile != undefined) {
+		data.img = myFile;
+	}
+	data.room_name = name;
+	data.device = device;
+	socket.emit('client_send_create_room', {'data' : data});
+	window.location.back();
+}
+
+function updateRoom(e){
+	let data = $(e).val();
+	socket.emit('client_send_update_room', data);
 }

@@ -2,98 +2,73 @@
 <html>
 
 <head>
-	<% include ./partials/head %>
-		<link rel="stylesheet" href="/css/home.css">
-		<title>Add room</title>
+<% include ./partials/head %>
+<script>
+	var token = localStorage.getItem('token');
+	if (token == null || token == undefined) {
+		token = "<%=req.session.usertoken%>";
+		localStorage.setItem('token', token);
+	}
+	var socket = io({query : {'token': token}});
+	socket.emit('join-room', token);
+</script>
+<link rel="stylesheet" href="/css/home.css">
+<title>Add room</title>
 </head>
 
 <body>
 	<% include ./partials/header %>
-	<div class="space-medium">
-		<div class="container-fluid main">
+	<div class="container-fluid main">
+		<div class="row">
 			<div class="well">
-				<div class="row">
-					<% if(message){%>
-					<p class="error"><%=message%></p>
-					<%}%>
-					<form class="form-horizontal" action="/room/add" method="post" enctype="multipart/form-data">
-						<div class="form-group">
-							<label class="control-label col-sm-2">Room name:</label>
-							<div class="col-sm-8">
-								<input type="text" class="form-control" name="room_name" placeholder="Enter Room Name" required>
-							</div>
+				<% if(message){%>
+				<p class="error"><%=message%></p>
+				<%}%>
+				<form class="form-horizontal" action="/room/add" method="post" enctype="multipart/form-data" id="formRoom">
+					<div class="form-group">
+						<label class="control-label col-sm-2">Room name:</label>
+						<div class="col-sm-8">
+							<input type="text" class="form-control" id="room_name" name="room_name" placeholder="Enter Room Name" required>
 						</div>
-						<div class="form-group">
-							<label class="control-label  col-sm-2">Room picture: </label>
-							<div class="col-sm-8"><input type='file' accept="image/*" onchange="readURL(this);" class="form-control" title="Choose your profile picture" name="file" />
-								<img id="image-preview" src="/image/no-images.png" alt="your image" />
-
-							</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label  col-sm-2">Room picture: </label>
+						<div class="col-sm-8"><input type='file' accept="image/*" onchange="changeImg(this);" class="form-control" title="Choose your profile picture" name="file" id="file"/>
+						<img id="image-preview" style="height: 120px; width: auto;" src="/image/no-images.png" alt="your image" />
 						</div>
+					</div>
 
-						<div class="form-group">
-							<label class="control-label col-sm-2">Device:</label>
-							<% if(listDeviceRoom.length > 0){%>
-							<div class="col-sm-10">
-								<div id="devicelist" class="carousel slide" data-ride="carousel">
-									<div class="carousel-inner">
-									<% var row = listDeviceRoom.length%6;
-									if(row==0)
-										row =listDeviceRoom.length/6;
-									else
-										row = listDeviceRoom.length/6 +1;
-									for(var i = 0; i<row; i++){
-									%>
-									<div class="item">
-										<ul class="list-device">
-											<% for(var j =0; j<6; j++){
-												if(j+i*j<listDeviceRoom.length-1){
-												var device = listDeviceRoom[j+i*j];
-											%>
-											<li class="list-item" id="it<%=i%>">
-												<img src="<%=device.device.img%>" value=<%=device.status%> id="img
-												<%=i%>" onclick="img_click(this)">
-													<figcaption>
-														<input type="checkbox" name="device" value="<%=device._id%>">
-														<%=device.device_name%>
-													</figcaption>
-											</li>
-											<% }} %>
-										</ul>
-									</div>
-
-									<%}%>
-									</div>
-
-									<!-- Left and right controls -->
-									<a class="left carousel-control" href="#devicelist" data-slide="prev">
-										<span class="glyphicon glyphicon-chevron-left"></span>
-										<span class="sr-only">Previous</span>
-									  </a>
-									<a class="right carousel-control" href="#devicelist" data-slide="next">
-										<span class="glyphicon glyphicon-chevron-right"></span>
-										<span class="sr-only">Next</span>
-									</a>
-								</div>
-
+					<div class="form-group">
+						<label class="control-label col-xs-2 text-left">Device:</label>
+						<% if(listDeviceRoom.length > 0){%>
+						<div class="col-xs-10 row">
+							<%listDeviceRoom.forEach((device)=>{%>
+							<div id="item_device_<%=device._id%>">
+								<label class="col-lg-2 col-md-2 col-sm-2 col-xs-3">
+									<input type="checkbox" class="pull-right" id="device" name="device" value="<%=device._id%>">
+									<img src="<%=device.device.img%>" class="img img-responsive img-circle" width="100%">
+									<figcaption class="text-center"><%=device.device_name%></figcaption>
+								</label>
 							</div>
-							<%}else{%>
-							<div class="col-sm-10">
-							  <p class="form-control-static">No device to use</p>
-							</div>
-							<%}%>
+							<%});%>
 						</div>
-
-						<div class="form-group">
-							<div class="col-sm-offset-2 col-sm-10">
-								<input type="submit" class="btn btn-default" value="Submit">
-							</div>
+						<%}else{%>
+						<div class="col-sm-10">
+						  <div class="form-control-static">No device to use</div>
 						</div>
-					</form>
-				</div>
+						<%}%>
+					</div>
+
+					<div class="form-group">
+						<div class="col-sm-offset-2 col-sm-10">
+							<input type="button" class="btn btn-default" value="Submit" onclick="createRoom()">
+						</div>
+					</div>
+				</form>
 			</div>
 		</div>
 	</div>
+	<script src="/sockets/room.js"></script>
 	<% include ./partials/footer %>
 </body>
 

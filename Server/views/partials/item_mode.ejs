@@ -1,0 +1,23 @@
+<a href="/mode/<%=mode._id%>">
+	<div class="well panel panel-warning col-xs-5">
+		<div class="panel-body">
+			<div class="col-xs-10">
+				<span style="font-size: 25px;"> <%=mode.mode_name%></span>
+			</div>
+			<div>
+				<label class="switch">
+					<input type="checkbox" <%if(mode.status==true){%>checked<%}%>>
+					<span class="slider round"></span>
+				</label>
+			</div>
+			<div><span class="uppercase col-xs-4"><b>Start time: </b><%=mode.starttime %></span>
+			</div>
+			<div><span class="uppercase col-xs-4"><b>Stop time: </b><%=mode.stoptime %></span>
+			</div>
+			<div class="bold uppercase col-xs-12">Repeat: </div>
+			<ol><%for(var i=0;i<mode.circle.length; i++){%>
+				<li class="badge badge-warning"><%=mode.circle[i]%></li><%}%>
+			</ol>
+		</div>
+	</div>
+</a>

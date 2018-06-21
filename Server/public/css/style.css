@@ -27,12 +27,6 @@ hr {
 	margin-bottom: 15px;
 }
 
-.navbar-nav  li a{
-	font-size: 18px;
-	text-align: center;
-	
-}
-
 a:hover{
 	text-decoration: none;
 }
@@ -48,6 +42,7 @@ a:hover{
 #image-preview {
 	margin-top: 20px;
 	resize: both;
+	width: 100%;
 	border: 1px solid;
 	border-color: #c4dafb;
 	background: white;
@@ -88,8 +83,9 @@ a:hover{
 
 .form-control {
 	border-color: #9e8036;
-	height: 35px;
+	height: 32px;
 	border-radius: 0;
+	margin: 0;
 }
 
 .space-input-item div {
@@ -124,24 +120,19 @@ a:hover{
 }
 
 .my-gallery {
-	max-height=150px;
+	margin-top: -20px;;
+	max-height:150px;
 	height: 150px;
 	display: inline-block;
 	overflow: inherit;
-	width: 200%;
-
+	width: 100%;
 }
 
 .gallery-list-item {
-	display: inline;
-	width: 100px;
 	height: 100px;
 	resize: both;
-	background: white;
-	border-radius: 15px;
-	margin: 1px;
+	margin-bottom: 2px;
 }
-
 
 .text-border{
 	color : white;
@@ -238,10 +229,81 @@ a:hover{
 	font-size: 24px;
 }
 
+.font18{
+	font-size: 18px;
+}
+
 .opacity-background {
 	background-color: rgba(255, 255, 255, 0);
+	border: none;
 }
 
 .uppercase{
 	text-transform: uppercase;
+}
+
+.recycler-view{
+	display: table-row;
+	overflow-x: scroll;
+	overflow-y: hidden;
+	max-height: 130px;
+	width: 100%;
+}
+
+figcaption{
+	font-size: 12px;
+	margin: auto;
+	height: 40px;
+}
+
+.carousel {
+	margin-bottom: 0;
+	padding: 0 40px 30px 40px;
+}
+/* The controlsy */
+.carousel-control {
+	left: -120px;
+	height: 40px;
+	width: 40px;
+	background: none repeat scroll 0 0 #222222;
+	border: 4px solid #FFFFFF;
+	border-radius: 23px 23px 23px 23px;
+	margin-top: 90px;
+}
+.carousel-control.right {
+	right: -120px;
+}
+/* The indicators */
+.carousel-indicators {
+	right: 50%;
+	top: auto;
+	bottom: -10px;
+	margin-right: -19px;
+}
+/* The colour of the indicators */
+.carousel-indicators li {
+	background: #cecece;
+}
+.carousel-indicators .active {
+background: #428bca;
+}
+
+.controler-left{
+	position: absolute;
+	left: 15px;
+}
+
+.controler-right{
+	position: absolute;
+	right: 15px;
+}
+
+.col-lg-1p8{
+	width: 12.5%;
+	max-width: 12.5%;
+}
+@media screen and (min-width: 800px) {
+    .col-lg-1p8 {
+        width: auto;
+    }
 }

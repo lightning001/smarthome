@@ -8,25 +8,14 @@ function readURL(input) {
 	}
 }
 
-function img_click(e){
-		var value = $(e).children('input').val();
-		$.ajax({
-			url: '/device/turn-on',
-			type : 'POST',
-			data : {'id' : value},
-			success : function(data){
-				if(data.success==true){
-					if(data.onvalue==false){
-						$(e).children('img').addClass('item-off');
-					}else if(data.onvalue==true){
-						$(e).children('img').removeClass('item-off');
-					}
-				}else{
-					 alert('Error! An error occurred. Please try again later');
-				}
-			},
-			error: function(){
-				alert('Error! An error occurred. Please try again later');
-			}
-		});
-	}
+function logout(){
+	localStorage.clear();
+	$.ajax({
+		url : '/logout',
+		method : 'GET'
+	});
+}
+
+function goBack(){
+	window.history.back();
+}

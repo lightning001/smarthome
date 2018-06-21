@@ -1,25 +1,18 @@
-var nodemailer = require('nodemailer');
-let http = require('http');
-const config = require('../util/config');
-//var transporter = nodemailer.createTransport({
-//	service: 'gmail',
-//	pool: true,
-//	host: 'smtp.gmail.com',
-//	port: 587,
-//	secure: false, // secure:true use TLS for port 465, secure:false use STARTTLS for port 587
-//	proxy: process.env.http_proxy,
-//	auth: {
-//		user: config.emailFrom,
-//		pass: config.emailPassword
-//	},
-//	tls: {
-//        rejectUnauthorized: false
-//    }
-//},{
-//	from: 'SmartHome system <smarthomeproject2018@gmail.com>'
-//});
-
-var transporter = nodemailer.createTransport('smtps://smarthomeproject2018:100100.m@smtp.gmail.com');
+var nodemailer = require('nodemailer'),
+	randomstring = require('randomstring'),
+	config = require('../util/config'),
+	transporter = nodemailer.createTransport({service: 'gmail',	port: 587,
+		secure: false, // secure:true use TLS for port 465, secure:false use STARTTLS for port 587
+		auth: {
+			user: config.emailFrom,
+			pass: config.emailPassword
+		},
+		tls: {
+			rejectUnauthorized: false
+		}
+	},{
+		from: 'SmartHome system <smarthomeproject2018@gmail.com>'
+	});
 
 var Email = new Object();
 
@@ -39,11 +32,22 @@ sendMail = (eFrom, eTo, eSubject, eHtml) => {
 	});
 }
 
-sendMail = (eFrom, eTo, eSubject, eHtml, eAttachments) => {
+Email.sendMailOptions = (options) => {
+	transporter.sendMail(options, function (error, info) {
+		if (error) {
+			console.log(error);
+		} else {
+			console.log('Email sent: ' + info.response.toString());
+		}
+	});
+}
+
+Email.sendMail = (eFrom, eTo, eSubject, eHtml, eText, eAttachments) => {
 	options = {
 		from: eFrom,
 		to: eTo,
 		subject: eSubject,
+		text : eText,
 		html: eHtml,
 		attachments : eAttachments
 	};
@@ -70,7 +74,7 @@ Email.forgetPassword = (email, encode, number) => {
 		'<div>We received a request to reset your SmartHome password</div>',
 		'<a href="' + config.host + 'recover/password/' + encode + '">Click here to change your password</a>',
 		'<div>Alternatively, you can enter the following password reset code: <b>' + number + '</b></div>',
-		'<div><i>Note: This email is valid for 30 minutes</i></div><hr>',
+		'<div><i>Note: This email is valid for 5 minutes</i></div><hr>',
 		'<div> Best regards <div>',
 		'<div>Smart Home system</div>',
 		'</body>',

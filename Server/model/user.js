@@ -17,10 +17,7 @@ var schemaUser = new mongoose.Schema({
 	type : {type : String, default : 'Normal'},
 	status : {type : String, default : 'Pending'},
 	startdateregister : {type : Date, default : Date.now()},
-	img : {type : String, default : 'https://image.ibb.co/d7xiTn/men.png'},
-	forgetcode : {type: String},
-	forgetTimeRequest : {type : Date},
-	activeTimeRequest : {type : Date}
+	img : {type : String, default : 'https://image.ibb.co/d7xiTn/men.png'}
 }, { toJSON : {virtuals: true}});
 
 schemaUser.virtual(  'listMode', {ref : 'Mode', localField : '_id', foreignField : 'id_user', justOne : false});

@@ -1,0 +1,70 @@
+<html>
+<head>
+<% include ./partials/head %>
+</head>
+<body>
+<main>
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-xs-1 text-right">
+				<i class="fa fa-arrow-left fa-2x controler-left"></i>
+			</div>
+			<div id="carousel" class="col-xs-9">
+			<% var x = 0;
+				listRoom.forEach(room=>{%>
+				<div class="col-lg-2 col-md-2 col-sm-4 col-xs-4" id="item_room_<%=room._id%>">
+					<a data-toggle="tab" href="#room_<%=room._id%>">
+						<img src="<%=room.img%>" class="img img-responsive" width="100%" style="max-height:150px">
+						<figcaption class="text-center"><%=room.room_name%></figcaption>
+					</a>
+				</div>
+			<% x++;});%>
+			</div>
+			<div class="col-xs-1 text-left">
+				<i class="fa fa-arrow-right fa-2x controler-right"></i>
+			</div>
+			<input type="hidden" value="<%=listRoom.length%>" id="length">
+			<input type="hidden" value="0" id="currentIndex">
+		</div>
+	</div>
+</main>
+<script>
+	let quantity = 4;
+	let view = quantity+1;
+	$(document).ready(()=>{
+		$('#carousel').children('div:nth-child(1n+'+view+')').hide();
+	});
+	$('.controler-left').click(()=>{
+		let length = $('#length').val();
+		if(length>quantity){
+			currentIndex = $('#currentIndex').val() -1;
+			if(currentIndex<0)
+				if(length%quantity==0){
+					currentIndex = length/(quantity-1);
+				} else{
+					currentIndex = length/quantity;
+				}
+			$('#carousel').children('div:nth-child(1n+0)').hide();
+			for(var i=0;i<quantity;i++){
+				$('#carousel').children('div:nth-child('+(currentIndex*quantity+i)+')').show(300);
+			}
+			$('#currentIndex').val(currentIndex);
+		}
+	});
+	$('.controler-right').click(()=>{
+		let length = $('#length').val();
+		if(length>quantity){
+			currentIndex = $('#currentIndex').val()+1;
+			if(currentIndex*quantity>length)
+				currentIndex =0;
+			
+			$('#carousel').children('div:nth-child(1n+0)').hide();
+			for(var i=0;i<quantity;i++){
+				$('#carousel').children('div:nth-child('+(1+currentIndex*quantity+i)+')').show(300);
+			}
+			$('#currentIndex').val(currentIndex);
+		}
+	});
+</script>
+</body>
+</html>
