@@ -1,23 +1,34 @@
-<a href="/mode/<%=mode._id%>">
-	<div class="well panel panel-warning col-xs-5">
-		<div class="panel-body">
-			<div class="col-xs-10">
-				<span style="font-size: 25px;"> <%=mode.mode_name%></span>
-			</div>
-			<div>
-				<label class="switch">
-					<input type="checkbox" <%if(mode.status==true){%>checked<%}%>>
-					<span class="slider round"></span>
-				</label>
-			</div>
-			<div><span class="uppercase col-xs-4"><b>Start time: </b><%=mode.starttime %></span>
-			</div>
-			<div><span class="uppercase col-xs-4"><b>Stop time: </b><%=mode.stoptime %></span>
-			</div>
-			<div class="bold uppercase col-xs-12">Repeat: </div>
-			<ol><%for(var i=0;i<mode.circle.length; i++){%>
-				<li class="badge badge-warning"><%=mode.circle[i]%></li><%}%>
-			</ol>
+<a href="/mode/<%=mode._id%>" id="item_mode_<%=mode._id%>">
+	<fieldset class="col-lg-6 col-sm-12 col-xs-12">
+		<div class="well ">
+			<legend>
+				<div class="col-xs-10 white">
+					<span id="mode_name" style="font-size: 25px;"> <%=mode.mode_name%></span>
+				</div>
+				<div>
+					<label class="switch">
+						<input type="checkbox" <%if(mode.status==true){%>checked<%}%>>
+						<span class="slider round"></span>
+					</label>
+				</div>
+			</legend>
+			<blockquote>
+				<div style="color: #414141;"><%let start = new Date(parseInt(mode.starttime *1000)).toISOString().split('T')[1].split('.')[0];let stop = new Date(parseInt(mode.stoptime *1000)).toISOString().split('T')[1].split('.')[0];%>
+					<div><span class="bold uppercase col-xs-4">Start time: </span><span id="starttime"><%=start %></span></div>
+					<div><span class="bold uppercase col-xs-4" >Stop time: </span><span id="stoptime"><%=stop %></span>
+					</div>
+					<div class="bold uppercase col-xs-12">Repeat: </div>
+					<ul id="circle">
+						<li class="badge <%if(mode.circle.indexOf(1)>=0){%>badge-warning<%}%>">Monday</li>
+						<li class="badge <%if(mode.circle.indexOf(2)>=0){%>badge-warning<%}%>">Tuesday</li>
+						<li class="badge <%if(mode.circle.indexOf(3)>=0){%>badge-warning<%}%>">Wednesday</li>
+						<li class="badge <%if(mode.circle.indexOf(4)>=0){%>badge-warning<%}%>">Thursday</li>
+						<li class="badge <%if(mode.circle.indexOf(5)>=0){%>badge-warning<%}%>">Friday</li>
+						<li class="badge <%if(mode.circle.indexOf(6)>=0){%>badge-warning<%}%>">Saturday</li>
+						<li class="badge <%if(mode.circle.indexOf(0)>=0 || mode.circle.indexOf(7)>=0){%>badge-warning><%}%>">Sunday</li>
+					</ul>
+				</div>
+			</blockquote>
 		</div>
-	</div>
+	</fieldset>
 </a>

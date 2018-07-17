@@ -2,60 +2,21 @@
 <head>
 <% include ./partials/head %>
 <link href="/css/switch.css" rel="stylesheet">
-<style>
-	a{
-	}
-</style>
+<script type="text/javascript" src="/js/ejs/ejs.js"></script>
+<script>
+	var token = localStorage.getItem('token');
+	var socket = io({query: {'token': token}});
+	socket.emit('join-room', token);
+</script>
+<script type="text/javascript" src="/sockets/mode.js"></script>
+	
 <title>Mode</title>
 </head>
 <body>
 	<% include ./partials/header %>
-	<div class="container main">
-		<%if(listMode.length>0){
-			listMode.forEach(function(mode){
-			
-		%>
-		<a href="/mode/<%=mode._id%>">
-			<fieldset class="col-xs-6">
-				<div class="well ">
-					<legend>
-						<div class="col-xs-10 white">
-							<span style="font-size: 25px;"> <%=mode.mode_name%></span>
-						</div>
-						<div>
-							<label class="switch">
-								<input type="checkbox" <%if(mode.status==true){%>checked<%}%>>
-								<span class="slider round"></span>
-							</label>
-						</div>
-					</legend>
-					<blockquote>
-						<div style="color: #414141;">
-							<%if(mode.type==0){
-								let start = new Date(parseInt(mode.starttime *1000)).toISOString().split('T')[1].split('.')[0];
-								let stop = new Date(parseInt(mode.stoptime *1000)).toISOString().split('T')[1].split('.')[0];
-							%>
-							<div><span class="bold uppercase col-xs-4">Start time: </span><%=start %></div>
-							<div><span class="bold uppercase col-xs-4">Stop time: </span><%=stop %></div>
-							<div class="bold uppercase col-xs-12">Repeat: </div>
-							<ul>
-							<%for(var i=0;i<mode.circle.length; i++){%>
-								<li class="badge badge-warning"><%=mode.circle[i]%> </li>
-							<%}%>
-							</ul>
-							<%}else if(mode.type==1){%>
-							<div class="bold uppercase col-xs-12">Time Period: </div>
-							<div><b class="bold uppercase col-xs-4">Start date: </b><%= mode.day.startdate.toISOString().split('T')[0]%></div>
-							<div><b class="bold uppercase col-xs-4">Stop date: </b><%= mode.day.stopdate.toISOString().split('T')[0]%></div>
-							<%}%>
-						</div>
-					</blockquote>
-				</div>
-			</fieldset>
-		</a>
-		<%});}else{%>
-		<div class="alert alert-warning">You don't have any Mode</div>
-		<%}%>
+	<div class="container main"><%if(listMode.length>0){listMode.forEach(function(mode){%>
+		<%- include('./partials/item_mode', {'mode' : mode})%><%});}else{%>
+		<div class="alert alert-warning">You don't have any Mode</div><%}%>
 		<a class="label" href="/mode/add"><i class="fa fa-plus fa-4x btn btn-add"></i></a>
 	</div>
 	<% include ./partials/footer %>

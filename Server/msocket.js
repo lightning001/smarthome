@@ -33,6 +33,7 @@ module.exports = exports = function (io) {
 			mUser.byToken(token).then(async (decode)=>{
 				socket.user = {_id : decode.result._id, email : decode.result.email, status: decode.result.status};
 				socket.usertoken = token;
+				socket.setKeepAlive(true);
 				await socket.join(decode._id);
 				return true;
 			}).catch(e=>{
@@ -44,10 +45,15 @@ module.exports = exports = function (io) {
 	}
 
 	io.sockets.on('connection', (socket) => {
+//		 setTimeout(() => socket.disconnect(true), 5000);
 		console.log('connected: '+socket.id);
-//		console.log(socket.client.conn);
 		socket.on('disconnect', () => {
 			console.log(socket.id + 'disconnect');
+		});
+		
+		socket.on('timeout', function(timedOutSocket) {
+			timedOutSocket.write('socket timed out!');
+			timedOutSocket.end();
 		});
 
 		/** ================= USER ============================================ */
@@ -74,6 +80,15 @@ module.exports = exports = function (io) {
 					console.log('join room'+data._id);
 				}
 			});
+			
+		});
+		
+		socket.on('join_dv', function(user){
+			console.log('join device room: '+JSON.stringify(user));
+			socket.join('device_'+user.user);
+			socket.join(user.user);
+			console.log(JSON.stringify(socket.adapter.rooms));
+			socket.emit('joinresult', true);
 		});
 
 		socket.on('client_send_data_user', (token) => {
@@ -133,8 +148,6 @@ module.exports = exports = function (io) {
 			if(data.admin == true){
 				mUser.mDelete(data._id).then((result) => {
 					console.log(JSON.stringify(result));
-					
-					
 					io.sockets.in(socket.user._id).emit('server_send_delete_user', result);
 				}).catch((e)=> {
 					console.log(e);
@@ -145,11 +158,20 @@ module.exports = exports = function (io) {
 
 		/** ================= MODE ================================================ */
 
+		socket.on('client_send_mode', ()=>{
+			if(authenSocket(socket)){
+				mMode.findByUser(socket.user._id).then((result)=>{
+					socket.emit('server_send_mode', result);
+				}).catch(e=>{
+					socket.emit('server_send_mode', {'success': false, 'message' : e.message});
+				});
+			}
+		});
 
 		socket.on('client_send_create_mode', (data) => {
-			console.log('client send create mode');
+			console.log('client send create mode: '+JSON.stringify(data));
 			if(authenSocket(socket)){
-			mMode.mInsert(socket.user._id, data.data).then((result) => {
+			mMode.mInsert(socket.user._id, data).then((result) => {
 				io.sockets.in(socket.user._id).emit('server_send_create_mode', result);
 			}).catch((e)=> {
 				console.log(JSON.stringify(e));
@@ -193,12 +215,11 @@ module.exports = exports = function (io) {
 
 
 		/** ================= ROOM ================================================ */
-		socket.on('client_send_room', (data)=>{
+		socket.on('client_send_room', ()=>{
 			if(authenSocket(socket)){
 				console.log('client_send_room');
-				console.log('Room: '+JSON.stringify(data));
-				mRoom.getFullDetailUser(socket.user._id, data._id).then(result=>{
-					console.log(JSON.stringify(result));
+				console.log(socket.user);
+				mRoom.getFullDetailUser(socket.user._id).then(result=>{
 					socket.emit('server_send_room', result);
 				}).catch(e=>{
 					console.log(JSON.stringify(e));
@@ -325,6 +346,7 @@ module.exports = exports = function (io) {
 				console.log('client send control device');
 				mDeviceInRoom.onoff(data._id).then(result=>{
 					io.sockets.in(socket.user._id).emit('server_send_control_device', {'success' : true, result : {'device' : data._id, status : result.status}});
+					io.sockets.in('device_'+socket.user._id).emit('changed', {'stt' : result.status, 'dv' : data._id});
 				}).catch(e=>{
 					io.sockets.in(socket.user._id).emit('server_send_control_device', {'success' : false, message : e.message});
 				});

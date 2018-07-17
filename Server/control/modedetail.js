@@ -19,21 +19,6 @@ ModeDetail.getDetailMode = (mode) =>{
 	});
 }
 
-ModeDetail.unused = (user, data) =>{
-	return new Promise((resolve, reject)=>{
-		ModeDetail.find().
-		populate({path : 'mode',match : {'_id' : {$nin : [new mongoose.Types.ObjectId(data.mode)]},'id_user' : new mongoose.Types.ObjectId(user)}}).
-		populate('device').
-		exec((error2, data2) => {
-			if(error2){
-				return reject({'success': false, 'message': msg.error.occur});
-			} else if (!error2 && data2) {
-				return resolve({'success': true,  'result' : data2});
-			}
-		});
-	});
-}
-
 ModeDetail.findByMode = (mode) =>{
 	return new Promise((resolve, reject)=>{
 		ModeDetail.find({'mode' : new mongoose.Types.ObjectId(mode)}).
@@ -91,18 +76,32 @@ ModeDetail.mInsert = (user, data) =>{
 }
 
 ModeDetail.insertArray = (user, data, mode)=>{
-	return new Promise((resolve, reject)=>{
-		try{
-			data.forEach(modedetail=>{
-				let mModeDetail = new ModeDetail(modedetail);
-				mModeDetail.mode = mode;
-				mModeDetail.save();
-			});
-			resolve(true);
-		}catch(e){
-			reject(false);
-		}
-	});
+	console.log('Array: \n'+JSON.stringify(data));
+	try{
+		data.forEach(async function(modedetail){
+			let mModeDetail = new ModeDetail();
+			mModeDetail.mode = mode._id;
+			mModeDetail.device = modedetail.device._id;
+			if(modedetail.schedule!=null && modedetail.schedule!=undefined){
+				if(mModeDetail.schedule.ontime==null | undefined){
+					mModeDetail.schedule.ontime = mode.stoptime - mode.starttime;
+				}else{
+					mModeDetail.schedule.ontime = modedetail.schedule.ontime;
+				}
+				if(mModeDetail.schedule.offtime ==null |undefined){
+					mModeDetail.schedule.offtime = 0;
+				}else{
+					mModeDetail.schedule.offtime = modedetail.schedule.offtime;
+				}
+			}else{
+				mModeDetail.schedule.ontime = mode.stoptime - mode.starttime;
+				mModeDetail.schedule.offtime = 0;
+			}
+			await mModeDetail.save();
+		});
+	}catch(e){
+		console.log('\ninsert array mode detail FALSE ======================================================\n'+ JSON.stringify(e));
+	}
 }
 
 ModeDetail.mUpdate = (user, data) => {

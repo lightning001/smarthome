@@ -10,7 +10,7 @@ var mongoose = require('mongoose');
 Mode.findBy_ID = (id_user, _id) =>{
 	return new Promise((resolve, reject)=>{
 		Mode.findOne({'_id' :new mongoose.Types.ObjectId(_id), 'id_user' : id_user}).
-		populate('listModeDetail').
+		populate('modedetail').
 		exec((error2, data2) => {
 			if(error2){
 				return reject({'success': false, 'message': msg.error.occur});
@@ -24,7 +24,7 @@ Mode.findBy_ID = (id_user, _id) =>{
 Mode.getFullDetail = (id_user, _id)=>{
 	return new Promise((resolve, reject)=>{
 		Mode.findOne({'_id' : new mongoose.Types.ObjectId(_id), 'id_user' : id_user}).
-		populate({path: 'listModeDetail', populate: {path: 'device', populate : {path: 'device', select: 'img'}}}).
+		populate({path: 'modedetail', populate: {path: 'device', populate : {path: 'device'}}}).
 		exec((error2, data2) => {
 			if(error2){
 			  return reject({'success': false, 'message': msg.error.occur});
@@ -42,7 +42,7 @@ Mode.getScheduleMode = (id_user, id)=>{
 	return new Promise((resolve, reject)=>{
 		console.log('User : '+ id_user + ' mode: '+ id);
 		Mode.findOne({'id_user' : new mongoose.Types.ObjectId(id_user), '_id' : new mongoose.Types.ObjectId(id)}).
-		populate({path: 'listModeDetail', populate: {path: 'device', populate : {path: 'device', select: 'img'}}}).
+		populate({path: 'modedetail', populate: {path: 'device', populate : {path: 'device', select: 'img'}}}).
 		exec((error2, mode) => {
 			if(error2){
 				console.log(error2);
@@ -52,9 +52,9 @@ Mode.getScheduleMode = (id_user, id)=>{
 				let currentDay = new Date().getDay();
 				let starttime = mode.starttime;
 				let stoptime = mode.stoptime;
-				for(let j = 0; j < mode.listModeDetail.length; j++){
+				for(let j = 0; j < mode.modedetail.length; j++){
 					let listSchedule = [];
-					let modedetail = mode.listModeDetail[j];
+					let modedetail = mode.modedetail[j];
 					if(modedetail.schedule.offtime==0){
 						if(modedetail.schedule.ontime>0)
 						listSchedule.push({ontime : mode.stoptime - mode.starttime, offtime : 0});
@@ -70,7 +70,7 @@ Mode.getScheduleMode = (id_user, id)=>{
 							stop += modedetail.schedule.offtime;
 							listSchedule.push(item);
 						}
-						mMode.listModeDetail[j].schedule.scheduledetail = listSchedule;
+						mMode.modedetail[j].schedule.scheduledetail = listSchedule;
 					}
 				}
 				return resolve({'success' : true, result : {'mode' : mMode}});
@@ -92,7 +92,7 @@ Mode.createSchedule = (date)=>{
 			]}
 		   ]).
 		sort({type : 1, starttime : 1, stoptime : 1, day : 1}).
-		populate('listModeDetail').
+		populate('modedetail').
 		exec((err, data)=>{
 			if(err){
 				console.log(err);
@@ -104,8 +104,8 @@ Mode.createSchedule = (date)=>{
 					let SchedulerOff = [];
 					let starttime = mode.starttime;
 					let stoptime = mode.stoptime;
-					for(let j = 0; j < mode.listModeDetail.length; j++){
-						let modedetail = mode.listModeDetail[j];
+					for(let j = 0; j < mode.modedetail.length; j++){
+						let modedetail = mode.modedetail[j];
 						if(modedetail.schedule.offtime==0){
 							if(modedetail.schedule.ontime>0){
 								SchedulerOn.push({time : mode.starttime, device : modedetail.device});
@@ -138,6 +138,7 @@ Mode.createSchedule = (date)=>{
 Mode.findByUser = (id_user) =>{
   	return new Promise((resolve, reject)=>{
 		Mode.find({'id_user' : new mongoose.Types.ObjectId(id_user)}).
+		populate({path: 'modedetail', populate: {path: 'device', populate : {path: 'device'}}}).
 		exec((error2, data2) => {
 			if(error2){
 				return reject({'success': false, 'message': msg.error.occur});
@@ -168,19 +169,19 @@ Mode.mInsert = (user, data) =>{
 		let mMode = new Mode();
 		mMode.mode_name = data.mode_name,
 		mMode.id_user   = new mongoose.Types.ObjectId(user);
-		mMode.status    = data.status;
 		mMode.circle    = data.circle;
 		mMode.starttime = data.starttime;
 		mMode.stoptime  = data.stoptime;
-		mMode.save((error2, result) =>{
+		mMode.save(async (error2, result) =>{
 			if (error2){
 				return reject({'success': false, 'message': msg.error.occur});
 			} else{
-				if(data.modeDetail!=null){
+				if(data.modedetail!=null){
+					console.log('data.modedetail != null');
 					let mModeDetail = require('./modedetail');
-					mModeDetail.insertArray(user, data.modeDetail, result._id).then().catch(e=>console.log(e));
+					mModeDetail.insertArray(user, data.modedetail, result);
 				}
-				return resolve({'success': true, 'id' : user, 'result' : result});
+				return resolve({'success': true, 'result' : result});
 			}
 		});
 	});

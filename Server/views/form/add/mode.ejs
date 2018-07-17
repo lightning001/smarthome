@@ -1,0 +1,184 @@
+<head>
+<% include ./partials/head %>
+<script type="text/javascript" src="/js/ejs/ejs.js"></script>
+<script>
+	var token = localStorage.getItem('token');
+	var socket = io({query: {'token': token}});
+	socket.emit('join-room', token);
+</script>
+<script type="text/javascript" src="/sockets/mode.js"></script>
+<title>Add Mode</title>
+</head>
+
+<body>
+	<% include ./partials/header %>
+	<div class="space-medium">
+		<div class="container-fluid main">
+			<div class="row">
+				<div class="well">
+					<form class="form-horizontal" id="formMode">
+						<div class="form-group">
+							<label class="control-label col-sm-2">Mode name:</label>
+							<div class="col-sm-8">
+								<input type="text" class="form-control" id="mode_name" name="mode_name" placeholder="Enter Mode Name" required>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-sm-2">Cycle:</label>
+							<div class="col-sm-8" id="circle">
+								<label class="col-sm-1 label"><input type="checkbox" name="circle" onchange="checkCircle(this)" value="1"><img src="/image/icon/ic_monday1.png" style=" width:35px;"></label>
+								<label class="col-sm-1 label"><input type="checkbox" name="circle" onchange="checkCircle(this)" value="2"><img src="/image/icon/ic_tuesday1.png" style=" width:35px;"></label>
+								<label class="col-sm-1 label"><input type="checkbox" name="circle" onchange="checkCircle(this)" value="3"><img src="/image/icon/ic_wednesday1.png" style=" width:35px;"></label>
+								<label class="col-sm-1 label"><input type="checkbox" name="circle" onchange="checkCircle(this)" value="4"><img src="/image/icon/ic_thursday1.png" style=" width:35px;"></label>
+								<label class="col-sm-1 label"><input type="checkbox" name="circle" onchange="checkCircle(this)" value="5"><img src="/image/icon/ic_friday1.png" style=" width:35px;"></label>
+								<label class="col-sm-1 label"><input type="checkbox" name="circle" onchange="checkCircle(this)" value="6"><img src="/image/icon/ic_saturday1.png" style=" width:35px;"></label>
+								<label class="col-sm-1 label"><input type="checkbox" name="circle" onchange="checkCircle(this)" value="0"><img src="/image/icon/ic_sunday1.png" style=" width:35px;"></label>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-sm-2">Start:</label>
+							<div class="col-sm-3">
+								<input type="time" class="form-control" id="starttime" name="starttime" value="06:00" required>
+							</div>
+							<label class="control-label col-sm-2">Stop:</label>
+							<div class="col-sm-3">
+								<input type="time" class="form-control" id="stoptime" name="stoptime" value="10:00" required>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-sm-2">Devices:</label>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-sm-3">Find:</label>
+							<div class="col-sm-7">
+								<select class="form-control" id="chooseRoom">
+								<option value="0"> --Choose room--</option><%listRoom.forEach((room)=>{%>
+								<option value="<%=room._id%>"><%=room.room_name%></option><%});%>
+							</select>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-sm-3">Result:</label>
+							<div class="col-sm-8" id="result">
+
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="col-sm-10">
+								<table class="table">
+									<thead>
+										<th class="col-sm-2"></th>
+										<th class="col-sm-2 text-center">Name</th>
+										<th class="col-sm-2 text-center">Room</th>
+										<th class="col-sm-3 text-center" title="Period time turn on device">On time</th>
+										<th class="col-sm-3 text-center" title="Period time turn off device">Off time</th>
+										<th class="col-sm-1"></th>
+									</thead>
+									<tbody id="listDevice"></tbody>
+								</table>
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="col-sm-1"></div>
+							<div class="col-sm-10">
+								<input type="button" class="btn btn-default" value="Cancel" onclick="goBack()">
+								<input type="button" class="btn btn-success" value="Submit" id="submit">
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	<% include ./partials/footer %>
+	<script type="text/javascript">
+		function checkCircle(e) {
+			let img = $(e).parent().children('img').attr('src');
+			if ($(e).is(':checked') == true) {
+				$(e).parent().children('img').attr('src', img.replace('1.png', '.png'));
+			} else {
+				$(e).parent().children('img').attr('src', img.replace('.png', '1.png'));
+			}
+		}
+
+		function removeDevice(value) {
+			$('#tbdevice_' + value).remove();
+			$('#chooseRoom').change();
+		}
+
+		function addToListDevice(e) {
+			let value = $(e).children('input').val();
+			if ($('#tbdevice_' + value).text() != null && $('#tbdevice_' + value).text() != '') {} else {
+				let img = $(e).children('img').attr('src'),
+					name = $(e).children('figcaption').text(),
+					room = $('#chooseRoom option:checked').text(),
+					html = document.createElement('tr'),
+					str = '<tr id="tbdevice_' + value + '"><td><input type="hidden" name="device" value="' + value + '"><img src="' + img + '" style="height:65px; width:auto;" class="img img-thumbnail opacity-background"></td>' +
+					'<td>' + name + '</td>' +
+					'<td>' + room + '</td>' +
+					'<td><input type="text" id="ontime" class="form-control" placeholder="hh:mm"></td>' +
+					'<td><input type="text" id="offtime" class="form-control"placeholder="hh:mm"></td>' +
+					'<td><i class="fa fa-times close" onclick="removeDevice(\'' + value + '\')"></i></td></tr>';
+				html.innerHTML = str;
+				html.id = 'tbdevice_' + value;
+				$('#device_' + value).unbind('click');
+				$('#device_' + value).hide();
+				$('#listDevice').append(html);
+			}
+		}
+		$('#chooseRoom').change(function() {
+			let value = $('#chooseRoom').val();
+			let html = [];
+			if (value != 0) {
+				$.ajax({
+					url: '/room/get/' + value,
+					type: 'GET',
+					success: function(data) {
+						$('#result').empty();
+						for (var i = 0; i < data.devices.length; i++) {
+							if ($('#tbdevice_' + data.devices[i]._id).children().length > 0) {} else {
+								let device = data.devices[i];
+								let str = '<div style="width:75px; display:inline-grid;" id="device_' + device._id + '"><div class="thumbnail opacity-background" style="width:100%;" onclick="addToListDevice(this)"><input type="hidden" value="' + device._id + '"><img src="' + device.device.img + '" style="width:100%" class="img img-circle"><figcaption class="caption text-center">' + device.device_name + '</figcaption></div></div>';
+								html.push(str);
+							}
+						}
+						$('#result').html(html.join(''));
+					},
+					error: function() {
+						alert('An error was occur');
+					}
+				});
+			}
+		});
+
+		$('#submit').click(() => {
+			console.log('submit');
+			let data = {};
+			data.mode_name = $('#mode_name').val();
+			data.circle = $("#circle input:checkbox:checked").map(function() {return parseInt($(this).val());}).get();
+			let tmp = $('#starttime').val();
+			let hh = parseInt(tmp.split(':')[0]) *3600;
+			let mm = parseInt(tmp.split(':')[1]) *60;
+			data.starttime = hh + mm;
+			tmp = $('#stoptime').val();
+			hh = parseInt(tmp.split(':')[0]) *3600;
+			mm = parseInt(tmp.split(':')[1]) *60;
+			data.stoptime =hh + mm;
+			let detail = [];
+			var table = document.getElementById("listDevice");
+			for (var i = 0, row; row = table.rows[i]; i++) {
+				let id = $(row.cells[0]).children('input').val();
+				let ontime = $(row.cells[3]).children('input').val();
+				let offtime =$(row.cells[4]).children('input').val();
+				let item = {'device' : {'_id' : id}, schedule : {'ontime' : ontime, 'offtime' : offtime}};
+				console.log('detail: '+JSON.stringify(item));
+				detail.push(item);
+			}
+			console.log(JSON.stringify(data));
+			data.modedetail = detail;
+			socket.emit('client_send_create_mode', data);
+			window.location.href = location.protocol + '//' + location.host+'/mode';
+		});
+
+	</script>
+</body>

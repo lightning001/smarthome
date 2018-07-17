@@ -19,6 +19,18 @@ router.get('/', authenticated, function(req, res) {
 	});
 });
 
+router.get('/get/:id', authenticated, function(req, res){
+	let id = req.params.id;
+	mRoom.getFullDetail(req.session.user._id, id).then(function(data){
+		console.log('Request update page: '+JSON.stringify(data));
+		let room = data.result;
+		let listDeviceRoom = data.result.listDevice;
+		res.status(200).json({devices : listDeviceRoom});
+	}).catch(function(e){
+		res.status(403).json({device : []});
+	});
+});
+
 router.get('/:id', authenticated, function(req, res) {
 	console.log('require room detail ');
 	let id = req.params.id;
@@ -34,14 +46,13 @@ router.get('/:id', authenticated, function(req, res) {
 		});
 	}else{
 		mRoom.getFullDetail(req.session.user._id, id).then(function(data){
-			console.log('Request update page: '+JSON.stringify(data));
 			let room = data.result;
 			let listDeviceRoom = data.result.listDevice;
 			mDeviceInRoom.unused(req.session.user._id).
 			then(function(data){
-				if(data.length == 0 || data == undefined)
-					data = [];
-				res.render('user_views/roomdetail', {'req': req,'res': res, 'room' : room, 'listDeviceRoom': listDeviceRoom, 'listDeviceNoRoom': data, 'alertMessage' : req.flash('alertMessage')});
+				if(data == undefined || data.result.length == 0 )
+					data.result = [];
+				res.render('user_views/roomdetail', {'req': req,'res': res, 'room' : room, 'listDeviceRoom': listDeviceRoom, 'listDeviceNoRoom': data.result, 'alertMessage' : req.flash('alertMessage')});
 			}).catch(function(e){
 				req.flash('error', e.message);
 				res.redirect('/error');
@@ -91,7 +102,6 @@ router.post('/add', authenticated, function(req, res){
 });
 
 router.post('/update', authenticated, function(req, res){
-	console.log('require update room');
 	let form = new formidable.IncomingForm();
 	form.uploadDir = './public/image/room';
 	form.encoding = 'utf-8';

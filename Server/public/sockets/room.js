@@ -19,7 +19,6 @@ socket.on('server_send_create_room', function (data){
 			location.reload(true);
 		}else{
 			let newRoom = ejs.renderFile('./partials/item_room', {'room' : data.result});
-			console.log('New room: '+ JSON.stringify(newRoom));
 			$('#carousel').append(newRoom);
 		}
 	}else{

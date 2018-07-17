@@ -2,6 +2,8 @@ var express = require('express'),
 	msg = require('../msg'),
 	{authenticated} = require('./authenticated'),
 	mMode = require('../control/mode'),
+	mRoom = require('../control/room'),
+	mDeviceInRoom = require('../control/deviceinroom'),
 	mModeDetail = require('../control/modedetail'),
 	config = require('../util/config'),
 	router = express.Router();
@@ -72,9 +74,6 @@ router.get('/', authenticated, (req, res) => {
 		if (data.result != undefined && data.result.length > 0) {
 			listMode = data.result;
 		}
-		for(var i = 0; i<listMode.length; i++){
-			listMode[i].circle = changeCircle(listMode[i].circle);
-		}
 		res.render('user_views/mode', {'req': req,'res': res,'listMode': listMode});
 	}, (e) => {
 		req.flash('error', 'We can\'t get your Mode. Please try later');
@@ -82,16 +81,34 @@ router.get('/', authenticated, (req, res) => {
 	});
 });
 
-router.get('/:id', authenticated, (req, res) => {
+router.get('/:id', authenticated, async (req, res) => {
 	let id = req.params.id;
-	mMode.getScheduleMode(req.session.user._id, id).then(
-		(data) => {
-			data.result.mode.circle = changeCircle(data.result.mode.circle);
-			res.render('user_views/modedetail', {req: req, res: res, 'mode': data.result.mode});
-		}).catch((err) => {
-			req.flash('error', 'We can\'t get this mode. Please try later');
+	if(id.indexOf('add')==0){
+		let listDevice = [],
+			listRoom = [];
+		await mDeviceInRoom.findByUser(req.session.user._id).then((result) => {
+			listDevice = result.result
+		}).catch((e)=> {
+			req.flash('error', 'We can\'t take your require. Please try later');
 			res.redirect('/error');
-	});
+		});
+		await mRoom.getFullDetailUser(req.session.user._id).then((result) => {
+			listRoom = result.result;
+		}).catch((e)=> {
+			req.flash('error', 'We can\'t take your require. Please try later');
+			res.redirect('/error');
+		});
+		return res.render('form/add/mode', {req : req, res : res, listDevice : listDevice, listRoom : listRoom, failure : req.flash('error')});
+	}else{
+		mMode.getScheduleMode(req.session.user._id, id).then(
+			(data) => {
+				data.result.mode.circle = changeCircle(data.result.mode.circle);
+				res.render('user_views/modedetail', {req: req, res: res, 'mode': data.result.mode});
+			}).catch((err) => {
+				req.flash('error', 'We can\'t get this mode. Please try later');
+				res.redirect('/error');
+		});
+	}
 });
 
 module.exports = exports = router;

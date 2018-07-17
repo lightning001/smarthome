@@ -10,7 +10,7 @@
 	socket.emit('join-room', token);
 </script>
 <script src="/js/ejs.min.js"></script>
-</head><%function changeTime(time){return new Date(parseInt(time *1000)).toISOString().split('T')[1].split('.')[0]}%>
+</head><%function convertTime(time){return new Date(parseInt(time *1000)).toISOString().split('T')[1].split('.')[0]}%>
 <body>
 	<% include ./partials/header %>
 	<div class="container-fluid main">
@@ -33,8 +33,7 @@
 								<button class="btn btn-success pull-right" id="btnSave" title="Done">Done</button>
 							</div>
 						</div></legend>
-						<%	if(mode.type==0){
-							var start = new Date(parseInt(mode.starttime *1000)).toISOString().split('T')[1].split('.')[0];
+						<%	var start = new Date(parseInt(mode.starttime *1000)).toISOString().split('T')[1].split('.')[0];
 			  				var stop = new Date(parseInt(mode.stoptime *1000)).toISOString().split('T')[1].split('.')[0];%>
 						<div><span class="bold uppercase col-xs-4">Start time: </span><%=start %></div>
 						<div><span class="bold uppercase col-xs-4">Stop time: </span><%=stop %></div>
@@ -42,15 +41,10 @@
 						<ol><%for(var i=0;i<mode.circle.length; i++){%>
 							<li class="badge badge-warning"><%=mode.circle[i]%></li><%}%>
 						</ol>
-						<%}else{%>
-						<div class="bold uppercase col-xs-12">Time Period: </div>
-						<div><b class="bold uppercase col-xs-4">Start date: </b><%= mode.day.startdate.toISOString().split('T')[0]%></div>
-						<div><b class="bold uppercase col-xs-4">Stop date: </b><%= mode.day.stopdate.toISOString().split('T')[0]%></div>
-						<%}%>
 						<hr>
 						<div class="row">
-							<%if(mode.listModeDetail!=null && mode.listModeDetail.length>0){
-							mode.listModeDetail.forEach(function(modedetail){
+							<%if(mode.modedetail!=null && mode.modedetail.length>0){
+							mode.modedetail.forEach(function(modedetail){
 							let device = modedetail.device;
 							let	perOn = 100.0 * modedetail.schedule.ontime / (mode.stoptime - mode.starttime) ;
 							let	perOff = 100.0 * modedetail.schedule.offtime / (mode.stoptime - mode.starttime);
@@ -62,12 +56,10 @@
 								<div class="media-body">
 									<h4 class="media-heading"><%=device.device_name%></h4>
 									<div class="row">
-										<div class="col-xs-12"><% let on = changeTime(modedetail.schedule.ontime);let off = changeTime(modedetail.schedule.offtime);%>
+										<div class="col-xs-12"><% let on = convertTime(modedetail.schedule.ontime);let off = convertTime(modedetail.schedule.offtime);%>
 											<div class="col-xs-2"><b>On Time: </b><%=on%></div>
 											<div class="col-xs-2"><b>Off Time: </b><%=off%></div>
-										</div><%if(mode.type==0){%>
-										<div class="col-sm-1 hidden-xs pull-left"><%=start%></div>
-										<div class="col-sm-1 hidden-xs pull-right"><%=stop%></div><%}%>
+										</div>
 										<div class="col-xs-10">
 											<div class="progress" style="border-radius : 0px;">
 												<%if(modedetail.schedule.offtime==0 && modedetail.schedule.ontime>0){%>
@@ -75,7 +67,7 @@
 												<%}else if(modedetail.schedule.offtime==0 && modedetail.schedule.ontime==0){%>
 												<div class="progress-bar progress-bar-success" style="width: 0%"></div>
 												<%}else{schedule.forEach((detail)=>{%>
-												<div class="progress-bar progress-bar-success" style="width: <%=perOn%>%"  data-placement="top" data-toggle="popover" data-trigger="hover" data-content="<%='On: '+changeTime(detail.ontime) + ' to '+ changeTime(detail.offtime)%>"></div>
+												<div class="progress-bar progress-bar-success" style="width: <%=perOn%>%"  data-placement="top" data-toggle="popover" data-trigger="hover" data-content="<%='On: '+convertTime(detail.ontime) + ' to '+ convertTime(detail.offtime)%>"></div>
 												<div class="progress-bar" style="background-color : #d3d3d3; width: <%=perOff%>%"></div><%});}%>
 											</div>
 										</div>	

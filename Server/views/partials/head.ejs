@@ -19,7 +19,10 @@
 		$.ajax({
 			url : '/autologin',
 			type : 'POST',
-			data : {'data' : token}
+			data : {'data' : token},
+			success : function(){
+				location.reload();
+			}
 		});
 	}
 </script>

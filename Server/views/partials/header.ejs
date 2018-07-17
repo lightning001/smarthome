@@ -25,14 +25,6 @@
 			<% } %>
 			<ul class="nav navbar-nav navbar-right">
 				<% if(req.session!=null && req.session.user != null){ %>
-				<li>
-					<form class="navbar-form navbar-left input-group" role="search">
-						<div class="form-group has-feedback">
-							<input type="search" class="form-control" placeholder="Search" id="searchnav">
-							<span class="glyphicon glyphicon-search form-control-feedback"></span>
-						</div>
-					</form>
-				</li>
 				<li class="dropdown"><a href="#" class="dropdown-toggle"
 					data-toggle="dropdown"><img alt="profile" class="img-circle image-profile-link"
 						src=<%= req.session.user.img %>><span class="caret"></span></a>
