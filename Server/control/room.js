@@ -45,8 +45,8 @@ Room.getFullDetail = function(user, _id){
 Room.getFullDetailUser = function(user){
 	return new Promise((resolve, reject) => {
 		Room.find({'id_user' : new mongoose.Types.ObjectId(user)}).
-		populate({path: 'listDevice', populate:{path: 'device'}}).
-		exec((error2, data2) => {
+		populate({path: 'listDevice', populate :{path : 'device'}}).
+		exec((error2, data2)=> {
 			if (error2) {
 				return reject({'success': false,'message': msg.error.occur});
 			} else {

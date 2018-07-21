@@ -4,6 +4,9 @@ const msg = require('../msg').en;
 const config = require('../util/config');
 var jwt = require('jsonwebtoken');
 var mongoose = require('mongoose');
+let dateOp = require('../util/dateOperation');
+require('../model/mode_detail');
+require('../model/device');
 /**
  * Tìm kiếm dựa vào _id (truyền vào kiểu String) của mode (kiểu ObjectId)
  */
@@ -30,14 +33,44 @@ Mode.getFullDetail = (id_user, _id)=>{
 			  return reject({'success': false, 'message': msg.error.occur});
 			} else if (!error2 && data2) {
 			  return resolve({'success': true,  'result' : data2});
+			}else{
+				return resolve({'success': true,  'result' : []});
 			}
   		});
 	});
 }
 
-let dateOp = require('../util/dateOperation');
-require('../model/mode_detail');
-require('../model/device');
+Mode.getDeviceUnusedInMode = (id_user, _id)=>{
+	return new Promise((resolve, reject)=>{
+		Mode.findOne({'_id' : new mongoose.Types.ObjectId(_id), 'id_user' : new mongoose.Types.ObjectId(id_user)}).
+		populate('modedetail').
+		exec(async (error2, data2) => {
+			if(error2){
+			  return reject({'success': false, 'message': msg.error.occur});
+			} else if (!error2 && data2) {
+				let detail = [];
+				await data2.modedetail.forEach(mdt=>{
+					detail.push(new mongoose.Types.ObjectId(mdt.device));
+				});
+				await DeviceInRoom.find({'user' : new mongoose.Types.ObjectId(id_user), '_id' : {$nin:detail}}).
+				populate('device').
+				sort({'device.device': 1}).
+				exec((err, result)=>{
+					if(err){
+						return reject({'success': false, 'message': msg.error.occur});
+					}else if(!err && result){
+			  			return resolve({'success': true,  'result' : result});
+					}else{
+			  			return resolve({'success': true,  'result' : []});
+					}
+				})
+			}else{
+				return resolve({'success': true,  'result' : []});
+			}
+  		});
+	});
+}
+
 Mode.getScheduleMode = (id_user, id)=>{
 	return new Promise((resolve, reject)=>{
 		console.log('User : '+ id_user + ' mode: '+ id);

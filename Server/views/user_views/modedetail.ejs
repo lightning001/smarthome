@@ -38,9 +38,15 @@
 						<div><span class="bold uppercase col-xs-4">Start time: </span><%=start %></div>
 						<div><span class="bold uppercase col-xs-4">Stop time: </span><%=stop %></div>
 						<div class="bold uppercase col-xs-12">Repeat: </div>
-						<ol><%for(var i=0;i<mode.circle.length; i++){%>
-							<li class="badge badge-warning"><%=mode.circle[i]%></li><%}%>
-						</ol>
+						<ul id="circle">
+							<li class="badge <%if(mode.circle.indexOf(1)>=0){%>badge-warning<%}%>">Monday</li>
+							<li class="badge <%if(mode.circle.indexOf(2)>=0){%>badge-warning<%}%>">Tuesday</li>
+							<li class="badge <%if(mode.circle.indexOf(3)>=0){%>badge-warning<%}%>">Wednesday</li>
+							<li class="badge <%if(mode.circle.indexOf(4)>=0){%>badge-warning<%}%>">Thursday</li>
+							<li class="badge <%if(mode.circle.indexOf(5)>=0){%>badge-warning<%}%>">Friday</li>
+							<li class="badge <%if(mode.circle.indexOf(6)>=0){%>badge-warning<%}%>">Saturday</li>
+							<li class="badge <%if(mode.circle.indexOf(0)>=0 || mode.circle.indexOf(7)>=0){%>badge-warning><%}%>">Sunday</li>
+						</ul>
 						<hr>
 						<div class="row">
 							<%if(mode.modedetail!=null && mode.modedetail.length>0){
@@ -51,27 +57,25 @@
 							let	schedule = modedetail.schedule.scheduledetail;
 								if(device!=null){
 					%>
-							<div class="media well"><a class="pull-left" href="#">
+							<div class="well col-lg-6 col-md-6 col-sm-12 col-xs-12"><a class="pull-left" href="#">
 								<img class="media-object<%if(device.status==false){%> item-off<%}%>" style="width : 85px;" src="<%=device.device.img%>" alt="<%=device.device_name%>"></a>
 								<div class="media-body">
 									<h4 class="media-heading"><%=device.device_name%></h4>
-									<div class="row">
-										<div class="col-xs-12"><% let on = convertTime(modedetail.schedule.ontime);let off = convertTime(modedetail.schedule.offtime);%>
-											<div class="col-xs-2"><b>On Time: </b><%=on%></div>
-											<div class="col-xs-2"><b>Off Time: </b><%=off%></div>
-										</div>
-										<div class="col-xs-10">
-											<div class="progress" style="border-radius : 0px;">
-												<%if(modedetail.schedule.offtime==0 && modedetail.schedule.ontime>0){%>
-												<div class="progress-bar progress-bar-success" style="width: 100%"></div>
-												<%}else if(modedetail.schedule.offtime==0 && modedetail.schedule.ontime==0){%>
-												<div class="progress-bar progress-bar-success" style="width: 0%"></div>
-												<%}else{schedule.forEach((detail)=>{%>
-												<div class="progress-bar progress-bar-success" style="width: <%=perOn%>%"  data-placement="top" data-toggle="popover" data-trigger="hover" data-content="<%='On: '+convertTime(detail.ontime) + ' to '+ convertTime(detail.offtime)%>"></div>
-												<div class="progress-bar" style="background-color : #d3d3d3; width: <%=perOff%>%"></div><%});}%>
-											</div>
-										</div>	
+									<div class="col-xs-12"><% let on = convertTime(modedetail.schedule.ontime);let off = convertTime(modedetail.schedule.offtime);%>
+										<div class="col-xs-6"><b>On Time: </b><span><%=on%></span></div>
+										<div class="col-xs-6"><b>Off Time: </b><span><%=off%></span></div>
 									</div>
+									<div class="col-xs-10">
+										<div class="progress" style="border-radius : 0px;">
+											<%if(modedetail.schedule.offtime==0 && modedetail.schedule.ontime>0){%>
+											<div class="progress-bar progress-bar-success" style="width: 100%"></div>
+											<%}else if(modedetail.schedule.offtime==0 && modedetail.schedule.ontime==0){%>
+											<div class="progress-bar progress-bar-success" style="width: 0%"></div>
+											<%}else{schedule.forEach((detail)=>{%>
+											<div class="progress-bar progress-bar-success" style="width: <%=perOn%>%"  data-placement="top" data-toggle="popover" data-trigger="hover" data-content="<%='On: '+convertTime(detail.ontime) + ' to '+ convertTime(detail.offtime)%>"></div>
+											<div class="progress-bar" style="background-color : #d3d3d3; width: <%=perOff%>%"></div><%});}%>
+										</div>
+									</div>	
 								</div>
 							</div><%}});}else{%>
 							<div> No device</div><%}%>
@@ -82,6 +86,7 @@
 		</div>
 	</div>
 	<% include ./partials/footer %>
+			<%-mode.circle.toString();%>
 	<script>
 		$(document).ready(function() {
 			$(".close").hide();
@@ -101,6 +106,7 @@
 
 	</script>
 	<script src="/sockets/device.js"></script>
+	<script src="/sockets/modedetail.js"></script>
 </body>
 
 </html>

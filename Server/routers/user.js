@@ -15,6 +15,7 @@ var mUser = require('../control/user'),
 	userRouter = express.Router();
 
 userRouter.get('/profile', authenticated, (req, res) => {
+	console.log('User: '+ JSON.stringify(req.session.user));
 	res.render('user_views/profile', {'req': req,'res': res});
 });
 

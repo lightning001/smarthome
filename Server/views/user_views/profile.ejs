@@ -31,7 +31,7 @@
 								<li class="list-group-item"><b>Address: </b><span class="pull-right" id="address"><%= user.street %> - <%=user.district %> - <%=user.city%></span></li>
 								<li class="list-group-item"><b>Phone number: </b><span class="pull-right" id="phonenumber"><%=user.phonenumber%></span></li>
 								<li class="list-group-item"><b>Home phone: </b><span class="pull-right" id="homephone"><%=user.homephone%></span></li>
-								<li class="list-group-item"><b>Date of Birth: </b><span class="pull-right" id="dob"><%=user.dob.split("T")[0]%></span></li>
+								<li class="list-group-item"><b>Date of Birth: </b><span class="pull-right" id="dob"><%=user.dob.toDateString()%></span></li>
 							</ul>
 							<div class="clearfix"></div>
 							<div>
@@ -61,7 +61,7 @@
 									<div class="col-sm-8"> <input type="text" class="form-control edit-in-list" name="homephone" id="edtHomephone" value="<%=user.homephone%>" ></div>
 								</li>
 								<li class="list-group-item form-group"><label class="control-label col-sm-4">Date of birth<sup style="color : red">*</sup>: </label>
-									<div class="col-sm-8"> <input type="date" class="form-control edit-in-list" name="dob" id="edtDob" value="<%=user.dob.split("T")[0]%>" required></div>
+									<div class="col-sm-8"> <input type="date" class="form-control edit-in-list" name="dob" id="edtDob" value="<%=user.dob.toISOString().split("T")[0]%>" required></div>
 								</li>
 							</ul>
 							<div>

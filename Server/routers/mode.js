@@ -100,14 +100,21 @@ router.get('/:id', authenticated, async (req, res) => {
 		});
 		return res.render('form/add/mode', {req : req, res : res, listDevice : listDevice, listRoom : listRoom, failure : req.flash('error')});
 	}else{
-		mMode.getScheduleMode(req.session.user._id, id).then(
+		let mode, other ;
+		await mMode.getScheduleMode(req.session.user._id, id).then(
 			(data) => {
-				data.result.mode.circle = changeCircle(data.result.mode.circle);
-				res.render('user_views/modedetail', {req: req, res: res, 'mode': data.result.mode});
+				mode =  data.result.mode;
 			}).catch((err) => {
 				req.flash('error', 'We can\'t get this mode. Please try later');
 				res.redirect('/error');
 		});
+		await mMode.getDeviceUnusedInMode(req.session.user._id, id).then(data=>{
+			other = data.result;
+		}).catch(e=>{
+			req.flash('error', 'We can\'t get this mode. Please try later');
+			res.redirect('/error');
+		})
+		return res.render('user_views/modedetail', {req: req, res: res, 'mode': mode, 'other' : other});
 	}
 });
 
