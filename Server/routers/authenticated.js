@@ -1,7 +1,6 @@
 module.exports = {
 	authenticated : function(req, res, next){
-		let localStorage = require('localStorage'),
-			config = require('../util/config');
+		let config = require('../util/config');
 		if(req.session.authentication == false | null | undefined){
 			res.redirect('/login');
 		}else if(req.session.usertoken == null|undefined){
@@ -33,5 +32,41 @@ module.exports = {
 		}else{
 			next();
 		}
+	},
+	admin_authenticated : function(req, res, next){
+		let config = require('../util/config');
+		if(req.session.admin_authenticated == false | null | undefined){
+			res.redirect('/login');
+		}else if(req.session.admintoken == null|undefined){
+			res.redirect('/login');
+		}else{
+			let msg = require('../msg').en;
+			let Admin = require('../control/admin');
+			Admin.byToken(req.session.admintoken, (err, u)=>{
+				if(err){
+					res.redirect('/login');
+				}else{
+					if(u.result.admin!= true){
+						req.session.admintoken = null;
+						req.session.admin_authenticated = false;
+						return res.redirect('/login');
+					}
+					if(u.result.role == null | undefined | []){
+						req.session.admintoken = null;
+						req.session.admin_authenticated = false;
+						return res.redirect('/login');
+					}
+					req.session.admin = u.result;
+					next();
+				}
+			});
+		}
+	},
+	admin_deauthenticated : function(req, res, next){
+		if(req.session.admin_authenticated==true || !(req.session.admin == null | undefined)){
+		 return	res.redirect('/admin');
+	 }else{
+		 next();
+	 }
 	}
 }

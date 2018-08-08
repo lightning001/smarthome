@@ -5,7 +5,7 @@ require('mongoose-double')(mongoose);
 var conn = require('../util/config').database;
 
 var schemaDevice = new mongoose.Schema({
-  name : {type : String},
+  name : {type : String, text : true},
   img : {type : String},
   description : {type : String},
   price : {type : mongoose.Schema.Types.Double, default : 0},

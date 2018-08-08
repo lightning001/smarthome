@@ -4,6 +4,7 @@ var mDevice = require('./control/device'),
 	mRoom = require('./control/room'),
 	mModeDetail = require('./control/modedetail'),
 	mDeviceInRoom = require('./control/deviceinroom'),
+	mSensor = require('./control/sensor'),
 	config = require('./util/config'),
 	jwt = require('jsonwebtoken');
 
@@ -44,13 +45,34 @@ module.exports = exports = function (io) {
 		}
 	}
 
+	io.of('/admin').on('connection', (socket)=>{
+		console.log('admin connected: '+socket.id);
+
+		socket.on('disconnect', () => {
+			console.log(socket.id + ' disconnect');
+		});
+
+		socket.on('get sensor', (type)=>{
+			mSensor.GET(type).then(
+			data=>{
+				socket.emit('server send sensor information', {'result' : data});
+			}).catch(err=>{
+				console.log(JSON.stringify(err));
+				socket.emit('server send sensor information', err);
+			})
+		});
+
+		socket.on('login', (data)=>{
+
+		});
+	});
+
 	io.sockets.on('connection', (socket) => {
-//		 setTimeout(() => socket.disconnect(true), 5000);
 		console.log('connected: '+socket.id);
 		socket.on('disconnect', () => {
-			console.log(socket.id + 'disconnect');
+			console.log(socket.id + ' disconnect');
 		});
-		
+
 		socket.on('timeout', function(timedOutSocket) {
 			timedOutSocket.write('socket timed out!');
 			timedOutSocket.end();
@@ -80,9 +102,9 @@ module.exports = exports = function (io) {
 					console.log('join room'+data._id);
 				}
 			});
-			
+
 		});
-		
+
 		socket.on('join_dv', function(user){
 			console.log('join device room: '+JSON.stringify(user));
 			socket.join('device_'+user.user);
@@ -279,8 +301,8 @@ module.exports = exports = function (io) {
 		 * ================= DEVICE IN ROOM
 		 * ================================================
 		 */
-		
-		
+
+
 		socket.on('client_send_all_device', (data) => {
 			console.log('client request device');
 			if(authenSocket(socket)){
@@ -294,7 +316,7 @@ module.exports = exports = function (io) {
 				socket.emit('server_send_all_device',  {'success': false, message : 'Must be login before'});
 			}
 		});
-		
+
 		socket.on('client_send_device_in_room', (data) => {
 			if(authenSocket(socket)){
 				console.log('client_send_device_in_room');
@@ -340,7 +362,7 @@ module.exports = exports = function (io) {
 				socket.emit('server_send_create_device_in_room', {'success': false, message :  {'success': false, message : 'Must be login before'}});
 			}
 		});
-		
+
 		socket.on('control-device', (data)=>{
 			if(authenSocket(socket)){
 				console.log('client send control device');
@@ -385,7 +407,7 @@ module.exports = exports = function (io) {
 				socket.emit('server_send_delete_device_in_room',  {'success': false, message : 'Must be login before'});
 			}
 		});
-		
+
 		socket.on('client_send_remove_device_from_room', (data) => {
 			if(authenSocket(socket)){
 				console.log('client send remove device in room');
@@ -417,6 +439,9 @@ module.exports = exports = function (io) {
 				socket.emit('server_send_list_device',  {'success': false, message : 'Must be login before'});
 			}
 		});
+
+		/*------------------  SENSOR  ----------------------------------------------**/
+
 	});
 
 }

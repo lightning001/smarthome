@@ -27,13 +27,15 @@ var userRouter = require('./routers/user'),
 	deviceinroomRouter = require('./routers/deviceinroom'),
 	roomRouter = require('./routers/room'),
 	modeRouter = require('./routers/mode'),
-	indexRouter = require('./routers/index');
+	indexRouter = require('./routers/index'),
+	adminRouter = require('./routers/admin');
 
 app.use('/', userRouter);
 app.use('/', indexRouter);
 app.use('/room', roomRouter);
 app.use('/mode', modeRouter);
 app.use('/device', deviceinroomRouter);
+app.use('/admin', adminRouter);
 require('./msocket')(io);
 
 server.listen(port, function() {

@@ -12,12 +12,12 @@
 //	console.log(JSON.stringify(e));
 //});
 
-var mMode = require('./control/mode');
-mMode.getDeviceUnusedInMode("5ab3333038b9043e4095ff84", '5ab47f0d52b9ed7bf00ed1c6').then(data=>{
-	console.log(JSON.stringify(data));
-}).catch(e=>{
-	console.log(JSON.stringify(e));
-});
+// var mMode = require('./control/mode');
+// mMode.getDeviceUnusedInMode("5ab3333038b9043e4095ff84", '5ab47f0d52b9ed7bf00ed1c6').then(data=>{
+// 	console.log(JSON.stringify(data));
+// }).catch(e=>{
+// 	console.log(JSON.stringify(e));
+// });
 //mMode.getScheduleMode('5ab3333038b9043e4095ff84', '5ab47f0d52b9ed7bf00ed1c6').then(data=>{
 //	console.log(JSON.stringify(data));
 //}).catch(e=>{
@@ -30,3 +30,15 @@ mMode.getDeviceUnusedInMode("5ab3333038b9043e4095ff84", '5ab47f0d52b9ed7bf00ed1c
 //mMode.createSchedule(new Date()).then(
 //	data=>console.log(JSON.stringify(data))).catch(
 //	e=>console.log(JSON.stringify(e)));
+
+
+//$search
+
+let search = require('./control/search');
+search.user_search('5ab3333038b9043e4095ff84' ,'phòng', function(err, data){
+    if(err){
+        console.log(err);
+    }else{
+        console.log(JSON.stringify(data));
+    }
+});

@@ -7,11 +7,10 @@ var schemaDeviceInRoom = new mongoose.Schema({
   device: {type: mongoose.Schema.Types.ObjectId, require: true, ref: 'Device'},
   room: {type: mongoose.Schema.Types.ObjectId, ref: 'Room'},
   user: {type: mongoose.Schema.Types.ObjectId, require: true, ref: 'User'},
-  device_name: {type: String},
+  device_name: {type: String, text : true},
   status: {type: Boolean, default : false}
 }, { toJSON : {virtuals: true}});
 
 schemaDeviceInRoom.virtual('keyonoffdevice', {ref : 'KeyOnOffDevice', localField : '_id', foreignField : 'device', justOne : false});
-
 var DeviceInRoom = conn.model('DeviceInRoom', schemaDeviceInRoom, 'DEVICEINROOM');
 module.exports = exports = DeviceInRoom;

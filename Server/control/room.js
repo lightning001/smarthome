@@ -72,6 +72,7 @@ Room.findByUser = (user)=>{
 Room.findBy_ID = (user, _id) => {
 	return new Promise((resolve, reject) => {
 		Room.findOne({'_id' : new mongoose.Types.ObjectId(_id), 'id_user' : user}).
+		populate({path: 'listDevice', populate :{path : 'device'}}).
 		exec((error2, data2) => {
 			if (error2) {
 				return reject({'success': false,'message': msg.error.occur});
@@ -211,7 +212,9 @@ Room.mDeleteByUser = (user)=>{
 
 Room.getAllRoom = () => {
 	return new Promise((resolve, reject) => {
-		Room.find().exec((error2, data2) => {
+		Room.find().
+		populate({path: 'listDevice'}).
+		exec((error2, data2) => {
 			if (error2) {
 				return reject({'success': false,'message': msg.error.occur});
 			} else {
