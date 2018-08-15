@@ -1,0 +1,14 @@
+.small-box .icon {
+	top: 10px;
+	bottom: 5px;
+	font-size: 72;
+}
+
+.small-box .icon:hover {
+	font-size: 72;
+}
+
+.table-header {
+	font-weight: bold;
+	border: 1px solid;
+}

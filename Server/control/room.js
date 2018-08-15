@@ -155,11 +155,11 @@ Room.mUpdate = (user, data) => {
 			data.img = config.host +config.upload_path+ 'room/' +fileName;
 		}else if(data.img!=null && data.img ==''){delete data[img];}
 		Room.update({'_id': new mongoose.Types.ObjectId(data._id)}, {$set: data}).
-		exec((error2, result) => {
+		exec(async (error2, result) => {
 			if (error2) {
 				return reject({'success': false, 'message': msg.error.occur});
 			} else {
-				if (data.device != null) {DeviceInRoom.setRoom(data.device, data._id);}
+				if (data.device != null) {await DeviceInRoom.setRoom(data.device, data._id);}
 				if(data.img !=null){
 					let mpath = 'room/'+ path.posix.basename(result.img);
 					ImageResize.resize(mpath, 400, 400, mpath);

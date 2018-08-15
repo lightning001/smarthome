@@ -24,6 +24,7 @@ User.login = (email, password) => {
 		User.findOne({'email': email}).
 		exec((error, data) => {
 			if (error) {
+				console.log(error);
 				return reject({'token': 'error', message : msg.error.occur});
 			}
 			if (!data || typeof data === undefined) {

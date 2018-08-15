@@ -1,0 +1,232 @@
+<head>
+<%- include('./management/other/head') %>
+<script src="/socket.io/socket.io.js"></script>
+<title> Dashboard</title>
+</head><% var
+	total_user = statistic.user.active + statistic.admin + statistic.user.pending + statistic.user.block %>
+<body class="sidebar-mini skin-blue" style="height: auto; min-height: 100%;">
+	<div class="wrapper" style="height: auto; min-height: 100%;">
+		<%- include('./management/other/header') %>
+		<%- include('./management/other/sidebar') %>
+		<div class="content-wrapper">
+			<section class="content-header">
+				<h1>Dashboard<small>Control panel</small></h1>
+			</section>
+			<section class="content">
+				<div class="box box-primary">
+					<div class="box-header with-border">
+						<h3 class="box-title">HUMAN</h3>
+						<div class="box-tools pull-right">
+							<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+							<button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+						</div>
+					</div>
+					<div class="box-body">
+						<div class="row">
+							<div class="col-md-15 col-sm-20 col-xs-30">
+								<div class="small-box bg-green">
+									<div class="inner">
+										<h3><%=statistic.user.active%></h3>
+										<p>ACTIVE USER</p>
+									</div>
+									<div class="icon">
+										<i class="fa fa-user"></i>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-15 col-sm-20 col-xs-30">
+								<div class="small-box bg-blue">
+									<div class="inner">
+										<h3><%=statistic.admin%></h3>
+										<p>ADMIN</p>
+									</div>
+									<div class="icon">
+										<i class="fa fa-user-shield"></i>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-15 col-sm-20 col-xs-30">
+								<div class="small-box bg-orange">
+									<div class="inner">
+										<h3><%=statistic.user.pending%></h3>
+										<p>PENDING USER</p>
+									</div>
+									<div class="icon">
+										<i class="fas fa-user-plus"></i>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-15 col-sm-20 col-xs-30">
+								<div class="small-box bg-red">
+									<div class="inner">
+										<h3><%=statistic.user.block%></h3>
+										<p>BLOCKED USER</p>
+									</div>
+									<div class="icon">
+										<i class="fas fa-user-lock"></i>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="box box-primary">
+					<div class="box-header with-border">
+						<div class="box-title">SYSTEM</div>
+						<div class="box-tools pull-right">
+							<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+							<button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+						</div>
+					</div>
+					<div class="box-body">
+						<div class="row">
+							<div class="col-md-15 col-sm-20 col-xs-30">
+								<div class="small-box bg-aqua">
+									<div class="inner">
+										<h3><%=statistic.room%></h3>
+										<p>ROOM</p>
+									</div>
+									<div class="icon">
+										<i class="fas fa-box"></i>
+									</div>
+									<a href="/admin/room" class="small-box-footer">Detail <i class="fas fa-arrow-circle-right"></i></a>
+								</div>
+							</div>
+							<div class="col-md-15 col-sm-20 col-xs-30">
+								<div class="small-box bg-aqua">
+									<div class="inner">
+										<h3><%=statistic.mode%></h3>
+										<p>MODE</p>
+									</div>
+									<div class="icon">
+										<i class="fab fa-buromobelexperte"></i>
+									</div>
+									<a href="/admin/mode" class="small-box-footer">Detail <i class="fas fa-arrow-circle-right"></i></a>
+								</div>
+							</div>
+							<div class="col-md-15 col-sm-20 col-xs-30">
+								<div class="small-box bg-aqua">
+									<div class="inner">
+										<h3><%=statistic.device%></h3>
+										<p>DEVICE</p>
+									</div>
+									<div class="icon">
+										<i class="fas fa-charging-station"></i>
+									</div>
+									<a href="/admin/device" class="small-box-footer">Detail <i class="fas fa-arrow-circle-right"></i></a>
+								</div>
+							</div>
+							<div class="col-md-15 col-sm-20 col-xs-30">
+								<div class="small-box bg-aqua">
+									<div class="inner">
+										<h3><%=statistic.deviceinroom%></h3>
+										<p>DEVICE USER</p>
+									</div>
+									<div class="icon">
+										<i class="fas fa-chalkboard-teacher"></i>
+									</div>
+									<a href="/admin/deviceuser" class="small-box-footer">Detail <i class="fas fa-arrow-circle-right"></i></a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="box box-primary">
+					<div class="box-header with-border">
+						<div class="box-title">CONNECTING USER</div>
+						<div class="box-tools pull-right">
+							<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+							 <div class="btn-group" id="realtime" data-toggle="btn-toggle">
+							 	<button type="button" class="btn btn-default btn-xs active" data-toggle="on">On</button>
+							 	<button type="button" class="btn btn-default btn-xs" data-toggle="off">Off</button>
+							</div>
+							<button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+						</div>
+					</div>
+					<div class="box-body">
+						<div class="row">
+							<div class="col-md-60 col-sm-60 col-xs-60">
+								 <div id="connecting_user" style="height: 300px;"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+		</div>
+		<%- include('./management/other/footer') %>
+	</div>
+	<script src="/plugins/Flot/jquery.flot.js"></script>
+	<script src="/plugins/Flot/jquery.flot.resize.js"></script>
+	<!-- FLOT PIE PLUGIN - also used to draw donut charts -->
+	<script src="/plugins/Flot/jquery.flot.pie.js"></script>
+	<!-- FLOT CATEGORIES PLUGIN - Used to draw bar charts -->
+	<script src="/plugins/Flot/jquery.flot.categories.js"></script>
+	<script>
+		var socket = io('/admin', {query : {token : '<%=req.session.admintoken%>'}});
+		var _data = [];
+		_data.push(0);
+		
+		var connecting_user_plot = $.plot('#connecting_user', [_data], {
+		  grid  : {
+			borderColor: '#f3f3f3',
+			borderWidth: 1,
+			tickColor  : '#f3f3f3'
+		  },
+		  series: {
+			shadowSize: 0, // Drawing is faster without shadows
+			color     : '#3c8dbc'
+		  },
+		  lines : {
+			fill : true, //Converts the line chart to area chart
+			color: '#3c8dbc'
+		  },
+		  yaxis : {
+			min : 0,
+			max : 100,
+			show: true
+		  },
+		  xaxis : {
+			  min : 0,
+			  max : 50,
+			  show: false
+		  }
+		})
+		var sches;
+		var updateInterval = 5000 
+		var realtime       = 'on'
+		function exec(){
+			setTimeout(function(){
+				if(realtime=='on')
+					socket.emit('real time user')
+			}, updateInterval)
+		}
+		exec();
+		
+		function update() {
+			connecting_user_plot.setData(_data);
+			connecting_user_plot.draw();
+		}
+		socket.on('real time user data', function(data){
+			if (_data.length > 0)
+				_data = _data.slice(1)
+				_data.push(data);
+			if(_data.length>50){
+				_data.remove(0);
+			}
+			if(realtime=='on'){
+				update()
+			}
+		});
+
+		$('#realtime .btn').click(function () {
+		  if ($(this).data('toggle') === 'on') {
+			realtime = 'on';
+			thread.start();
+		  }
+		  else {
+			realtime = 'off';
+			thread.stop();
+		  }
+		})
+	</script>
+</body>

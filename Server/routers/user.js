@@ -88,6 +88,8 @@ userRouter.post('/login', deauthenticated, async function(req, res){
 		if(req.body.remember=='on'){
 			req.session.remember = true;
 		}
+		console.log(JSON.stringify(user.token));
+
 		mUser.byToken(user.token).then(decode=>{
 			if(decode.result.status == config.user_status.Pending){
 				req.session.active_email = decode.result.email;
@@ -106,6 +108,7 @@ userRouter.post('/login', deauthenticated, async function(req, res){
 		});
 	}).catch((e)=>{
 		console.log('Login error: '+e);
+		console.log(e)
 		if(req.session.loginRequestCount ==null){
 			req.session.loginRequestCount = 0;
 		}
@@ -117,7 +120,7 @@ userRouter.post('/login', deauthenticated, async function(req, res){
 
 userRouter.post('/autologin', deauthenticated, (req, res)=>{
 	let token = req.body.data;
-	if(token){
+	if(token&& token!='' ){
 		mUser.byToken(token).then(decode=>{
 			req.session.authentication = true;
 			req.session.usertoken = token;

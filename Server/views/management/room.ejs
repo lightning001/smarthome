@@ -1,0 +1,55 @@
+<head>
+<%- include('./management/other/head') %>
+<title> Room</title>
+<style>
+	td {
+		font-size : 14;
+	}
+</style>
+</head>
+<body class="sidebar-mini skin-blue" style="height: auto; min-height: 100%;">
+	<div class="wrapper" style="height: auto; min-height: 100%;">
+		<%- include('./management/other/header') %>
+		<%- include('./management/other/sidebar') %>
+		<div class="content-wrapper">
+			<section class="content-header">
+				<h1>ROOM<small></small></h1>
+			</section>
+			<section class="content">
+				<div class="box box-primary">
+					<div class="box-header with-border">
+						<div class="box-title">
+							<button class="btn btn-default btn-sm"><i class="fa fa-plus"></i></button>
+						</div>
+						<div class="box-tools pull-right">
+							<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+							<button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+						</div>
+					</div>
+					<div class="box-body">
+						
+						<div>
+							<div class="input-group table-header row">
+								<div>
+								<div class="col-xs-8 table-element">#</div>
+								<div class="col-xs-17 table-element" >Picture</div>
+								<div class="col-xs-20 table-element">Name</div>
+								<div class="col-xs-15 table-element">User</div>
+									</div>
+							</div>
+							<div class="input-group table-body"><% count = 1; listRoom.forEach(room=>{%>
+								<div class="">
+									<span class="input-group-addon col-xs-8"><%=count%></span>
+									<input type="file" class="table-element col-xs-17" name="img">
+									<input type="text" class="table-element col-xs-20" name="room_name" value="<%=room.room_name%>">
+									<input type="text" class="table-element col-xs-15" name="id_user" value="<%=room.id_user%>">
+								</div><div class="clearfix"></div><% count++; });%>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+		</div>
+		<%- include('./management/other/footer') %>
+	</div>
+</body>

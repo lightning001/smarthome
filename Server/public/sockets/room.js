@@ -44,7 +44,7 @@ socket.on('server_send_update_room', (data) => {
 function deleteRoom(e, method){
 	var value = $(e).children('input').val();
 	console.log('input: '+value);
-	socket.emit('client_send_delete_room', {'data' : {'_id' : value, 'isDeleteDevice' : method}});
+	socket.emit('client_send_delete_room', {'_id' : value, 'isDeleteDevice' : method});
 }
 
 

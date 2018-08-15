@@ -247,6 +247,7 @@ Mode.mDelete = (user, mode_ID) =>{
 		});
 	});
 };
+
 /**
  * Lấy về tất cả các Mode
  */

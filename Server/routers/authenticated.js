@@ -44,9 +44,9 @@ module.exports = {
 			let Admin = require('../control/admin');
 			Admin.byToken(req.session.admintoken, (err, u)=>{
 				if(err){
-					res.redirect('/login');
+					res.redirect('/admin/login');
 				}else{
-					if(u.result.admin!= true){
+					if(u.result.user.admin!= true){
 						req.session.admintoken = null;
 						req.session.admin_authenticated = false;
 						return res.redirect('/login');
@@ -57,6 +57,7 @@ module.exports = {
 						return res.redirect('/login');
 					}
 					req.session.admin = u.result;
+					req.session.roles = Admin.roles;
 					next();
 				}
 			});

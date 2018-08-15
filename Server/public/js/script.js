@@ -14,6 +14,7 @@ function logout(){
 		url : '/logout',
 		method : 'GET'
 	});
+	location.href = '/';
 }
 
 function goBack(){

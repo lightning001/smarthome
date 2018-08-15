@@ -1,0 +1,385 @@
+<html style="height: auto; min-height: 100%;">
+
+<head>
+	<meta charset="utf-8">
+	<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+	<link href="/css/bootstrap.min.css" rel="stylesheet">
+	<!-- <link rel="stylesheet" href="/font-awesome/css/font-awesome.css" /> -->
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
+	<link href="/temp/dist/css/admin.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="/temp/dist/css/skins/_all-skins.min.css">
+	<link href="/css/admin-style.css" rel="stylesheet">
+	<link rel="icon" href="https://smarthome2018.herokuapp.com/image/icon/ic_icon_4mz_1.ico" type="image/x-icon">
+
+	<title> Room</title>
+	<style>
+		td {
+			font-size: 14;
+		}
+
+	</style>
+</head>
+
+<body class="sidebar-mini skin-blue" style="height: auto; min-height: 100%;">
+	<div class="wrapper" style="height: auto; min-height: 100%;">
+		<header class="main-header">
+			<!-- Logo -->
+			<a href="/admin/dashboard" class="logo">
+				<!-- mini logo for sidebar mini 50x50 pixels -->
+				<span class="logo-mini"><b>SH</b></span>
+				<!-- logo for regular state and mobile devices -->
+				<span class="logo-lg"><b>Admin</b>SmartHome</span>
+			</a>
+			<!-- Header Navbar: style can be found in header.less -->
+			<nav class="navbar navbar-static-top">
+				<!-- Sidebar toggle button-->
+				<a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button"><span class="sr-only">Toggle navigation</span><i class="fas fa-align-justify"></i>
+      </a>
+
+				<div class="navbar-custom-menu">
+					<ul class="nav navbar-nav">
+
+						<!-- Messages: style can be found in dropdown.less-->
+						<li class="dropdown messages-menu">
+							<a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+              <i class="fa fa-envelope-o"></i>
+              <span class="label label-success">4</span>
+            </a>
+
+						</li>
+						<!-- Notifications: style can be found in dropdown.less -->
+						<li class="dropdown notifications-menu">
+							<a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+              <i class="fa fa-bell-o"></i>
+              <span class="label label-warning">10</span>
+            </a>
+
+						</li>
+						<!-- Tasks: style can be found in dropdown.less -->
+						<li class="dropdown tasks-menu">
+							<a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+              <i class="fa fa-flag-o"></i>
+              <span class="label label-danger">9</span>
+            </a>
+						</li>
+						<!-- User Account: style can be found in dropdown.less -->
+						<li class="dropdown user user-menu">
+							<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+              <img src="http://192.168.15.135:3000/image/profile/QTgy5vEIBUcetNMHy1ZS1528350826284.png" class="user-image" alt="User Image">
+            </a>
+							<ul class="dropdown-menu">
+								<!-- User image -->
+								<li class="user-header">
+									<img src="http://192.168.15.135:3000/image/profile/QTgy5vEIBUcetNMHy1ZS1528350826284.png" class="img-circle" alt="User Image">
+
+									<p>
+										Phạm Trang Linh Đan - Master Admin
+										<small>Member since Thu, 22 Mar 2018 04:38:07 GMT</small>
+									</p>
+								</li>
+								<!-- Menu Body -->
+								<li class="user-body">
+								</li>
+								<!-- Menu Footer-->
+								<li class="user-footer">
+									<div class="pull-left">
+										<a href="#" class="btn btn-default btn-flat">Profile</a>
+									</div>
+									<div class="pull-right">
+										<a href="#" class="btn btn-default btn-flat">Sign out</a>
+									</div>
+								</li>
+							</ul>
+						</li>
+						<!-- Control Sidebar Toggle Button -->
+						<li>
+							<a href="#" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>
+						</li>
+					</ul>
+				</div>
+			</nav>
+		</header>
+		<aside class="main-sidebar">
+			<section class="sidebar" style="height: auto;">
+				<div class="user-panel">
+					<div class="pull-left image">
+						<img src="http://192.168.15.135:3000/image/profile/QTgy5vEIBUcetNMHy1ZS1528350826284.png" class="img-circle" alt="User Image">
+					</div>
+					<div class="pull-left info">
+						<p>
+							Phạm Trang Linh Đan
+						</p>
+						<a href="#"><i class="fa fa-circle text-success"></i> Online</a>
+					</div>
+				</div>
+				<form action="#" method="get" class="sidebar-form">
+					<div class="input-group">
+						<input type="text" name="q" class="form-control" placeholder="Search...">
+						<span class="input-group-btn">
+                <button type="submit" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
+                </button>
+              </span>
+					</div>
+				</form>
+				<ul class="sidebar-menu tree" data-widget="tree">
+					<li>
+						<a href="#"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a>
+					</li>
+					<li class="header">MANAGEMENT</li>
+
+					<li class="treeview">
+						<a href="#">
+					<i class="fas fa-box"></i>
+					<span>Room</span>
+						<span class="pull-right-container">
+						<i class="fa fa-angle-left pull-right"></i>
+					</span>
+			  	</a>
+						<ul class="treeview-menu">
+							<li><a href="/admin/room"><i class="fa fa-circle-o"></i>List Room</a></li>
+							<li><a href="/admin/room/add"><i class="fa fa-circle-o"></i>New Room</a></li>
+						</ul>
+					</li>
+
+					<li class="treeview">
+						<a href="#">
+					<i class="fab fa-buromobelexperte"></i>
+					<span>Mode</span>
+						<span class="pull-right-container">
+						<i class="fa fa-angle-left pull-right"></i>
+					</span>
+			  	</a>
+						<ul class="treeview-menu">
+							<li><a href="/admin/mode"><i class="fa fa-circle-o"></i>List Mode</a></li>
+							<li><a href="/admin/mode/add"><i class="fa fa-circle-o"></i>New Mode</a></li>
+						</ul>
+					</li>
+
+					<li class="treeview">
+						<a href="#">
+					<i class="fas fa-charging-station"></i>
+					<span>Device</span>
+						<span class="pull-right-container">
+						<i class="fa fa-angle-left pull-right"></i>
+					</span>
+			  	</a>
+						<ul class="treeview-menu">
+							<li><a href="/admin/device"><i class="fa fa-circle-o"></i>List Device</a></li>
+							<li><a href="/admin/device/add"><i class="fa fa-circle-o"></i>New Device</a></li>
+						</ul>
+					</li>
+
+					<li class="treeview">
+						<a href="#">
+					<i class="fas fa-chalkboard-teacher"></i>
+					<span>Device User</span>
+						<span class="pull-right-container">
+						<i class="fa fa-angle-left pull-right"></i>
+					</span>
+			  	</a>
+						<ul class="treeview-menu">
+							<li><a href="/admin/deviceuser"><i class="fa fa-circle-o"></i>List Device User</a></li>
+							<li><a href="/admin/deviceuser/add"><i class="fa fa-circle-o"></i>New Device User</a></li>
+						</ul>
+					</li>
+
+					<li class="header">HUMAN</li>
+					<li class="treeview">
+						<a href="#">
+					<i class="fas fa-users"></i>
+					<span>User</span>
+						<span class="pull-right-container">
+						<i class="fa fa-angle-left pull-right"></i>
+					</span>
+			  	</a>
+						<ul class="treeview-menu">
+							<li><a href="/admin/user"><i class="fa fa-circle-o"></i>List User</a></li>
+							<li><a href="/admin/user/add"><i class="fa fa-circle-o"></i>New User</a></li>
+						</ul>
+					</li>
+
+					<li class="treeview">
+						<a href="#">
+					<i class="fas fa-user-shield"></i>
+					<span>Admin</span>
+						<span class="pull-right-container">
+						<i class="fa fa-angle-left pull-right"></i>
+					</span>
+			  	</a>
+						<ul class="treeview-menu">
+							<li><a href="/admin/admin"><i class="fa fa-circle-o"></i>List Admin</a></li>
+							<li><a href="/admin/admin/add"><i class="fa fa-circle-o"></i>New Admin</a></li>
+						</ul>
+					</li>
+
+				</ul>
+			</section>
+		</aside>
+
+		<div class="content-wrapper" style="min-height: 1153px;">
+			<section class="content-header">
+				<h1>ROOM<small></small></h1>
+			</section>
+			<section class="content">
+				<div class="box box-primary">
+					<div class="box-header with-border">
+						<div class="box-title">
+							<button class="btn btn-default btn-sm"><i class="fa fa-plus"></i></button>
+						</div>
+						<div class="box-tools pull-right">
+							<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+							<button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+						</div>
+					</div>
+					<div class="box-body">
+						<div id="tbroom_wrapper" class="dataTables_wrapper form-inline dt-bootstrap no-footer">
+							<div class="row">
+								<div class="col-sm-6">
+									<div class="dataTables_length" id="tbroom_length"><label>Show <select name="tbroom_length" aria-controls="tbroom" class="form-control input-sm"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select> entries</label></div>
+								</div>
+								<div class="col-sm-6">
+									<div id="tbroom_filter" class="dataTables_filter"><label>Search:<input type="search" class="form-control input-sm" placeholder="" aria-controls="tbroom"></label></div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-sm-12">
+									<table class="table table-bordered table-striped dataTable no-footer" id="tbroom" role="grid" aria-describedby="tbroom_info">
+										<thead>
+											<tr role="row">
+												<th class="text-center sorting_asc" tabindex="0" aria-controls="tbroom" rowspan="1" colspan="1" aria-sort="ascending" aria-label="#: activate to sort column descending" style="width: 15px;">#</th>
+												<th class="text-center sorting" tabindex="0" aria-controls="tbroom" rowspan="1" colspan="1" aria-label="Pic: activate to sort column ascending" style="width: 24px;">Pic</th>
+												<th class="text-center sorting" tabindex="0" aria-controls="tbroom" rowspan="1" colspan="1" aria-label="Name: activate to sort column ascending" style="width: 60px;">Name</th>
+												<th class="text-center sorting" tabindex="0" aria-controls="tbroom" rowspan="1" colspan="1" aria-label="User: activate to sort column ascending" style="width: 184px;">User</th>
+												<th class="sorting" tabindex="0" aria-controls="tbroom" rowspan="1" colspan="1" aria-label=": activate to sort column ascending" style="width: 0px;"></th>
+											</tr>
+										</thead>
+										<tbody>
+
+											<tr role="row" class="odd">
+												<td class="text-center sorting_1">1</td>
+												<td class="text-center"><img src="https://smarthome2018.herokuapp.com/image/room/pqd3NVm9l91528785809802_suite-room-2.jpg" class="img img-responsive"></td>
+												<td class="text-center col-lg-20 col-md-20 col-xs-20">Living room</td>
+												<td class="text-center">5ab3333038b9043e4095ff84</td>
+												<td></td>
+
+											</tr>
+											<tr role="row" class="even">
+												<td class="text-center sorting_1">2</td>
+												<td class="text-center"><img src="https://smarthome2018.herokuapp.com/image/room/ydu8bCjrOB1528786115848_twin-room-2.jpg" class="img img-responsive"></td>
+												<td class="text-center col-lg-20 col-md-20 col-xs-20">Bed room</td>
+												<td class="text-center">5ab3333038b9043e4095ff84</td>
+												<td></td>
+
+											</tr>
+											<tr role="row" class="odd">
+												<td class="text-center sorting_1">3</td>
+												<td class="text-center"><img src="https://smarthome2018.herokuapp.com/image/room/1528982230164QmGV2qpi6V_buffet.jpg" class="img img-responsive"></td>
+												<td class="text-center col-lg-20 col-md-20 col-xs-20">Kitchen</td>
+												<td class="text-center">5ab3333038b9043e4095ff84</td>
+												<td></td>
+
+											</tr>
+											<tr role="row" class="even">
+												<td class="text-center sorting_1">4</td>
+												<td class="text-center"><img src="https://smarthome2018.herokuapp.com/image/room/t6DeaKPZueZsvtqvVyor1528355190510.png" class="img img-responsive"></td>
+												<td class="text-center col-lg-20 col-md-20 col-xs-20">Bathroom</td>
+												<td class="text-center">5ab3333038b9043e4095ff84</td>
+												<td></td>
+
+											</tr>
+											<tr role="row" class="odd">
+												<td class="text-center sorting_1">5</td>
+												<td class="text-center"><img src="https://smarthome2018.herokuapp.com/image/room/1M4AeSt9El1528785104509_twin-room.jpg" class="img img-responsive"></td>
+												<td class="text-center col-lg-20 col-md-20 col-xs-20">Bed room 2</td>
+												<td class="text-center">5ab3333038b9043e4095ff84</td>
+												<td></td>
+
+											</tr>
+											<tr role="row" class="even">
+												<td class="text-center sorting_1">6</td>
+												<td class="text-center"><img src="https://smarthome2018.herokuapp.com/image/room/fBxLCvwdud1528777047301_single-room-2.jpg" class="img img-responsive"></td>
+												<td class="text-center col-lg-20 col-md-20 col-xs-20">Bed room 3</td>
+												<td class="text-center">5ab3333038b9043e4095ff84</td>
+												<td></td>
+
+											</tr>
+											<tr role="row" class="odd">
+												<td class="text-center sorting_1">7</td>
+												<td class="text-center"><img src="https://smarthome2018.herokuapp.com/image/B4zlz-6S9my3FfK8AAAA1525681439332.png" class="img img-responsive"></td>
+												<td class="text-center col-lg-20 col-md-20 col-xs-20">phạm văn phát</td>
+												<td class="text-center">5afea35f9cfee62868966058</td>
+												<td></td>
+
+											</tr>
+											<tr role="row" class="even">
+												<td class="text-center sorting_1">8</td>
+												<td class="text-center"><img src="http://192.168.1.111:3000/image/DOIs8Vhh6tUNZ53u0MZX1527840849391.png" class="img img-responsive"></td>
+												<td class="text-center col-lg-20 col-md-20 col-xs-20">phòng ngủ</td>
+												<td class="text-center">5af00d1f8ce2293e143c9b8e</td>
+												<td></td>
+
+											</tr>
+											<tr role="row" class="odd">
+												<td class="text-center sorting_1">9</td>
+												<td class="text-center"><img src="http://192.168.1.111:3000/image/v45d6K9e5DgCeiwhkm7f1527843292304.png" class="img img-responsive"></td>
+												<td class="text-center col-lg-20 col-md-20 col-xs-20">phòng khách</td>
+												<td class="text-center">5b1109dc06f0c917c8d68680</td>
+												<td></td>
+
+											</tr>
+											<tr role="row" class="even">
+												<td class="text-center sorting_1">10</td>
+												<td class="text-center"><img src="http://192.168.1.111:3000/image/QkEyKdmszLOCIN5RSqK01527843466697.png" class="img img-responsive"></td>
+												<td class="text-center col-lg-20 col-md-20 col-xs-20">phòng khách</td>
+												<td class="text-center">5b110a8a19af57141cddaea5</td>
+												<td></td>
+
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-sm-5">
+									<div class="dataTables_info" id="tbroom_info" role="status" aria-live="polite">Showing 1 to 10 of 21 entries</div>
+								</div>
+								<div class="col-sm-7">
+									<div class="dataTables_paginate paging_simple_numbers" id="tbroom_paginate">
+										<ul class="pagination">
+											<li class="paginate_button previous disabled" id="tbroom_previous"><a href="#" aria-controls="tbroom" data-dt-idx="0" tabindex="0">Previous</a></li>
+											<li class="paginate_button active"><a href="#" aria-controls="tbroom" data-dt-idx="1" tabindex="0">1</a></li>
+											<li class="paginate_button "><a href="#" aria-controls="tbroom" data-dt-idx="2" tabindex="0">2</a></li>
+											<li class="paginate_button "><a href="#" aria-controls="tbroom" data-dt-idx="3" tabindex="0">3</a></li>
+											<li class="paginate_button next" id="tbroom_next"><a href="#" aria-controls="tbroom" data-dt-idx="4" tabindex="0">Next</a></li>
+										</ul>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+		</div>
+
+		<footer class="main-footer">
+			<section class="row">
+				<div>Design by <strong>Smart Home team</strong> <br>FIT Nong Lam University of Ho Chi Minh City</div>
+			</section>
+		</footer>
+
+		<script src="/js/jquery.js" type="text/javascript"></script>
+		<script src="/js/bootstrap.min.js" type="text/javascript"></script>
+		<script src="/temp/dist/js/adminlte.min.js" type="text/javascript"></script>
+		<script src="/temp/dist/js/demo.js" type="text/javascript"></script>
+		<script src="/plugins/datatables.net/js/jquery.dataTables.min.js"></script>
+		<script src="/plugins/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+
+	</div>
+	<script>
+		$('#tbroom').DataTable()
+
+	</script>
+
+</body>
+
+</html>

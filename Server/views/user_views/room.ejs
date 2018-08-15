@@ -3,7 +3,7 @@
 <% include ./partials/head %>
 <script>
 	var token = localStorage.getItem('token');
-	if (token == null || token == undefined) {
+	if (token == null || token == undefined || token== '') {
 		token = "<%=req.session.usertoken%>";
 		localStorage.setItem('token', token);
 	}

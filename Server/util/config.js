@@ -10,7 +10,7 @@ var
 		 // host = 'http://192.168.15.135:3000/',
 	//	host = 'http://192.168.1.111:3000/',
 	//	host = 'http://192.168.1.115:3000/',
-		host = 'http://192.168.1.134:3000/',
+		host = 'http://192.168.1.135:3000/',
 	//  host = 'http://192.168.43.154:3000/',
 	port = 3000,
 	options = {
@@ -32,6 +32,7 @@ module.exports = exports = {
 	database: database,
 	database_version: database_version,
 	secret_key: 'smarthome_itnlu',
+	admin_secret_key : 'admin_smarthome_itnlu',
 	cookie_secret_key: ['cookie_', 'smarthome_itnlu', 'luanvan_linhdan_vanphat'],
 	upload_path: 'image/',
 	upload_media: 'media/',

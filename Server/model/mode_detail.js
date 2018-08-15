@@ -7,8 +7,8 @@ var schemaModeDetail = new mongoose.Schema({
 	mode : {type : mongoose.Schema.Types.ObjectId, require : true, ref : 'Mode'},
 	device : {type : mongoose.Schema.Types.ObjectId, require : true, ref : 'DeviceInRoom'},
 	schedule : {
-		ontime : {type: Number},
-		offtime : {type: Number},
+		ontime : {type: Number, default : 0},
+		offtime : {type: Number, default : 0},
 		scheduledetail : []
 	}
 });

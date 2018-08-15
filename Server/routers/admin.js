@@ -8,6 +8,7 @@ var DeviceInRoom = require('../control/deviceinroom'),
 	deauthenticated = require('./authenticated').admin_deauthenticated,
 	msg = require('../msg').en,
 	Admin = require('../control/admin'),
+	md5 = require('md5'),
 	express = require('express');
 
 var router = express.Router();
@@ -15,7 +16,7 @@ var router = express.Router();
 /**==========  GET  ==================================================*/
 
 router.get('/', (req, res)=>{
-	res.redirect('/dashboard');
+	res.redirect('/admin/dashboard');
 });
 
 router.get('/error', (req, res) => {
@@ -141,17 +142,18 @@ router.get('/admin', authenticated, (req, res)=>{
 
 /**=========  POST  ==========================================================*/
 
-router.post('/login', deauthenticated, (req, res)=>{
+router.post('/loginadmin', deauthenticated, (req, res)=>{
 	if(req.session.loginRequestCount >=3){
 		req.flash('failureLogin', msg.error.login_3);
 		return res.redirect('/admin/login');
 	}else{
 		let email = req.body.email;
-		let password = req.body.password;
+		let password = md5(req.body.password);
 		Admin.authen(email, password, (err, data)=>{
 			if(err){
+				console.log(err);
 				req.flash('failureLogin', err);
-				return res.redirect('/admin/error');
+				return res.redirect('/admin/login');
 			}else{
 				let token = data.token;
 				req.session.admin_authenticated = true;

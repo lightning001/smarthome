@@ -65,6 +65,7 @@ ModeDetail.mInsert = (user, data) =>{
 		let mModeDetail = new ModeDetail();
 		mModeDetail.mode = new mongoose.Types.ObjectId(data.mode);
 		mModeDetail.device = new mongoose.Types.ObjectId(data.device);
+		mModeDetail.schedule = data.schedule;
 		mModeDetail.save((err, result) =>{
 			if(err) {
 				return reject({'success' : false, 'message' : msg.error.occur});
@@ -76,32 +77,46 @@ ModeDetail.mInsert = (user, data) =>{
 }
 
 ModeDetail.insertArray = (user, data, mode)=>{
-	console.log('Array: \n'+JSON.stringify(data));
-	try{
-		data.forEach(async function(modedetail){
-			let mModeDetail = new ModeDetail();
-			mModeDetail.mode = mode._id;
-			mModeDetail.device = modedetail.device._id;
-			if(modedetail.schedule!=null && modedetail.schedule!=undefined){
-				if(mModeDetail.schedule.ontime==null | undefined){
-					mModeDetail.schedule.ontime = mode.stoptime - mode.starttime;
+	return new Promise((resolve, reject)=>{
+		try{
+			let result_return = []; var count = 0;
+			data.forEach(async function (modedetail){
+				let mModeDetail = new ModeDetail();
+				mModeDetail.mode = mode;
+				mModeDetail.device = modedetail;
+				if(modedetail.schedule!=null && modedetail.schedule!=undefined){
+					if(mModeDetail.schedule.ontime==null | undefined){
+						mModeDetail.schedule.ontime = 0
+					}else{
+						mModeDetail.schedule.ontime = modedetail.schedule.ontime;
+					}
+					if(mModeDetail.schedule.offtime ==null |undefined){
+						mModeDetail.schedule.offtime = 0;
+					}else{
+						mModeDetail.schedule.offtime = modedetail.schedule.offtime;
+					}
 				}else{
-					mModeDetail.schedule.ontime = modedetail.schedule.ontime;
-				}
-				if(mModeDetail.schedule.offtime ==null |undefined){
+					mModeDetail.schedule.ontime = 0;
 					mModeDetail.schedule.offtime = 0;
-				}else{
-					mModeDetail.schedule.offtime = modedetail.schedule.offtime;
 				}
-			}else{
-				mModeDetail.schedule.ontime = mode.stoptime - mode.starttime;
-				mModeDetail.schedule.offtime = 0;
-			}
-			await mModeDetail.save();
-		});
-	}catch(e){
-		console.log('\ninsert array mode detail FALSE ======================================================\n'+ JSON.stringify(e));
-	}
+				await mModeDetail.save((error, result)=>{
+					count+=1;
+					if(error){
+						console.log(error);
+						reject({success : false, message : msg.error.occur});
+					}else{
+						result_return.push(result);
+					}
+					if(count==data.length){
+						return resolve({'success' : true, result : result_return});
+					}
+				});
+			});
+		}catch(e){
+			console.log(e);
+			reject({success : false, message : msg.error.occur});
+		}
+	});
 }
 
 ModeDetail.mUpdate = (user, data) => {
@@ -142,7 +157,7 @@ ModeDetail.mDelete = (user, _id) =>{
 			if(error2){
 				return reject({'success': false, 'message': msg.error.occur});
 			} else {
-				return resolve({'success': true, 'id' : user, 'result' : _id});
+				return resolve({'success': true, 'result' : _id});
 			}
 		});
 	});

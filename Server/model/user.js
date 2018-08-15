@@ -1,7 +1,7 @@
 'use strict'
 
 var mongoose = require('mongoose');
-var conn = require('../util/config').database;
+var config = require('../util/config');
 
 var schemaUser = new mongoose.Schema({
 	email : {type : String, required: true, index: { unique: true }, text : true},
@@ -18,14 +18,13 @@ var schemaUser = new mongoose.Schema({
 	type : {type : String, default : 'Normal'},
 	status : {type : String, default : 'Pending'},
 	admin : {type : Boolean, default : false},
-	role : {type : []},
 	startdateregister : {type : Date, default : Date.now()},
-	img : {type : String, default : 'https://image.ibb.co/d7xiTn/men.png'}
+	img : {type : String, default : config.host+ 'image/profile/profile.png'}
 }, { toJSON : {virtuals: true}});
 
 schemaUser.virtual(  'listMode', {ref : 'Mode', localField : '_id', foreignField : 'id_user', justOne : false});
 schemaUser.virtual(  'listRoom', {ref : 'Room', localField : '_id', foreignField : 'id_user', justOne : false});
 schemaUser.virtual('listDevice', {ref : 'DeviceInRoom', localField : '_id', foreignField : 'user', justOne : false});
-var User = conn.model('User', schemaUser, 'USER');
+var User = config.database.model('User', schemaUser, 'USER');
 
 module.exports = exports = User;

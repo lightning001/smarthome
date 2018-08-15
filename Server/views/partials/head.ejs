@@ -15,7 +15,7 @@
 <%if(req.session.user == null | undefined || req.session.authentication==undefined | null | false){%>
 <script>
 	let token = localStorage.getItem('token');
-	if(token!=null && token != undefined){
+	if(token!=null && token != undefined && token!=''){
 		$.ajax({
 			url : '/autologin',
 			type : 'POST',

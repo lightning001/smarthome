@@ -16,7 +16,7 @@ var express = require('express'),
 	timeout = 500;
 
 app.use(express.static(path.join(__dirname, '/public')));
-app.use(session({secret: config.secret_key, resave: true, saveUninitialized: true, cookie: {maxAge : 1000*60*30}}));
+app.use(session({secret: config.secret_key, resave: true, saveUninitialized: true, cookie: {maxAge : 1000*60*300}}));
 app.use(cookieParser(config.cookie_secret_key));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());

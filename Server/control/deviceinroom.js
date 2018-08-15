@@ -140,7 +140,7 @@ DeviceInRoom.mUpdate = (user, data) => {
 
 DeviceInRoom.setRoom = (arrdata, roomId) => {
 	arrdata.forEach((device) => {
-		DeviceInRoom.update({'_id': new mongoose.Types.ObjectId(device)}, {$set: {'room': roomId}}).exec();
+		DeviceInRoom.update({'_id': new mongoose.Types.ObjectId(device)}, {$set: {'room': new mongoose.Types.ObjectId(roomId)}}).exec();
 	});
 }
 
