@@ -61,7 +61,7 @@ DeviceInRoom.onoff = (_id)=>{
 		exec((error2, findresult)=>{
 			if (error2) {
 				return reject({'success': false,'message': msg.error.occur});
-			}else{
+			}else if(findresult){
 				DeviceInRoom.update({'_id': mongoose.Types.ObjectId(_id)}, {$set: {'status': !findresult.status}}).
 				exec((error3) => {
 					if (error3) {
@@ -139,8 +139,22 @@ DeviceInRoom.mUpdate = (user, data) => {
 };
 
 DeviceInRoom.setRoom = (arrdata, roomId) => {
+	return new Promise((resolve, reject)=>{
+		let count = 0;
+		let array = [];
 	arrdata.forEach((device) => {
-		DeviceInRoom.update({'_id': new mongoose.Types.ObjectId(device)}, {$set: {'room': new mongoose.Types.ObjectId(roomId)}}).exec();
+		DeviceInRoom.findOneAndUpdate({'_id': new mongoose.Types.ObjectId(device)}, {$set: {'room': new mongoose.Types.ObjectId(roomId)}}).exec((err, result)=>{
+			if(err){
+				reject({'success': false,'message': msg.error.occur});
+			}else{
+				array.push(result);
+			}
+		});
+		count+=1;
+		if(count==arrdata.length){
+			return resolve({'success': true, 'result': array, 'room' : roomId});
+		}
+	});
 	});
 }
 

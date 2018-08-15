@@ -150,26 +150,30 @@
 				});
 			}
 		});
+		
+		function changeTime(value){
+			if(value==''){
+				return 0;
+			}else{
+				let hh = parseInt(value.split(':')[0]) *3600;
+				let mm = parseInt(value.split(':')[1]) *60;
+				return hh+mm;
+			}
+		}
 
 		$('#submit').click(() => {
 			console.log('submit');
 			let data = {};
 			data.mode_name = $('#mode_name').val();
 			data.circle = $("#circle input:checkbox:checked").map(function() {return parseInt($(this).val());}).get();
-			let tmp = $('#starttime').val();
-			let hh = parseInt(tmp.split(':')[0]) *3600;
-			let mm = parseInt(tmp.split(':')[1]) *60;
-			data.starttime = hh + mm;
-			tmp = $('#stoptime').val();
-			hh = parseInt(tmp.split(':')[0]) *3600;
-			mm = parseInt(tmp.split(':')[1]) *60;
-			data.stoptime =hh + mm;
+			data.starttime =  changeTime($('#starttime').val())
+			data.stoptime = changeTime($('#stoptime').val())
 			let detail = [];
 			var table = document.getElementById("listDevice");
 			for (var i = 0, row; row = table.rows[i]; i++) {
 				let id = $(row.cells[0]).children('input').val();
-				let ontime = $(row.cells[3]).children('input').val();
-				let offtime =$(row.cells[4]).children('input').val();
+				let ontime = changeTime($(row.cells[3]).children('input').val());
+				let offtime =changeTime($(row.cells[4]).children('input').val());
 				let item = {'device' : {'_id' : id}, schedule : {'ontime' : ontime, 'offtime' : offtime}};
 				console.log('detail: '+JSON.stringify(item));
 				detail.push(item);

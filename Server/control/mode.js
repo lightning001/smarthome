@@ -212,7 +212,7 @@ Mode.mInsert = (user, data) =>{
 				if(data.modedetail!=null){
 					console.log('data.modedetail != null');
 					let mModeDetail = require('./modedetail');
-					mModeDetail.insertArray(user, data.modedetail, result);
+					mModeDetail.insertArray(user, data.modedetail, result._id);
 				}
 				return resolve({'success': true, 'result' : result});
 			}

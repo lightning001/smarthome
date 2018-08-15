@@ -26,6 +26,16 @@ socket.on('server_send_create_room', function (data){
 	}
 });
 
+socket.on('server_send_add_device_in_room', (data)=>{
+	if(data.success==true){
+		let listDevice = data.result;
+		let id_room = data.room;
+		let parent = $('#room_'+id_room);
+	}else{
+		alert(data.message);
+	}
+})
+
 socket.on('server_send_update_room', (data) => {
 	if(data.success == true){
 		let room = data.result;

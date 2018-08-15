@@ -1,4 +1,3 @@
-let ejs = require('ejs');
 socket.on('server_send_create_mode', (data) => {
 	if (data.success == false) {
 		alert(data.message);

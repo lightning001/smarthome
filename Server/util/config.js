@@ -1,16 +1,16 @@
 'use strict'
 var mongoose = require('mongoose');
 var
-	//	 uri = 'mongodb://masteradmin_linhdan:nlu123456@ds040877.mlab.com:40877/smarthome',
-	//	 uri_version = 'mongodb://versionsmarthome2018:nlu123456@ds241570.mlab.com:41570/versionsmarthome',
-	//	 host = 'https://smarthome2018.herokuapp.com/',
-	uri = 'mongodb://localhost:27017/SmartHome',
-	uri_version = 'mongodb://localhost:27017/VersionSmartHome',
+		 uri = 'mongodb://masteradmin_linhdan:nlu123456@ds040877.mlab.com:40877/smarthome',
+		 uri_version = 'mongodb://versionsmarthome2018:nlu123456@ds241570.mlab.com:41570/versionsmarthome',
+		 host = 'https://smarthome2018.herokuapp.com/',
+//	uri = 'mongodb://localhost:27017/SmartHome',
+//	uri_version = 'mongodb://localhost:27017/VersionSmartHome',
 	// host = 'http://192.168.43.154:3000/',
 		 // host = 'http://192.168.15.135:3000/',
 	//	host = 'http://192.168.1.111:3000/',
 	//	host = 'http://192.168.1.115:3000/',
-		host = 'http://192.168.1.135:3000/',
+//		host = 'http://192.168.1.135:3000/',
 	//  host = 'http://192.168.43.154:3000/',
 	port = 3000,
 	options = {

@@ -82,15 +82,20 @@ ModeDetail.insertArray = (user, data, mode)=>{
 			let result_return = []; var count = 0;
 			data.forEach(async function (modedetail){
 				let mModeDetail = new ModeDetail();
-				mModeDetail.mode = mode;
-				mModeDetail.device = modedetail;
+				mModeDetail.mode = new mongoose.Types.ObjectId(mode);
+				if(typeof modedetail =='string')
+					mModeDetail.device = new mongoose.Types.ObjectId(modedetail);
+				else if(typeof modedetail == 'object'){
+					mModeDetail.device = new mongoose.Types.ObjectId(modedetail.device._id);
+				}
+				mModeDetail.schedule = {};
 				if(modedetail.schedule!=null && modedetail.schedule!=undefined){
-					if(mModeDetail.schedule.ontime==null | undefined){
+					if(mModeDetail.schedule.ontime==null | undefined|''){
 						mModeDetail.schedule.ontime = 0
 					}else{
 						mModeDetail.schedule.ontime = modedetail.schedule.ontime;
 					}
-					if(mModeDetail.schedule.offtime ==null |undefined){
+					if(mModeDetail.schedule.offtime ==null |undefined|''){
 						mModeDetail.schedule.offtime = 0;
 					}else{
 						mModeDetail.schedule.offtime = modedetail.schedule.offtime;
@@ -139,6 +144,7 @@ ModeDetail.updateArray = (user, arrdata, mode)=>{
 			let mModeDetail = new ModeDetail();
 			mModeDetail._id = new mongoose.Types.ObjectId(modedetail._id);
 			mModeDetail.mode = new mongoose.Types.ObjectId(mode);
+			mModeDetail.schedule = modedetail.schedule;
 			mModeDetail.device = new mongoose.Types.ObjectId(modedetail.device);
 			mModeDetail.save().exec((err)=>{
 				if(err){

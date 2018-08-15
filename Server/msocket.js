@@ -16,7 +16,6 @@ module.exports = exports = function (io) {
 		let token = socket.usertoken;
 		if(token == undefined){
 			if(socket.handshake!=null){
-				console.log('Handshake token: '+JSON.stringify(socket.handshake));
 				if(socket.handshake.token){
 					token = socket.handshake.token;
 				}else if(socket.handshake.query){
@@ -203,6 +202,7 @@ module.exports = exports = function (io) {
 
 		socket.on('client_send_mode', ()=>{
 			if(authenSocket(socket)){
+				console.log('client send mode')
 				mMode.findByUser(socket.user._id).then((result)=>{
 					socket.emit('server_send_mode', result);
 				}).catch(e=>{
@@ -215,7 +215,6 @@ module.exports = exports = function (io) {
 			if(authenSocket(socket)){
 				console.log('device in mode')
 				mMode.getFullDetail(socket.user._id, data).then(result=>{
-					console.log(JSON.stringify(result.result.modedetail));
 					socket.emit('server_send_device_in_mode', {'success' : true, 'result' : result.result.modedetail});
 				}).catch(e=>{
 					console.log(e);
@@ -242,7 +241,6 @@ module.exports = exports = function (io) {
 			if(authenSocket(socket)){
 				console.log('client send update mode')
 				mMode.mUpdate(socket.user._id, data).then((result) => {
-					console.log('result '+JSON.stringify(result));
 					io.sockets.in(socket.user._id).emit('server_send_update_mode', result);
 				}).catch((e)=> {
 					console.log(JSON.stringify(e));
@@ -428,12 +426,21 @@ module.exports = exports = function (io) {
 				socket.emit('server_send_create_device_in_room', {'success': false, message :  {'success': false, message : 'Must be login before'}});
 			}
 		});
+		
+		socket.on('client_send_add_device_in_room', data=>{
+			if(authenSocket(socket)){
+				mDeviceInRoom.setRoom(data.device, data.room).then(result=>{
+					io.sockets.in(socket.user._id).emit('server_send_add_device_in_room', result);
+				}).catch(e=>{
+					socket.emit('server_send_add_device_in_room', e);
+				});
+			}
+		});
 
 		socket.on('control-device', (data)=>{
 			console.log('control device : '+ JSON.stringify(data));
 			if(authenSocket(socket)){
 				console.log('client send control device');
-				console.log(socket.user._id);
 				mDeviceInRoom.onoff(data._id).then(result=>{
 					io.sockets.in(socket.user._id).emit('server_send_control_device', {'success' : true, result : {'device' : data._id, status : result.status}});
 					io.sockets.in('device_'+socket.user._id).emit('changed', {'stt' : result.status, 'dv' : data._id});
@@ -468,7 +475,7 @@ module.exports = exports = function (io) {
 					console.log(JSON.stringify(result));
 					io.sockets.in(socket.user._id).emit('server_send_delete_device_in_room', result);
 				}).catch((e)=> {
-					console.log(JSON.stringify(result));
+					console.log(JSON.stringify(e));
 					socket.emit('server_send_delete_device_in_room', e);
 				});
 			}else{
