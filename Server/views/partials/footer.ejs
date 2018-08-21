@@ -3,24 +3,24 @@
 		<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
 			<span> <a href="#" target="_blank"><span
 					style="color: rgb(32, 77, 151)"> <i
-						class="fa fa-facebook-square fa-2x awesome-icon"
+						class="fab fa-facebook-square fa-2x"
 						aria-hidden="true"></i>
 				</span></a><a href="#" target="_blank"><span
 					style="color: rgb(52, 168, 254)"> <i
-						class="fa fa-twitter-square fa-2x awesome-icon" aria-hidden="true"></i>
+						class="fab fa-twitter-square fa-2x awesome-icon" aria-hidden="true"></i>
 				</span></a><a href="#" target="_blank"><span style="color: rgb(240, 61, 9)"><i
-						class="fa fa-google-plus-square fa-2x awesome-icon"
+						class="fab fa-google-plus-square fa-2x awesome-icon"
 						aria-hidden="true"></i></span> </a> <a href="#" target="_blank"><span
 					style="color: rgb(31, 126, 154);"><i
-						class="fa fa-linkedin-square fa-2x awesome-icon"
+						class="fab fa-linkedin-square fa-2x awesome-icon"
 						aria-hidden="true"></i></span> </a>
 			</span>
-			<div>
+			<div class="text-gray">
 				Design by Smart Home team <br>FIT Nong Lam University of Ho Chi
 				Minh City
 			</div>
 		</div>
-		<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12" align="right">
+		<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 text-gray" align="right">
 			<address>
 				Address: Di An - Binh Duong - Viet Nam <br /> Tel: 0977933807 -
 				0972992607 <br /> E-mail: linhdanit1512@gmail.com -
@@ -29,3 +29,40 @@
 		</div>
 	</section>
 </footer>
+<script>
+	<%if(req.session.user == null | undefined || req.session.authentication==undefined | null | false){%>
+	let token = localStorage.getItem('token');
+	if(token!=null && token != undefined && token!=''){
+		console.log('token:'+token);
+		$.ajax({
+			url : '/autologin',
+			type : 'POST',
+			data : {'data' : token},
+			statusCode : {
+				200 : function(data){
+					localStorage.setItem('token', data.token);
+					location.reload();
+				},
+				404 : function(){
+					localStorage.removeItem('token');
+					location.reload();
+				}
+			}
+		});
+	}
+<%}%>
+	let currentLocation = location.pathname;
+	if(currentLocation.includes('/room')){
+		$('#mnRoom').addClass('text-green active');
+	}else if(currentLocation.includes('/mode')){
+		$('#mnMode').addClass('text-green active');
+	}else if(currentLocation.includes('/device')){
+		$('#mnDevice').addClass('text-green active');
+	}else if(currentLocation.includes('/profile')){
+		$('#mnProfile').addClass('text-green active');
+	}else if(currentLocation.includes('/setting')){
+		$('#mnSetting').addClass('text-green active');
+	}else if(currentLocation.includes('/camera')){
+		$('#mnCamera').addClass('text-green active');
+	}
+</script>

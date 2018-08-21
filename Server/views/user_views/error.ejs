@@ -1,30 +1,26 @@
-<html>
-
 <head>
-	<% include ./partials/head %>
-
-		<title>Error</title>
+<% include ./partials/head %>
+<title>Error</title>
 </head>
-
 <body>
-	<% include ./partials/header %>
-	<div class="container main">
-		<div class="panel panel-default text-center" style="width: 600px; margin: auto; margin-top: 30px;">
-			<% if(errormessage!=null && errormessage.length>0){%>
-			<div class="panel-heading text-center">
-				<h2>Oh no!!</h2>
-			</div>
-			<div class="panel-body">
-				<div class="alert-danger">
-					<%=errormessage%>
+	<div class="wrapper">
+		<% include ./partials/header %>
+		<div class="content-wrapper main">
+			<div class="panel panel-default text-center" style="width: 600px; margin: auto; margin-top: 30px;">
+				<% if(errormessage!=null && errormessage.length>0){%>
+				<div class="panel-heading text-center">
+					<h2>Oh no!!</h2>
 				</div>
+				<div class="panel-body">
+					<div class="alert-danger">
+						<%=errormessage%>
+					</div>
+				</div>
+				<%}else{%>
+				<h3>This page is not found.</h3>
+				<%}%>
 			</div>
-			<%}else{%>
-			<h3>This page is not found.</h3>
-			<%}%>
 		</div>
+		<% include ./partials/footer %>
 	</div>
-	<% include ./partials/footer %>
 </body>
-
-</html>

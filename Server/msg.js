@@ -22,7 +22,8 @@ var en = {
 		confirm_register: 'We have sent to you an activation code.. Please check your email to activate your account'
 	},
 	empty: {
-		cant_find: 'Can\'t find'
+		cant_find: 'Can\'t find',
+		not_found : 'No data was found'
 
 	},
 	not_exist: {
@@ -54,7 +55,8 @@ var vi = {
 		confirm_register: 'Quý khách đã gửi yêu cầu xác nhận email thành công. Vui lòng kiểm tra email để kích hoạt tài khoản'
 	},
 	empty: {
-		cant_find: 'Không tìm thấy kết quả'
+		cant_find: 'Không tìm thấy kết quả',
+		not_found: 'Không có dữ liệu nào được tìm thấy'
 	},
 	not_exist: {
 		account: 'Tài khoản không tồn tại'

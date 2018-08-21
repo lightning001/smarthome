@@ -22,7 +22,10 @@
 		</form>
 		<ul class="sidebar-menu tree" data-widget="tree">
 			<li>
-				<a href="#"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a>
+				<a href="/admin/dashboard"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a>
+			</li>
+			<li>
+				<a href="/"><i class="fas fa-tachometer-alt"></i> <span>User Page</span></a>
 			</li>
 			<li class="header">MANAGEMENT</li>
 			<%if(req.session.admin.role.indexOf(req.session.roles.view.ROOM)>=0){%>

@@ -105,7 +105,7 @@ Mode.getScheduleMode = (id_user, id)=>{
 						}
 						mMode.modedetail[j].schedule.scheduledetail = listSchedule;
 					}
-				}
+				}console.log(JSON.stringify(mMode));
 				return resolve({'success' : true, result : {'mode' : mMode}});
 			}else{
 				resolve({'success' : true, result : {}});
@@ -117,13 +117,7 @@ Mode.getScheduleMode = (id_user, id)=>{
 
 Mode.createSchedule = (date)=>{
 	return new Promise((resolve, reject)=>{
-		Mode.find({}).
-		or([{type : 0, circle : {$in : date.getDay()}}, 
-			{type : 1, $and : [
-				{day : {startdate : {$lte : date}}}, 
-				{day : {stopdate : {$gte : date}}}
-			]}
-		   ]).
+		Mode.find({circle : {$in : date.getDay()}}).
 		sort({type : 1, starttime : 1, stoptime : 1, day : 1}).
 		populate('modedetail').
 		exec((err, data)=>{
@@ -131,36 +125,37 @@ Mode.createSchedule = (date)=>{
 				console.log(err);
 				reject({success: false, message : err.toString()});
 			}else if(data){
-				let schedule = [];
-				data.forEach(mode=>{
-					let SchedulerOn = [];
-					let SchedulerOff = [];
-					let starttime = mode.starttime;
-					let stoptime = mode.stoptime;
-					for(let j = 0; j < mode.modedetail.length; j++){
-						let modedetail = mode.modedetail[j];
-						if(modedetail.schedule.offtime==0){
-							if(modedetail.schedule.ontime>0){
-								SchedulerOn.push({time : mode.starttime, device : modedetail.device});
-								SchedulerOff.push({time : mode.stoptime, device : modedetail.device});
-							}
-						}else{
-							let stop = starttime;
-							while(stop<stoptime){
-								SchedulerOn.push({time : stop, device : modedetail.device, delay : modedetail.schedule.ontime});
-								stop += modedetail.schedule.ontime
-								if(stop<stoptime){
-									SchedulerOff.push({time : stop, device : modedetail.device, delay : modedetail.schedule.offtime});
-									stop += modedetail.schedule.offtime;
-								}
-
-							}
-							SchedulerOff.push({time : stoptime, device : modedetail.device});
-						}
-					}
-					schedule.push({mode : mode._id, user : mode.id_user, scheduleOn : SchedulerOn, scheduleOff : SchedulerOff});
-				});
-				resolve(schedule);
+				resolve(data);
+//				let schedule = [];
+//				data.forEach(mode=>{
+//					let SchedulerOn = [];
+//					let SchedulerOff = [];
+//					let starttime = mode.starttime;
+//					let stoptime = mode.stoptime;
+//					for(let j = 0; j < mode.modedetail.length; j++){
+//						let modedetail = mode.modedetail[j];
+//						if(modedetail.schedule.offtime==0){
+//							if(modedetail.schedule.ontime>0){
+//								SchedulerOn.push({time : mode.starttime, device : modedetail.device});
+//								SchedulerOff.push({time : mode.stoptime, device : modedetail.device});
+//							}
+//						}else{
+//							let stop = starttime;
+//							while(stop<stoptime){
+//								SchedulerOn.push({time : stop, device : modedetail.device, delay : modedetail.schedule.ontime});
+//								stop += modedetail.schedule.ontime
+//								if(stop<stoptime){
+//									SchedulerOff.push({time : stop, device : modedetail.device, delay : modedetail.schedule.offtime});
+//									stop += modedetail.schedule.offtime;
+//								}
+//
+//							}
+//							SchedulerOff.push({time : stoptime, device : modedetail.device});
+//						}
+//					}
+//					schedule.push({mode : mode._id, user : mode.id_user, scheduleOn : SchedulerOn, scheduleOff : SchedulerOff});
+//				});
+//				resolve(schedule);
 			}else{
 				resolve([]);
 			}
@@ -222,7 +217,7 @@ Mode.mInsert = (user, data) =>{
 
 Mode.mUpdate = (user, data) => {
 	return new Promise((resolve, reject)=>{
-		Mode.update({'_id' : new mongoose.Types.ObjectId(data._id)}, {$set : data}).
+		Mode.findOneAndUpdate({'_id' : new mongoose.Types.ObjectId(data._id)}, {$set : data}).
 		exec((error2, result) => {
 			if (error2){
 				return reject({'success': false, 'message': msg.error.occur});
@@ -232,6 +227,33 @@ Mode.mUpdate = (user, data) => {
 		});
 	});
 };
+
+Mode.updateCircle = (user, data)=>{
+	return new Promise((resolve, reject)=>{
+		let query;
+		console.log(typeof data.circle);
+		if(typeof data.circle == 'number'){
+			console.log('number');
+			if(data.action=='pull'){
+				query= {$pull : {circle : data.circle}}
+			}else{
+				query= {$push : {circle : data.circle}}
+			}
+		}else if (typeof(data.circle=='object')){
+			console.log('object')
+			query = {$set : data};
+		}
+		Mode.findOneAndUpdate({'_id' : new mongoose.Types.ObjectId(data._id)}, query).
+		exec((error2, result) => {
+			
+			if (error2){
+				return reject({'success': false, 'message': msg.error.occur});
+			} else{
+				return resolve({'success': true, 'result' : data});
+			}
+		});
+	});
+}
 
 Mode.mDelete = (user, mode_ID) =>{
 	return new Promise((resolve, reject)=>{
@@ -252,9 +274,10 @@ Mode.mDelete = (user, mode_ID) =>{
  * Lấy về tất cả các Mode
  */
 
-Mode.getAllMode = () => {
+Mode.getAllModeON = () => {
 	return new Promise((resolve, reject)=>{
-		Mode.find().
+		Mode.find({status : true}).
+		populate({path: 'modedetail', populate : {path : 'device'}}).
 		exec((error2, data2) => {
 			if(error2){
 				return reject({'success': false, 'message': msg.error.occur});

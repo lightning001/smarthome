@@ -4,6 +4,7 @@ var mDevice = require('./control/device'),
 	mRoom = require('./control/room'),
 	mModeDetail = require('./control/modedetail'),
 	mDeviceInRoom = require('./control/deviceinroom'),
+	mKey = require('./control/recognition'),
 	mSensor = require('./control/sensor'),
 	config = require('./util/config'),
 	jwt = require('jsonwebtoken');
@@ -125,14 +126,6 @@ module.exports = exports = function (io) {
 
 		});
 
-		socket.on('join_dv', function(user){
-			console.log('join device room: '+JSON.stringify(user));
-			socket.join('device_'+user.user);
-			socket.join(user.user);
-			console.log(JSON.stringify(socket.adapter.rooms));
-			socket.emit('joinresult', true);
-		});
-
 		socket.on('client_send_data_user', (token) => {
 			console.log('client_send_data_user');
 			mUser.byToken(token).then((data) => {
@@ -248,6 +241,18 @@ module.exports = exports = function (io) {
 				});
 			}else{
 				socket.emit('server_send_update_mode',  {'success': false, message : 'Must be login before'});
+			}
+		});
+		
+		socket.on('client_send_update_circle', data=>{
+			console.log('client_send_update_circle')
+			if(authenSocket(socket)){
+				mMode.updateCircle(socket.user._id, data).then(result=>{
+					io.sockets.in(socket.user._id).emit('server_send_update_circle', result);
+				}).catch(e=>{
+					console.log(JSON.stringify(e));
+					socket.emit('server_send_update_circle', e);
+				})
 			}
 		});
 
@@ -368,6 +373,17 @@ module.exports = exports = function (io) {
 		 * ================================================
 		 */
 
+		socket.on('client_send_device', (id_device)=>{
+			if(authenSocket(socket)){
+				mDeviceInRoom.findBy_ID(id_device).then(result=>{
+					socket.emit('server_send_device', result);
+				}).catch(e=>{
+					socket.emit('server_send_device', e);
+				})
+			}else{
+				socket.emit('server_send_device',  {'success': false, message : 'Must be login before'});
+			}
+		})
 
 		socket.on('client_send_all_device', () => {
 			console.log('client request device');
@@ -437,22 +453,6 @@ module.exports = exports = function (io) {
 			}
 		});
 
-		socket.on('control-device', (data)=>{
-			console.log('control device : '+ JSON.stringify(data));
-			if(authenSocket(socket)){
-				console.log('client send control device');
-				mDeviceInRoom.onoff(data._id).then(result=>{
-					io.sockets.in(socket.user._id).emit('server_send_control_device', {'success' : true, result : {'device' : data._id, status : result.status}});
-					io.sockets.in('device_'+socket.user._id).emit('changed', {'stt' : result.status, 'dv' : data._id});
-				}).catch(e=>{
-					socket.emit('server_send_control_device', {'success' : false, message : e.message});
-				});
-			}
-			else{
-				socket.emit('error',  {'success': false, message : 'Must be login before'});
-			}
-		});
-
 		socket.on('client_send_update_device_in_room', (data) => {
 			if(authenSocket(socket)){
 				console.log('client send update device in room');
@@ -469,8 +469,8 @@ module.exports = exports = function (io) {
 		});
 
 		socket.on('client_send_delete_device_in_room', (data) => {
-			if(authenSocket(socket)){
 				console.log('client send delete device in room');
+			if(authenSocket(socket)){
 				mDeviceInRoom.mDelete(data).then((result) => {
 					console.log(JSON.stringify(result));
 					io.sockets.in(socket.user._id).emit('server_send_delete_device_in_room', result);
@@ -484,8 +484,8 @@ module.exports = exports = function (io) {
 		});
 
 		socket.on('client_send_remove_device_in_room', (data) => {
-			if(authenSocket(socket)){
 				console.log('client send remove device in room');
+			if(authenSocket(socket) && data){
 				mDeviceInRoom.unsetRoomDevice(data).then((result) => {
 					console.log(JSON.stringify(result));
 					io.sockets.in(socket.user._id).emit('server_send_remove_device_in_room', result);
@@ -514,9 +514,105 @@ module.exports = exports = function (io) {
 				socket.emit('server_send_list_device',  {'success': false, message : 'Must be login before'});
 			}
 		});
+		
+		
+		/**---------------  KEY CONTROL  ---------------------------------------------------------*/
+		
+		socket.on('client_send_create_key', data=>{
+			if(authenSocket(socket)){
+			console.log('client_send_create_key' + JSON.stringify(data) +"   "+socket.user._id);
+				mKey.mInsert(data, socket.user._id).then(result=>{
+					io.sockets.in(socket.user._id).emit('server_send_create_key', result);
+				}).catch(e=>{
+					socket.emit('server_send_create_key', e);
+				})
+			}else{
+				socket.emit('server_send_list_device',  {'success': false, message : 'Must be login before'});
+			}
+		});
+		
+		socket.on('client_send_update_key', data=>{
+			console.log('client_send_update_key'+data);
+			if(authenSocket(socket)){
+				mKey.mUpdate(data, socket.user._id).then(result=>{
+					console.log(JSON.stringify(result));
+					io.sockets.in(socket.user._id).emit('server_send_update_key', result);
+				}).catch(e=>{
+					console.log(e);
+					socket.emit('server_send_update_key', e);
+				});
+			}else{
+				socket.emit('server_send_update_key',  {'success': false, message : 'Must be login before'});
+			}
+		});
+		
+		socket.on('client_send_delete_key', id=>{
+			if(authenSocket(socket)){
+				mKey.mDelete(id).then(result=>{
+					io.sockets.in(socket.user._id).emit('server_send_delete_key', result);
+				}).catch(e=>{
+					socket.emit('server_send_delete_key', e);
+				});
+			}else{
+				socket.emit('server_send_delete_key',  {'success': false, message : 'Must be login before'});
+			}
+		});
 
 		/*------------------  SENSOR  ----------------------------------------------**/
 
+		
+		
+		/*-------------  CONTROL  -----------------------------------------------------**/
+		
+		function control_board(nsp, data){
+			console.log(data);
+			io.of(nsp).emit('control-board', data);
+			
+		}
+		socket.on('control-device', (data)=>{
+			console.log('control device : '+ JSON.stringify(data));
+			if(authenSocket(socket)){
+				console.log('client send control device');
+				mDeviceInRoom.findBy_ID(data._id).then(result=>{
+//					io.sockets.in(socket.user._id).emit('server_send_control_device', {'success' : true, result : {'device' : data._id, status : result.status}});
+					control_board('/'+result.result.room, ''+result.result.status + data._id);
+				}).catch(e=>{
+//					socket.emit('server_send_control_device', {'success' : false, message : e.message});
+				});
+			}
+			else{
+				socket.emit('error',  {'success': false, message : 'Must be login before'});
+			}
+		});
+		
+		socket.on('feedback_control', feedback=>{
+			mDeviceInRoom.onoffStatus(feedback.id, feedback.status).then(()=>{
+				io.sockets.in(socket.user._id).emit('server_send_control_device', {'success' : true, result : {'device' : feedback._id, status : feedback.status}});
+			}).catch(e=>{
+				console.log(JSON.stringify(e));
+			})
+		})
+		
+		socket.on('client_send_key', (data)=>{
+			console.log('client_send_key ' + data);
+			if(authenSocket(socket)){
+				mKey.recognition(data, socket.user._id).then(result=>{
+					console.log(JSON.stringify(result));
+					if(result.action=='on'){
+						io.sockets.in(socket.user._id).emit('server_send_control_device', {'success' : true, result : {'device' : result.device._id, status : true}});
+						control_board('/'+result.device._id, 'true' + result.device._id);
+					}else if(result.action== 'off'){
+						io.sockets.in(socket.user._id).emit('server_send_control_device', {'success' : true, result : {'device' : result.device._id, status : false}});
+						control_board('/'+result.device._id, 'false'+result.device._id)
+					}
+				}).catch(e=>{
+					cosole.log(JSON.stringify(e))
+					socket.emit('server_send_control_device', e);
+				});
+			}else{
+				socket.emit('error',  {'success': false, message : 'Must be login before'});
+			}
+		});
 	});
 
 }

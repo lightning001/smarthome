@@ -1,0 +1,12 @@
+<div class="tab-pane well opacity-background fade<%if(i==0){%> in active<%}%>" id="room_<%=room._id%>">
+	<div class="room_name" style="font-size:22px;"><%=room.room_name%></div>
+	<%if(room.listDevice == undefined || room.listDevice == null || room.listDevice.length == undefined || room.listDevice.length==0){%>
+	<div class="row opacity-background">
+		<div class="col-xs-12" id="nodeviceuse">No device is used</div>
+	</div><%}else{%>
+	<div class="row opacity-background">
+		<div id="havedevice"><%room.listDevice.forEach(function(device){%>
+		<%- include('./partials/item_device', {'device' : device});%><%})%>
+		</div>
+	</div><%}%>
+</div>

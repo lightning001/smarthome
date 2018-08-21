@@ -5,12 +5,12 @@
 //	console.log(e);
 //})
 //
-let mDeviceInRoom = require('./control/deviceinroom');
-mDeviceInRoom.unused('5af00d1f8ce2293e143c9b8e').then(data=>{
-	console.log(data);
-}).catch(e=>{
-	console.log(JSON.stringify(e));
-});
+//let mDeviceInRoom = require('./control/deviceinroom');
+//mDeviceInRoom.unused('5af00d1f8ce2293e143c9b8e').then(data=>{
+//	console.log(data);
+//}).catch(e=>{
+//	console.log(JSON.stringify(e));
+//});
 
 // var mMode = require('./control/mode');
 // mMode.getFullDetail("5ab3333038b9043e4095ff84", '5ab47f0d52b9ed7bf00ed1c6').then(data=>{
@@ -18,7 +18,7 @@ mDeviceInRoom.unused('5af00d1f8ce2293e143c9b8e').then(data=>{
 // }).catch(e=>{
 // 	console.log(JSON.stringify(e));
 // });
-//mMode.getScheduleMode('5ab3333038b9043e4095ff84', '5ab47f0d52b9ed7bf00ed1c6').then(data=>{
+//mMode.getScheduleMode('5ab3333038b9043e4095ff84', '5b73dcdc7a268a11a4e69e9d').then(data=>{
 //	console.log(JSON.stringify(data));
 //}).catch(e=>{
 //	console.log(JSON.stringify(e));
@@ -26,7 +26,7 @@ mDeviceInRoom.unused('5af00d1f8ce2293e143c9b8e').then(data=>{
 
 //var date = new Date(3600000).toISOString().split('T')[1].split('.')[0];
 //console.log(date);
-
+//
 //mMode.createSchedule(new Date()).then(
 //	data=>console.log(JSON.stringify(data))).catch(
 //	e=>console.log(JSON.stringify(e)));
@@ -65,3 +65,28 @@ mDeviceInRoom.unused('5af00d1f8ce2293e143c9b8e').then(data=>{
 //	data=>console.log(JSON.stringify(data))).catch(
 //	e=>console.log(JSON.stringify(e)));
 
+
+//let Key = require('./control/recognition');
+//let data = {"turnon":"on","device":"5afe61cb3c70ce293c242e32"} ;
+////Key.mInsert(data, " 5af00d1f8ce2293e143c9b8e").then(data=> console.log(JSON.stringify(data))).catch(e=> console.log(e));
+//Key.recognition('tắt quạt', '5ab3333038b9043e4095ff84').then(data=> console.log(JSON.stringify(data))).catch(e=> console.log(e));
+//
+
+var nts=require('node-task-scheduler');
+ 
+var scheduler = nts.init({
+  tasksDir : './tasks'
+});
+ 
+global.scheduler = scheduler; //available to entire application
+ 
+scheduler.addTask('hello', {hello: 'world'}, function(args, callback){
+  console.log("Hello from hello! ", "ARGS: "+args.hello);
+  callback();
+}, "0/2 * * * * *", new Date(new Date().getTime()+4000));
+ 
+ 
+//removing the task
+scheduler.removeTask('hello', function(){
+  console.log("Task 'hello' removed.");
+});

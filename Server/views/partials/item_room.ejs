@@ -1,6 +1,32 @@
-				<div class="col-lg-2 col-md-2 col-sm-4 col-xs-4" id="item_room_<%=room._id%>">
-					<a data-toggle="tab" href="#room_<%=room._id%>">
-						<img src="<%=room.img%>" class="img img-responsive" width="100%">
-						<figcaption class="text-center"><%=room.room_name%></figcaption>
-					</a>
+<div class="col-lg-2 col-md-3 col-sm-4 col-xs-4" id="item_room_<%=room._id%>">
+	<div class="box box-primary box-solid">
+		<div class="box-header">
+			<h5 class="box-title">
+				<%=room.room_name%>
+			</h5>
+			<div class="box-tools pull-right">
+				<a onclick="update_Room('<%=room._id%>')" class=""><i class="fa fa-edit"></i></a>
+				<a class="" onclick="deleteRoom('<%=room._id%>', 0)" title="Delete your room"><i class="fas fa-trash-alt"></i></a>
+				<a class="" onclick="deleteRoom('<%=room._id%>', 1)" title="Delete your room and device"><i class="fa fa-times"></i></a>
+			</div>
+		</div>
+		<div class="box-body">
+			<a data-toggle="tab" href="#room_<%=room._id%>">
+				<img src="<%=room.img%>" class="img img-responsive" width="100%">
+			</a>
+		</div>
+		<div class="box-footer">
+			<figcaption class="text-center">
+				<%=room.room_name%>
+			</figcaption>
+			<div class="edt-pane" style="display:none">
+				<input type="text" style="width:100%" value="<%=room.room_name%>">
+				<input type="file" style="width:100%" onchange="changeImg(this)">
+				<div class="btn-group">
+					<button class="btn btn-sm" data-toggle="modal" data-target="#modalDeviceNoRoom" title="Add device to room"><i class="fa fa-plus"></i> Device</button>
+					<button class="btn btn-sm" onclick="pushUpdateRoom(this)"><i class="fa fa-save"></i> Save</button>
 				</div>
+			</div>
+		</div>
+	</div>
+</div>

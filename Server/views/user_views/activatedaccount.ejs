@@ -15,11 +15,11 @@ $(document).ready(function(){
 	<% include ./partials/header %>
 	<div class="space-medium">
 		<div class="container-fluid main">
-			<div class="well panel col-xs-8">
-				<div class="panel-heading">
-					<h3>Activate Account</h3>
+			<div class="box box-primary col-xs-8">
+				<div class="box-header">
+					<h3 class="box-title">Activate Account</h3>
 				</div>
-				<div class="panel-body">
+				<div class="box-body">
 					<%if(checkemail && checkemail.length >0){%>
 					<div class="alert alert-success"  role="alert">We have sent you an activation code. Please check your email!</div>
 					<%}%>

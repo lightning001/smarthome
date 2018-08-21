@@ -82,11 +82,24 @@ router.get('/device', authenticated, (req, res)=>{
 	}
 });
 
+router.get('/deviceuser', authenticated, (req, res)=>{
+	if(req.session.admin.role.indexOf(Admin.roles.view.DEVICE)>=0){
+		DeviceInRoom.getAllDeviceInRoom().then(data=>{
+			return res.render('management/deviceuser', {'req': req,'res': res, 'listDevice' : data.result});
+		}).catch(e=>{
+			req.flash('error', e.mesage);
+			return req.redirect('/admin/error');
+		})
+	}else{
+		res.redirect('/admin/dashboard');
+	}
+});
+
 router.get('/mode', authenticated, (req, res)=>{
 	if(req.session.admin.role.indexOf(Admin.roles.view.MODE)>=0){
 		Mode.getAllMode().then(data=>{
 			User.getAllUser().then(users=>{
-				return res.render('management/room', {'req': req,'res': res, 'listMode' : data.result, 'listUser' : users});
+				return res.render('management/mode', {'req': req,'res': res, 'listMode' : data.result, 'listUser' : users});
 			}).catch(e=>{
 				req.flash('error', e.mesage);
 				return req.redirect('/admin/error');
@@ -103,7 +116,7 @@ router.get('/mode', authenticated, (req, res)=>{
 router.get('/mode/:user/:id', authenticated, (req, res)=>{
 	if(req.session.admin.role.indexOf(Admin.roles.view.MODE)>=0){
 		Mode.findBy_ID(req.params.user, req.params.id).then(data=>{
-			return res.render('management/mode', {'req': req,'res': res, 'mode' : data.result});
+			return res.render('management/modedetail', {'req': req,'res': res, 'mode' : data.result});
 		}).catch(e=>{
 			req.flash('error', e.mesage);
 			return req.redirect('/admin/error');

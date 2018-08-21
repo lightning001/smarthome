@@ -119,17 +119,17 @@ userRouter.post('/login', deauthenticated, async function(req, res){
 });
 
 userRouter.post('/autologin', deauthenticated, (req, res)=>{
+	console.log('auto login');
 	let token = req.body.data;
-	if(token&& token!='' ){
+	if(token && token!='' ){
 		mUser.byToken(token).then(decode=>{
 			req.session.authentication = true;
 			req.session.usertoken = token;
 			req.session.user = decode.result
 			localStorage.setItem('token', token);
-			res.redirect('/room');
+			res.status(200).json({'success': true, 'token' : token});
 		}).catch(e=>{
-			req.flash('error', msg.error.occur);
-			res.redirect('/error');
+			res.status(404).json({'success' : false});
 		});
 	}else{
 		res.redirect('/login');

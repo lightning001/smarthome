@@ -14,7 +14,7 @@ require('../model/device_in_room');
 /**
  * server_send_all_device_user
  */
-Room.getAllDeviceUser = function(id_user){
+Room.getAllRoomUser = function(id_user){
 	return new Promise((resolve, reject) => {
 		Room.find({'id_user': new mongoose.Types.ObjectId(id_user)}).
 		exec((error2, data2) => {
@@ -31,7 +31,7 @@ Room.getAllDeviceUser = function(id_user){
 Room.getFullDetail = function(user, _id){
 	return new Promise((resolve, reject) => {
 		Room.findOne({'_id': new mongoose.Types.ObjectId(_id), 'id_user' : new mongoose.Types.ObjectId(user)}).
-		populate({path: 'listDevice', populate:{path: 'device'}}).
+		populate({path: 'listDevice', populate:{path: 'device', populate : {path : 'keyOnOff'}}}).
 		exec((error2, data2) => {
 			if (error2) {
 				return reject({'success': false,'message': msg.error.occur});
@@ -45,7 +45,7 @@ Room.getFullDetail = function(user, _id){
 Room.getFullDetailUser = function(user){
 	return new Promise((resolve, reject) => {
 		Room.find({'id_user' : new mongoose.Types.ObjectId(user)}).
-		populate({path: 'listDevice', populate :{path : 'device'}}).
+		populate({path: 'listDevice', populate :{path : 'device', populate : {path : 'keyOnOff'}}}).
 		exec((error2, data2)=> {
 			if (error2) {
 				return reject({'success': false,'message': msg.error.occur});

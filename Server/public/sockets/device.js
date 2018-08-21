@@ -1,10 +1,13 @@
 socket.on('server_send_control_device', (data)=>{
-	console.log('receive on/off device' + JSON.stringify(data));
 	if(data.success == true){
 		if(data.result.status == true){
+			$('#device_'+data.result.device).css('background', 'orange');
 			$('#device_'+data.result.device).children('div.thumbnail').children('img').removeClass('item-off');
+			$('#device_'+data.result.device).children('div.thumbnail').children('div').children('label').children('input').prop('checked', true);
 		}else{
+			$('#device_'+data.result.device).css('background', 'gray');
 			$('#device_'+data.result.device).children('div.thumbnail').children('img').addClass('item-off');
+			$('#device_'+data.result.device).children('div.thumbnail').children('div').children('label').children('input').prop('checked', false);
 		}
 	}else{
 		alert(data.message);
@@ -12,9 +15,9 @@ socket.on('server_send_control_device', (data)=>{
 });
 
 socket.on('client_send_create_device_in_room', (data)=>{
-	let link = $(location).attr('href');
-	if(link.indexOf('/room')>=0){
-		if(data.success==true){
+	let link = location.pathname;
+	if(data.success==true){
+		if(link =='/room'){
 			let device = data.result;
 			let newDevice = ejs.renderFile('./partials/item_room', {'device' : device});
 			if(device.room!=null && device.room!=undefined){
@@ -30,16 +33,32 @@ socket.on('client_send_create_device_in_room', (data)=>{
 				}
 
 			}
-		}else{
-			alert(data.message);
+		}else if(link==device){
+			let device= data.result;
+			if(device.room){
+				let newDevice = ejs.renderFile('./partials/item_device2', {'device': device});
+				$('#room_'+device.room).children('div:contains("No device is used")').remove();
+				$('#room_'+device.room).append(newDevice);
+			}else{
+				let newDevice = ejs.renderFile('./partials/item_device_noroom', {'device': device});
+				$('#noroom').append(newDevice);
+			}
+			
 		}
-	}else if(link.indexOf('/device')>=0){
-		
+	}else{
+		alert(data.message);
 	}
 });
 
 
 socket.on('server_send_delete_device_in_room', (data)=>{
+	if(data.success==true){
+		$('#device_'+data.result).remove();
+	}else{
+		alert(data.message);
+	}
+});
+socket.on('server_send_remove_device_in_room', (data)=>{
 	if(data.success==true){
 		$('#device_'+data.result).remove();
 	}else{
@@ -52,6 +71,8 @@ socket.on('server_send_remove_device_from_room', data=>{
 		let html = $('#device_'+data.result);
 		$('#listNoRoom').append(html);
 		$('#device_'+data.result).remove();
+		let change = 
+		$('.modal-body').children('div').append(change);
 	}else{
 		alert(data.message);
 	}
@@ -63,10 +84,14 @@ socket.on('server_send_update_device_in_room', (data)=>{
 		if(device.room){
 			location.reload(true);
 		}else{
+		console.log('AAA'+JSON.stringify(device));
 			let pane = $('#device_' + device._id).children('div.thumbnail');
 			if(device.device_name){
-				pane.children('figcaption').text = device.device_name;
+				console.log('AAA'+JSON.stringify(device.device_name));
+				pane.children('figcaption').text(device.device_name);
+				pane.children('figcaption').show();
 				pane.children('input:text').value = device.device_name;
+				pane.children('input:text').hide();
 			}
 			if(device.device){
 				pane.children('img').attr('src', device.device.img);
@@ -78,8 +103,7 @@ socket.on('server_send_update_device_in_room', (data)=>{
 });
 
 
-function control_device(e){
-	var value = $(e).parent().children('input:hidden').val();
+function control_device(value){
 	if(value==undefined){
 		alert('The device doesn\'t exist');
 	}else{
@@ -87,20 +111,20 @@ function control_device(e){
 	}
 }
 
-function delete_device(e){
-	var value = $(e).parent().children('input:hidden').val();
-	if(value==undefined){
-		alert('The device doesn\'t exist');
-	}else{
-		socket.emit('client_send_delete_device_in_room', {'_id' : value});
+function delete_device(value, name){
+	var r = confirm("You are really want to delete "+name+"?");
+	if(r==true){
+		if(value==undefined){
+			alert('The device doesn\'t exist');
+		}else{
+			socket.emit('client_send_delete_device_in_room', value);
+		}
 	}
 }
 
-function remove_device(e){
-	var value = $(e).parent().children('input:hidden').val();
-	if(value==undefined){
-		alert('The device doesn\'t exist');
-	}else{
-		socket.emit('client_send_remove_device_from_room', {'_id' : value});
+function remove_device(value, name){
+	var r = confirm("You are really want to remove "+name+" from room?");
+	if(r==true){
+		socket.emit('client_send_remove_device_in_room', value);
 	}
 }

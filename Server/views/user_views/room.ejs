@@ -3,10 +3,6 @@
 <% include ./partials/head %>
 <script>
 	var token = localStorage.getItem('token');
-	if (token == null || token == undefined || token== '') {
-		token = "<%=req.session.usertoken%>";
-		localStorage.setItem('token', token);
-	}
 	var socket = io({query : {'token': token}});
 	socket.emit('join-room', token);
 </script>
@@ -18,9 +14,15 @@
 <main>
 	<div class="container main">
 		<div class="row">
-			<div class="well"><%if(listRoom.length ==0){%>
+			<div class="box box-primary"><%if(listRoom.length ==0){%>
 				<div id="noroom">No room</div><%}else{%>
-				<div id="haveroom">
+				<div class="box-header">
+					<h3 class="box-title"></h3>
+					<div class="box-tool pull-left">
+						<a href="/room/add" class="btn btn-default"><i class="fa fa-plus"></i></a>
+					</div>
+				</div>
+				<div id="haveroom" class="box-body">
 					<div class="col-xs-12">
 						<div class="row">
 							<div id="carousel" class="row"><%listRoom.forEach((room)=>{%>
@@ -35,45 +37,87 @@
 					<div class="clearfix"></div>
 					<!-- Content room -->
 					<div class="tab-content"><% for(var i=0; i<listRoom.length; i++){%>
-						<div class="tab-pane well opacity-background fade<%if(i==0){%> in active<%}%>" id="room_<%=listRoom[i]._id%>">
-							<div class="btn-group">
-								<button type="button" class="btn btn-default btn-group-lg dropdown-toggle" data-toggle="dropdown">
-								<%=listRoom[i].room_name%>
-								<i class="fa fa-ellipsis-v" style="padding-right:0px;"></i>
-								</button>
-								<ul class="dropdown-menu">
-									<li><a href="/room/<%=listRoom[i]._id%>"> Update room </a></li>
-									<li><a onclick="deleteRoom(this, 0)">Delete room
-										<input type="hidden" value="<%=listRoom[i]._id%>" name="id">
-										</a>
-									</li>
-									<li><a onclick="deleteRoom(this, 1)">Delete room and device
-										<input type="hidden" value="<%=listRoom[i]._id%>">
-										</a>
-									</li>
-								</ul>
-							</div><%if(listRoom[i].listDevice == undefined || listRoom[i].listDevice == null || listRoom[i].listDevice.length == undefined || listRoom[i].listDevice.length==0){%>
-							<div class="row opacity-background">
-								<div class="col-xs-12" id="nodeviceuse"> No device is used</div>
-							</div><%}else{%>
-							<div class="row opacity-background">
-								<div id="havedevice"><%listRoom[i].listDevice.forEach(function(device){%>
-								<%- include('./partials/item_device', {'device' : device});%><%})%>
-								</div>
-							</div><%}%>
-						</div><%}%>
+						<%-include('./partials/item_room_content', {'room' : listRoom[i], i : i})%>
+						<%}%>
 					</div>
 				</div>
 				<input type="hidden" value="<%=listRoom.length%>" id="lengthRoom"><%}%>
 			</div><!-- end well-->
-			<a class="label" href="/room/add"><i class="fa fa-plus fa-3x btn btn-add"></i></a>
+			<a class="label" href="/room/add"><i class="fa fa-3x fa-plus-circle label label-success"></i></a>
 		</div><!-- end row-->
 	</div><!-- end container-->
-	<script src="/js/carousel.js"></script>
-	<script src="/sockets/room.js"></script>
-	<script src="/sockets/device.js"></script>
+	<div class="modal" id="modalDeviceNoRoom" style="display: none;">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">×</span></button>
+					<h4 class="modal-title">Add device to room</h4>
+				</div>
+				<div class="modal-body">
+					<div class="row">
+						<%listDeviceNoRoom.forEach((device)=>{%>
+						<div class="col-md-2 col-xs-3" id="md_device_<%=device._id%>">
+							<div class="thumbnail text-center opacity-background">
+								<input type="checkbox" class="pull-right" value="<%=device._id%>" name="unused">
+								<img class="img img-circle opacity-background" style="width:85px;" src="<%=device.device.img%>">
+								<figcaption class="caption"><%=device.device_name%></figcaption>
+							</div>
+						</div>
+						<%})%>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-primary" onclick="submitUpdateRoom()">Submit</button>
+				</div>
+			</div>
+		<!-- /.modal-content -->
+		</div>
+		<!-- /.modal-dialog -->
+	</div>
 </main>
 <%- include('./partials/footer'); %>
+<script src="/js/carousel.js"></script>
+<script src="/sockets/room.js"></script>
+<script src="/sockets/device.js"></script>
+<script>
+	let idRoom;
+	let listAdd=[];
+	function update_Room(id){
+		idRoom = id;
+		$('#item_room_'+id).find('figcaption').hide();
+		$('#item_room_'+id).find('div.edt-pane').show();
+		$('#carousel').children('div.active').removeClass('in active');
+		$('#room_'+id).addClass('active');
+	}
+	
+	function submitUpdateRoom(){
+		listAdd = [];
+		$('.modal-body').find('input:checkbox:checked').map((e, id)=>{
+			listAdd.push(id.value);
+		});
+		$('.modal').modal('hide');	
+		
+	}
+	
+	function pushUpdateRoom(e){
+		let name = $(e).closest('.edt-pane').children('input:text').val();
+		let data = {};
+		if(listAdd.length>0){
+			data.device = listAdd;
+		}
+		data.room = idRoom;
+		data._id = idRoom;
+		data.room_name = name;
+		if (myFile !=null && myFile != undefined) {
+			data.img = myFile;
+		}
+		socket.emit('client_send_add_device_in_room', data);
+		socket.emit('client_send_update_room', data);
+	}
+	
+</script>
 </body>
 
 </html>

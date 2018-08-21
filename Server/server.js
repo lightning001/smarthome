@@ -11,7 +11,6 @@ var express = require('express'),
 	io = require('socket.io')(server),
 	port = process.env.PORT || 3000,
 	config = require('./util/config'),
-	mUser = require('./control/user'),
 	{initStorage} = require('./util/storage'),
 	timeout = 500;
 
@@ -37,6 +36,7 @@ app.use('/mode', modeRouter);
 app.use('/device', deviceinroomRouter);
 app.use('/admin', adminRouter);
 require('./msocket')(io);
+let schedule = require('./control/schedule');
 
 server.listen(port, function() {
 	console.log("Waiting statement...");

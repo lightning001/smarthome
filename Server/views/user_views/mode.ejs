@@ -8,17 +8,29 @@
 	var socket = io({query: {'token': token}});
 	socket.emit('join-room', token);
 </script>
-	
 <title>Mode</title>
 </head>
 <body>
+	<div class="wrapper">
 	<% include ./partials/header %>
-	<div class="container main"><%if(listMode.length>0){listMode.forEach(function(mode){%>
-		<%- include('./partials/item_mode', {'mode' : mode})%><%});}else{%>
-		<div class="alert alert-warning">You don't have any Mode</div><%}%>
-		<a class="label" href="/mode/add"><i class="fa fa-plus fa-4x btn btn-add"></i></a>
+	<div class="content-wrapper main">
+		<div class="box box-primary">
+			<div class="box-header">
+				<h3 class="box-title">MODE</h3>
+				<div class="box-tools">
+					<a class="btn-box-tool" href="/mode/add"><i class="fa fa-plus"></i></a>
+				</div>
+			</div>
+			<div class="box-body">
+				
+			<%if(listMode.length>0){listMode.forEach(function(mode){%>
+			<%- include('./partials/item_mode', {'mode' : mode})%><%});}else{%>
+			<div class="alert alert-warning">You don't have any Mode</div><%}%>
+			</div>
+		</div>
 	</div>
 	<script type="text/javascript" src="/sockets/mode.js"></script>
 	<% include ./partials/footer %>
+	</div>
 </body>
 </html>

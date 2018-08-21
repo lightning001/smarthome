@@ -1,0 +1,7 @@
+<div style="width:120px; display:inline-grid; background:gray;" id="device_<%=device._id%>">
+	<div class="thumbnail opacity-background" style="width:100%;">
+		<i class="fa fa-times-circle text-red" style="float:right"  onclick="delete_device('<%=device._id%>', '<%=device.device_name%>')"></i>
+		<img src="<%=device.device.img%>" style="width:100%" class="img img-circle <%if(device.status==false){%> item-off<%}%>">
+		<figcaption class="text-center"><%=device.device_name%></figcaption>
+	</div>
+</div>

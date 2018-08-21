@@ -6,72 +6,76 @@
 	var socket = io({query : {'token': token}});
 	socket.emit('join-room', token);
 </script>
+<link href="/css/switch.css" rel="stylesheet">
 <title>Device</title>
 </head>
 <body>
-	<% include ./partials/header %>
-	<div class="container main">
-		<div class="well">
-			<div class="row">
-				<div class="col-xs-12">
-					<a class="btn btn-default pull-right" id="btnAdd" href="#">Add</a>
-					<button class="btn btn-default pull-right" id="btnDelete" title="Delete your device">Delete</button>
+	<div class="wrapper">
+		<% include ./partials/header %>
+		<div class="content-wrapper main">
+			<div class="box box-primary">
+				<div class="box-header  with-border">
+					<h3 class="box-title">DEVICE</h3>
+					<div class="box-tools pull-right">
+						<a class="btn  btn-box-tool btn-info" id="btnAdd" href="#"><i class="fa fa-plus"></i></a>
+						&nbsp;&nbsp;
+						<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+						<button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+					</div>
 				</div>
-				<div class="col-xs-12"><%listRoom.forEach(function(room){%>
-					<div class="col-sm-6 col-xs-12 well">
-						<legend><h4 class="white"><%=room.room_name%></h4></legend><% if(room.listDevice.length==0){%>
-							<div>No device is used</div><%}else{ room.listDevice.forEach((device)=>{%>
-							<div style="width:85px; display:inline-grid;" id="device_<%=device._id%>">
-								<div class="thumbnail opacity-background" style="width:100%;">
-									<i class="fa fa-times-circle fa-2x close" onclick="delete_device(this)"></i>
-									<input type="hidden" value="<%=device._id%>">
-									<img src="<%=device.device.img%>" style="width:100%" onclick="control_device(this)" class="img img-circle <%if(device.status==false){%> item-off<%}%>">
-									<figcaption class="caption text-center" onclick="editDevice(this)"><%=device.device_name%></figcaption>
-									<input type="text" id="edt_device" style="font-size: 12px; display:none; width:100%" onchange="submitEditDevice(this)" value="<%=device.device_name%>">
+				<div class="box-body">
+					<div class="box-group"><%listRoom.forEach(function(room){%>
+						<div class="col-xs-12">
+							<div class="panel box box-primary box-solid">
+								<div class="box-header with-border">
+									<h4 class="box-title text-center"><%=room.room_name%></h4>
+								</div>
+								<div class="box-body" id="room_<%=room._id%>"><% if(room.listDevice.length==0){%>
+									<div>No device is used</div><%}else{ room.listDevice.forEach((device)=>{%>
+									<%-include('./partials/item_device2', {'device' : device})%>
+									<%});}%>
 								</div>
 							</div>
-						<%});}%>
-					</div><%}); %>
-					<div class="clearfix"></div>
-					<div class="col-xs-12 well" id="listNoRoom">
-						<h4 class="white">Other device</h4><%listDevice.forEach((device)=>{%>
-						<div style="width:85px; display:inline-grid;" id="device_<%=device._id%>">
-							<div class="thumbnail opacity-background" style="width:100%;">
-								<i class="fa fa-times-circle fa-2x close" onclick="delete_device(this)"></i>
-								<input type="hidden" value="<%=device._id%>">
-								<img src="<%=device.device.img%>" style="width:100%" onclick="control_device(this)" class="img img-circle <%if(device.status==false){%> item-off<%}%>">
-								<figcaption class="caption text-center" onclick="editDevice(this)"><%=device.device_name%></figcaption>
-								<input type="text" id="edt_device" style="font-size: 12px; display:none; width:100%" onchange="submitEditDevice(this)" value="<%=device.device_name%>">
+						</div><%}); %>
+						<div class="col-xs-12">
+							<div class="panel box box-primary box-solid" id="listNoRoom">
+								<div class="box-header with-border">
+									<h4 class="box-title">Other device</h4>
+									<div class="box-tools pull-right">
+										<button class="btn btn-box-tool" title="Update your device"><i class="fa fa-edit text-orange"></i></button>
+										<button class="btn btn-box-tool" title="Delete your device"><i class="fa fa-times text-red"></i></button>
+									</div>
+								</div>
+								<div class="box-body" id="noroom"><%listDevice.forEach((device)=>{%>
+									<%- include('./partials/item_device_noroom', {'device': device})%>
+								<%});%>
+								</div>
 							</div>
-						</div><%});%>
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-	</div>
 	<% include ./partials/footer %>
+	</div>
 	<script src="/sockets/device.js"></script>
 	<script>
-	$(document).ready(function(){
-		$(".close").hide();
-	});
-	$('#btnDelete').click(function(){
-		$(".close").show();
-	});
-	
 	function editDevice(e){
 		$(e).parent().children('input:text').show();
 		$(e).hide();
 	}
-	function submitEditDevice(e){
-		console.log('forcus_out');
-		let id = $(e).parent().children('input:hidden').val();
+	function submitEditDevice(id, e){
 		let name = $(e).val();
 		let data = {'_id' : id, 'device_name' : name};
 		socket.emit('client_send_update_device_in_room', {'data' : data});
 		$(e).hide();
 		$(e).parent().children('figcaption').show();
 	}
+		
+	function overScope(e){
+		$(e).val($(e).parent().children('figcaption').val());
+		$(e).hide();
+		$(e).parent().children('figcaption').show();
+	}
 	</script>
 </body>
-</html>

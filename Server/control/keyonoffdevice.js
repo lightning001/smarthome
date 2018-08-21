@@ -22,12 +22,15 @@ Key.mInsert = (user, data)=>{
 
 Key.mUpdate = (user, data)=>{
 	return new Promise((resolve, reject)=>{
-		Key.update({'_id' : new mongoose.Types.ObjectId(data._id)}, {$set : {data}}).
+		Key.findOneAndUpdate({'_id' : new mongoose.Types.ObjectId(data._id)}, {$set : {data}}).
 		exec((err, result)=>{
+			console.log('AAA'+result);
 			if(err){
 				return reject({'success' : false, 'message' : msg.error.occur});
-			}else{
+			}else if(result){
 				return resolve({'success' : true, 'id' : user, 'result' : result});
+			}else{
+				Key.mInsert(user, data);
 			}
 		});
 	});

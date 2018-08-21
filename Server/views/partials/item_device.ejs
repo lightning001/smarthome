@@ -1,8 +1,7 @@
-<div style="width:85px; display:inline-grid;" id="device_<%=device._id%>">
-	<div class="thumbnail opacity-background" style="width:100%;">
-<!--		<i class="fa fa-times-circle fa-2x close" onclick="remove_device(this)"></i>-->
-		<input type="hidden" value="<%=device._id%>">
-		<img src="<%=device.device.img%>" style="width:100%" onclick="control_device(this)" class="img img-circle <%if(device.status==false){%> item-off<%}%>">
+<div style="width:120px; display:inline-grid; <%if(device.status==false){%>background:gray;<%}else{%>background:orange;<%}%>" id="device_<%=device._id%>">
+	<div class="thumbnail opacity-background" style="width:100%; margin-bottom:0;">
+		<i class="fa fa-times-circle text-red" style="float:right" onclick="remove_device('<%=device._id%>', '<%=device.device_name%>')"></i>
+		<img src="<%=device.device.img%>" style="width:100%" onclick="control_device('<%=device._id%>')" class="img img-circle <%if(device.status==false){%> item-off<%}%>">
 		<figcaption class="caption text-center"><%=device.device_name%></figcaption>
 	</div>
 </div>

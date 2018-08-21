@@ -5,8 +5,8 @@ var conn = require('../util/config').database;
 
 var schemaKey = new mongoose.Schema({
 	  device : {type :  mongoose.Schema.Types.ObjectId, require : true, ref : 'DeviceInRoom'},
-	  on : {type : String, require : true},
-	  off : {type: String, require : true}
+	  turnon : {type : String, default : ""},
+	  turnoff : {type: String, default : ""}
 });
 
 var KeyOnOffDevice = conn.model('KeyOnOffDevice', schemaKey, 'KEYCONTROLDEVICE');

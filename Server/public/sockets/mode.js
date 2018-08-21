@@ -48,3 +48,16 @@ socket.on('server_send_delete_mode', (data)=>{
 		document.getElementById('item_mode_'+data.result).remove();
 	}
 });
+
+function createMode(){
+	
+}
+
+function removeMode(id){
+	socket.emit('client_send_delete_mode', {'_id' : id});
+}
+
+function switchMode(e, id){
+	let status = 
+	socket.emit('client_send_update_mode', {'_id' : id, 'status' : status});
+}

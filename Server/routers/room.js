@@ -12,7 +12,15 @@ var router = express.Router();
 router.get('/', authenticated, function(req, res) {
 	mRoom.getFullDetailUser(req.session.user._id).then(
 	(data) => {
-		res.render('user_views/room', {'req': req, 'res': res, 'listRoom': data.result});
+		mDeviceInRoom.unused(req.session.user._id).
+			then(function(data2){
+				if(data2 == undefined || data2.result.length == 0 )
+					data2.result = [];
+			res.render('user_views/room', {'req': req, 'res': res, 'listRoom': data.result, 'listDeviceNoRoom': data2.result});
+		}).catch(e=>{
+			req.flash('error', e.message);
+			res.redirect('/error');
+		})
 	}, (e) => {
 		req.flash('error', e.message);
 		res.redirect('/error');

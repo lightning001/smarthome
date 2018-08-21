@@ -11,6 +11,8 @@ require('../model/room');
 DeviceInRoom.findBy_ID = (_id) => {
 	return new Promise((resolve, reject) => {
 		DeviceInRoom.findById(new mongoose.Types.ObjectId(_id)).
+		populate('device').
+		populate('keyOnOff').
 		exec((error2, data2) => {
 			if (error2) {
 				return reject({'success': false,'message': msg.error.occur});
@@ -67,9 +69,21 @@ DeviceInRoom.onoff = (_id)=>{
 					if (error3) {
 						return reject({'success': false,'message': msg.error.occur});
 					} else {
-						return resolve({'success': true, status: !findresult.status});
+						return resolve({'success': true, status: !findresult.status, room : findresult.room});
 					}
 				});
+			}
+		});
+	});
+}
+DeviceInRoom.onoffStatus = (_id, status)=>{
+	return new Promise((resolve, reject) => {
+		DeviceInRoom.update({'_id': mongoose.Types.ObjectId(_id)}, {$set: {'status': status}}).
+		exec((error3) => {
+			if (error3) {
+				return reject({'success': false,'message': msg.error.occur});
+			} else {
+				return resolve({'success': true, result : {status: status, 'id' : _id}});
 			}
 		});
 	});
@@ -159,8 +173,16 @@ DeviceInRoom.setRoom = (arrdata, roomId) => {
 }
 
 
-DeviceInRoom.unsetRoom = async (roomId) => {
-	await DeviceInRoom.update({'room': new mongoose.Types.ObjectId(roomId)}, {$unset: {'room': 1}}, {multi : true}).exec();
+DeviceInRoom.unsetRoom = (roomId) => {
+	return new Promise((resolve, reject)=>{
+		DeviceInRoom.update({'room': new mongoose.Types.ObjectId(roomId)}, {$unset: {'room': 1}}, {multi : true}).exec((err, data)=>{
+			if(err){
+				return reject({'success': false,'message': msg.error.occur});
+			}else {
+				return resolve({'success': true, 'result' : roomId});
+			}
+		});
+	});
 }
 
 DeviceInRoom.unsetRoomDevice = (_id) => {
@@ -170,7 +192,7 @@ DeviceInRoom.unsetRoomDevice = (_id) => {
 			if(error){
 				return reject({'success': false,'message': msg.error.occur});
 			}else{
-				return resolve({'success': true, 'result' : {'_id' : _id}});
+				return resolve({'success': true, 'result'  : _id});
 			}
 		});
 
